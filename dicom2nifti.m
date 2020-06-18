@@ -8,12 +8,12 @@ check          = 1;
 do_dcm_convert = 1;
 do_move        = 1;
 
-subs = [5:53];
+subs = [5];
 
 dummies           = 5;
 
 n_runs = 2;
-data_names = {'epi', 'FM_2TE', 'FM_diff'};
+data_names = {'', 'FM_2TE', 'FM_diff'};
 
 for g = 1:size(subs,2)
     name = sprintf('sub%03d',subs(g));
@@ -25,7 +25,7 @@ for g = 1:size(subs,2)
         
         % Loop over runs (including epis and both fmaps)
         for run = 1:n_runs
-            run_name = strcat('Run', num2str(run));
+            run_name = strcat(sprintf('run%03d',run), 'mrt/');
             
             % Loop over datatypes
             for i = 1:numel(data_names)
@@ -51,9 +51,9 @@ for g = 1:size(subs,2)
         % T1
         if ~ismember(subs(g),[5,13])
             
-            files = spm_select('FPList', [base_dir name filesep 'T1'], '^MR');
+            files = spm_select('FPList', fullfile(base_dir, name, 'run000/mrt/'), '^MR');
             matlabbatch{gi}.spm.util.import.dicom.data = cellstr(files);
-            matlabbatch{gi}.spm.util.import.dicom.outdir = {[base_dir name filesep 'T1']};
+            matlabbatch{gi}.spm.util.import.dicom.outdir = fullfile(base_dir, name, 'run000/mrt/';
             matlabbatch{gi}.spm.util.import.dicom.root             = 'flat';
             matlabbatch{gi}.spm.util.import.dicom.protfilter       = '.*';
             matlabbatch{gi}.spm.util.import.dicom.convopts.format  = 'nii';
@@ -77,12 +77,12 @@ for g = 1:size(subs,2)
     if do_move
         gi = 1;
         for run = 1:n_runs
-            run_name = strcat('Run', num2str(run));
+            run_name = fullfile(sprintf('run%03d',run), 'mrt');
             % and move dummy scans
-            files = spm_select('FPList', fullfile(base_dir, name, run_name, 'epi'),'^fPRISMA.*\.nii');
-            mkdir(fullfile(base_dir, name, run_name, 'epi', 'dummy'));
+            files = spm_select('FPList', fullfile(base_dir, name, run_name,),'^fPRISMA.*\.nii');
+            mkdir(fullfile(base_dir, name, run_name, 'dummy'));
             matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.files         = cellstr(files(1:dummies,:));
-            matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.action.moveto = {fullfile(base_dir, name, run_name, 'epi', 'dummy')};
+            matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.action.moveto = {fullfile(base_dir, name, run_name,'dummy')};
             gi = gi + 1;
         end
         save matlabbatch matlabbatch
