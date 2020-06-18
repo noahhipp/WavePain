@@ -1,14 +1,14 @@
 function import_scans_nh
 
-base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
-data_file         = 'C:\Users\hipp\projects\WavePain\code\matlab\fmri\cb_pipeline\data.mat';
+base_dir          = 'projects/crunchie/hipp/wavepain'
+%data_file         = 'C:\Users\hipp\projects\WavePain\code\matlab\fmri\cb_pipeline\data.mat';
 
-check          = 0;
+check          = 1;
 
 do_dcm_convert = 1;
 do_move        = 1;
 
-subs = [5:17];
+subs = [5:53];
 
 dummies           = 5;
 
@@ -16,7 +16,7 @@ n_runs = 2;
 data_names = {'epi', 'FM_2TE', 'FM_diff'};
 
 for g = 1:size(subs,2)
-    name = sprintf('sub-%02d',subs(g));
+    name = sprintf('sub%03d',subs(g));
     %-------------------------------
     %Do DICOM convert
     if do_dcm_convert
