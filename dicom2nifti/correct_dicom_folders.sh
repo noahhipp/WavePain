@@ -11,19 +11,29 @@ pwd
 folders=$(ls)
 for folder in $folders; do
     # move in 
-    cd $folder
-    echo "arranging $folder"
+    cd $folder    
+    echo "__________________
+    arranging $folder"
+
+    if [[ "sub005sub013" == *$folder* ]];
+    then
+        echo "nope"
+    else
+        echo "t1"
+        cd run000/mrt/
+        mv 1*/* .
+        rmdir 1*   
+        cd ../../
+    fi
 	pwd
     # change stuff
     # run000
     echo "$folder run000"
-    cd run000/mrt/
-    mv 1*/* .
-    rmdir 1*   
+    
 
     # run001
-    echo "$folder run001"
-    cd ../../run001/mrt/
+    echo "run001"
+    cd run001/mrt/
     mv 1*/* .
     rmdir 1*
 
@@ -32,9 +42,10 @@ for folder in $folders; do
 
     mv FM_diff/1*/* FM_diff/
     rmdir FM_diff/1*    
+    cd ../
 
     # run002    
-    echo "$folder run002"
+    echo "run002"
     cd ../../run002/mrt/
     mv 1*/* .
     rmdir 1*
@@ -43,11 +54,13 @@ for folder in $folders; do
     rmdir FM2TE/1*
 
     mv FM_diff/1*/* FM_diff/
-    rmdir FM_diff/1*    
+    rmdir FM_diff/1*  
+    cd ../../  
 
     # move out
-    cd ../../../    
+    cd ../  
     echo "$folder done
+    __________________
     "
 done
 
