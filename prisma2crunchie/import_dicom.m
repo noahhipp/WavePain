@@ -16,7 +16,8 @@ mapping_names = {'','',...
 % each column corresponds to one
 
 % Loop through subjects
-for i = 1:height(mapping)
+for i = 1 
+    %:height(mapping)
     subject = mapping.subject(i);
     prisma = mapping.prisma_id(i);
     

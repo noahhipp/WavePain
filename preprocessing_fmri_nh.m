@@ -5,11 +5,15 @@ switch hostname
     case 'DESKTOP-3UBJ04S'
         base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
         n_proc            = 2;
-       otherwise
-        error('Only hosts noahs isn laptop accepted');
+    case 'revelations'
+        base_dir          = 'projects/crunchie/hipp/wavepain';
+        n_proc            = 4;
+    otherwise
+           
+        error('Only hosts noahs isn laptop or revelations accepted');
 end
 
-check          = 0;
+check          = 1;
 
 do_4d          = 0;
 do_field       = 0;%1
@@ -26,7 +30,7 @@ do_warp        = 0;%1
 do_avg_norm    = 0;%1
 
 
-all_subs = [5];
+all_subs = [5:53];
 %DEBUG
 %all_subs    = [19 25 35]; %they have only 1 EPI session
 

@@ -1,6 +1,6 @@
 function dicom2nifti
 
-base_dir          = 'projects/crunchie/hipp/wavepain';
+base_dir          = '/projects/crunchie/hipp/wavepain';
 %data_file         = 'C:\Users\hipp\projects\WavePain\code\matlab\fmri\cb_pipeline\data.mat';
 
 check          = 1;
@@ -15,14 +15,13 @@ dummies           = 5;
 n_runs = 2;
 data_names = {'', 'FM_2TE', 'FM_diff'};
 
-gi = 1;
 
 for g = 1:size(subs,2)
     name = sprintf('sub%03d',subs(g));
     %-------------------------------
     %Do DICOM convert
     if do_dcm_convert      
-        
+        gi = 1;
         
         % Loop over runs (including epis and both fmaps)
         for run = 1:n_runs
@@ -68,8 +67,8 @@ for g = 1:size(subs,2)
         end
         
         save matlabbatch matlabbatch
-        %spm_jobman('run',matlabbatch);
-        %clear matlabbatch;
+        spm_jobman('run',matlabbatch);
+        clear matlabbatch;
         
     end
     
