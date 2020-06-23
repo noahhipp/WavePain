@@ -8,12 +8,12 @@ check          = 1;
 do_dcm_convert = 1;
 do_move        = 1;
 
-subs = [5];
+subs = [6:53];
 
 dummies           = 5;
 
 n_runs = 2;
-data_names = {'', 'FM_2TE', 'FM_diff'};
+data_names = {'', 'fm_2TE', 'fm_Diff'};
 
 
 for g = 1:size(subs,2)
@@ -25,7 +25,7 @@ for g = 1:size(subs,2)
         
         % Loop over runs (including epis and both fmaps)
         for run = 1:n_runs
-            run_name = strcat(sprintf('run%03d',run), 'mrt/');
+            run_name = fullfile(sprintf('run%03d',run), 'mrt/');
             
             % Loop over datatypes
             for i = 1:numel(data_names)

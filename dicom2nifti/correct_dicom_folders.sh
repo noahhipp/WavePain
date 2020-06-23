@@ -7,6 +7,7 @@ echo "hello world"
 # Move to data 
 cd /projects/crunchie/hipp/wavepain
 pwd
+shopt -s dotglob # so * matches hidden files
 
 folders=$(ls)
 for folder in $folders; do
@@ -25,11 +26,6 @@ for folder in $folders; do
         rmdir 1*   
         cd ../../
     fi
-	pwd
-    # change stuff
-    # run000
-    echo "$folder run000"
-    
 
     # run001
     echo "run001"
@@ -37,24 +33,24 @@ for folder in $folders; do
     mv 1*/* .
     rmdir 1*
 
-    mv FM_2TE/1*/* FM_2TE/
-    rmdir FM2TE/1*
+    mv fm_2TE/1*/* fm_2TE/
+    rmdir fm_2TE/1*
 
-    mv FM_diff/1*/* FM_diff/
-    rmdir FM_diff/1*    
-    cd ../
+    mv fm_Diff/1*/* fm_Diff/
+    rmdir fm_Diff/1*    
+    cd ../../
 
     # run002    
     echo "run002"
-    cd ../../run002/mrt/
+    cd run002/mrt/
     mv 1*/* .
     rmdir 1*
 
-    mv FM_2TE/1*/* FM_2TE/
-    rmdir FM2TE/1*
+    mv fm_2TE/1*/* fm_2TE/
+    rmdir fm_2TE/1*
 
-    mv FM_diff/1*/* FM_diff/
-    rmdir FM_diff/1*  
+    mv fm_Diff/1*/* fm_Diff/
+    rmdir fm_Diff/1*  
     cd ../../  
 
     # move out
