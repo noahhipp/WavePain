@@ -15,13 +15,12 @@ dummies           = 5;
 n_runs = 2;
 data_names = {'', 'FM_2TE', 'FM_diff'};
 
-gi = 1;
-
 for g = 1:size(subs,2)
     name = sprintf('sub%03d',subs(g));
     %-------------------------------
     %Do DICOM convert
-    if do_dcm_convert      
+    if do_dcm_convert
+        gi = 1;
         
         
         % Loop over runs (including epis and both fmaps)
@@ -68,8 +67,8 @@ for g = 1:size(subs,2)
         end
         
         save matlabbatch matlabbatch
-        %spm_jobman('run',matlabbatch);
-        %clear matlabbatch;
+        spm_jobman('run',matlabbatch);
+        clear matlabbatch;
         
     end
     
