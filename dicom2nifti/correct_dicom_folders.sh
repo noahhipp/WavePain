@@ -6,14 +6,14 @@ echo "hello world"
 
 # Move to data 
 cd /projects/crunchie/hipp/wavepain
-
+pwd
 
 folders=$(ls)
 for folder in $folders; do
     # move in 
     cd $folder
     echo "arranging $folder"
-
+	pwd
     # change stuff
     # run000
     echo "$folder run000"
