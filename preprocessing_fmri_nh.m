@@ -1,4 +1,6 @@
 function preprocessing_fmri_nh
+	% to safely use parallel computing we first fill task specific batches (e.g. 4d_batch, slice_timing_batch...) with all subjects and then
+	% pass them to run_spm_parallel back to back
 
 hostname =  char(getHostName(java.net.InetAddress.getLocalHost));
 switch hostname
@@ -6,8 +8,9 @@ switch hostname
         base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
         n_proc            = 2;
     case 'revelations'
-        base_dir          = 'projects/crunchie/hipp/wavepain';
+        base_dir          = '/projects/crunchie/hipp/wavepain';
         n_proc            = 4;
+	
     otherwise
            
         error('Only hosts noahs isn laptop or revelations accepted');
@@ -54,35 +57,38 @@ mean_func_name    = 'meanafMRI.nii';
 
 skullstrip_name   = 'skull_strip.nii';
 
-% fm_default_file   = 'pm_defaults_Prisma_ISN_15.m';
 epi_folders       = {'run001\mrt','run002\mrt'};
 run_folders      = {'run001\mrt', 'run002\mrt'};
-% epi_folders       = {'Run1'};
 dummies           = 0; %already taken care of at import
 
 
 
-% Calculate multiprocessor stuff
-if size(all_subs) < n_proc
-    n_proc = size(all_subs,2);
-end
-subs     = splitvect(all_subs, n_proc);
+% Collect spm path
 spm_path = fileparts(which('spm')); %get spm path
 template_path = [spm_path filesep 'toolbox\cat12\templates_1.50mm' filesep]; % get newest toolbox
 tpm_path = [spm_path filesep 'tpm' filesep];
 
-
-for np = 1:size(subs,2) %number of processes
-    matlabbatch = [];
-    gi   = 1;
+% Initialize batch indices
+4d_i 		= 1;
+field_i 	= 1;
+slicetime_i	= 1;
+realign_i 	= 1;
+coreg_i		= 1;
+seg_i 		= 1;
+skull_i 	= 1;
+sm_skull_i 	= 1;
+norm_i		= 1;
+back_i 		= 1;
+warp_i 		= 1;
     
-    for g = 1:size(subs{np},2) 
+for g = 1:size(all_subs,2) 
+	
         %-------------------------------
         %House keeping stuff        
-        name = sprintf('sub%03d',subs{np}(g));
+        name = sprintf('sub%03d',all_subs(g));
         
         % Collect T1
-        st_dir       = fullfile(base_dir, name,'run000\mrt\');
+        st_dir       = fullfile(base_dir, name,'run000/mrt/');
         struc_file   = spm_select('FPList', st_dir, struc_templ);      
         
         
@@ -177,43 +183,41 @@ for np = 1:size(subs,2) %number of processes
         %Do 4D NIFTI conversion
         if do_4d
             for l=1:size(epi_folders,2)
-                matlabbatch{gi}.spm.util.cat.vols  = cellstr(epi_files{l}(dummies+1:end,:));
-                matlabbatch{gi}.spm.util.cat.name  = func_name;
-                matlabbatch{gi}.spm.util.cat.dtype = 0;
-                matlabbatch{gi}.spm.util.cat.RT    = TR; %???
-                gi = gi + 1;                
+                4d_batch{4d_i}.spm.util.cat.vols  = cellstr(epi_files{l}(dummies+1:end,:));
+                4d_batch{4d_i}.spm.util.cat.name  = func_name;
+                4d_batch{4d_i}.spm.util.cat.dtype = 0;
+                4d_batch{4d_i}.spm.util.cat.RT    = TR; %???
+                4d_i = 4d_i + 1;                
                 
                 % Get rid of 3D-niftis
-                matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.files = cellstr(epi_files{l});
-                matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.action.delete = false;
-                gi = gi + 1;
+                4d_batch{4d_i}.cfg_basicio.file_dir.file_ops.file_move.files = cellstr(epi_files{l});
+                4d_batch{4d_i}.cfg_basicio.file_dir.file_ops.file_move.action.delete = false;
+                4d_i = 4d_i + 1;
             end
         end
-        save('4D.mat','matlabbatch');
+        save('4D.mat','4d_batch');
         
         
         %-------------------------------
         %Do Fieldmap
         if do_field
             for j = 1:size(epi_folders,2)
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.data.presubphasemag.phase = phase_file(j);
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.data.presubphasemag.magnitude = magn_1_file(j);
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.defaults.defaultsfile = fm_default_file(j);
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.data.presubphasemag.phase = phase_file(j);
+
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.data.presubphasemag.magnitude = magn_1_file(j);
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.defaults.defaultsfile = fm_default_file(j);
                 
                 s_dir            = [base_dir name filesep epi_folders{j}];
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.session.epi = create_func_files(s_dir,ra_func_name,1)';
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.session.epi = create_func_files(s_dir,ra_func_name,1)';
                 
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.matchvdm = 1;
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.sessname = sprintf('session%d',j);
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.writeunwarped = 1;
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.anat = '';
-                matlabbatch{gi}.spm.tools.fieldmap.calculatevdm.subj.matchanat = 0;
-                gi = gi + 1;
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.matchvdm = 1;
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.sessname = sprintf('session%d',j);
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.writeunwarped = 1;
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.anat = '';
+                field_batch{field_i}.spm.tools.fieldmap.calculatevdm.subj.matchanat = 0;
+                field_i = field_i + 1;
             end
         end
-        
-        
-        
         
         
         %-------------------------------
@@ -223,15 +227,14 @@ for np = 1:size(subs,2) %number of processes
                 s_dir            = [base_dir name filesep epi_folders{l}];
                 func_files{l}    = create_func_files(s_dir,func_name,size(epi_files{l},1))';
             end
-            matlabbatch{gi}.spm.temporal.st.scans = func_files;
-            %%
-            matlabbatch{gi}.spm.temporal.st.nslices     = 66;
-            matlabbatch{gi}.spm.temporal.st.tr          = 1.599;
-            matlabbatch{gi}.spm.temporal.st.ta          = 0;
-            matlabbatch{gi}.spm.temporal.st.so          = repmat(linspace(1599 - 1599/(66/3),0,66/3),1,3);
-            matlabbatch{gi}.spm.temporal.st.refslice    = 800; 
-            matlabbatch{gi}.spm.temporal.st.prefix      = 'a';
-            gi = gi + 1;
+            slicetime_batch{slicetime_i}.spm.temporal.st.scans = func_files;
+            slicetime_batch{slicetime_i}.spm.temporal.st.nslices     = 66;
+            slicetime_batch{slicetime_i}.spm.temporal.st.tr          = 1.599;
+            slicetime_batch{slicetime_i}.spm.temporal.st.ta          = 0;
+            slicetime_batch{slicetime_i}.spm.temporal.st.so          = repmat(linspace(1599 - 1599/(66/3),0,66/3),1,3);
+            slicetime_batch{slicetime_i}.spm.temporal.st.refslice    = 800; 
+            slicetime_batch{slicetime_i}.spm.temporal.st.prefix      = 'a';
+            slicetime_i = slicetime_i + 1;
         end
        
         %-------------------------------
@@ -243,196 +246,205 @@ for np = 1:size(subs,2) %number of processes
                 func_files{l}    = create_func_files(s_dir,a_func_name,size(epi_files{l},1))';
             end
             
-            matlabbatch{gi}.spm.spatial.realign.estwrite.data             = func_files;
-            matlabbatch{gi}.spm.spatial.realign.estwrite.eoptions.quality = 0.9;
-            matlabbatch{gi}.spm.spatial.realign.estwrite.eoptions.sep     = 4;
-            matlabbatch{gi}.spm.spatial.realign.estwrite.eoptions.fwhm    = 5;
-            matlabbatch{gi}.spm.spatial.realign.estwrite.eoptions.rtm     = 1;
-            matlabbatch{gi}.spm.spatial.realign.estwrite.eoptions.interp  = 2;
-            matlabbatch{gi}.spm.spatial.realign.estwrite.eoptions.wrap    = [0 0 0];
-            matlabbatch{gi}.spm.spatial.realign.estwrite.eoptions.weight  = '';
-            matlabbatch{gi}.spm.spatial.realign.estwrite.roptions.which   = [2 1];
-            matlabbatch{gi}.spm.spatial.realign.estwrite.roptions.interp  = 4;
-            matlabbatch{gi}.spm.spatial.realign.estwrite.roptions.wrap    = [0 0 0];
-            matlabbatch{gi}.spm.spatial.realign.estwrite.roptions.mask    = 1;
-            matlabbatch{gi}.spm.spatial.realign.estwrite.roptions.prefix  = 'r';
-            gi = gi + 1;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.data             = func_files;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.eoptions.quality = 0.9;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.eoptions.sep     = 4;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.eoptions.fwhm    = 5;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.eoptions.rtm     = 1;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.eoptions.interp  = 2;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.eoptions.wrap    = [0 0 0];
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.eoptions.weight  = '';
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.roptions.which   = [2 1];
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.roptions.interp  = 4;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.roptions.wrap    = [0 0 0];
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.roptions.mask    = 1;
+            realign_batch{realign_i}.spm.spatial.realign.estwrite.roptions.prefix  = 'r';
+            realign_i = realign_i + 1;
         end
-        %save('realign.mat','matlabbatch');
+        %save('realign.mat','skull_batch');
         
         %-------------------------------
         %Do Realignment and unwarp
         if do_real_unwarp
             for l=1:size(epi_folders,2)
                 s_dir            = [base_dir name filesep epi_folders{l}];
-                %matlabbatch{gi}.spm.spatial.realignunwarp.data(l).scans =
+                %skull_batch{seg_i}.spm.spatial.realignunwarp.data(l).scans =
                 %create_func_files(s_dir,a_func_name,size(epi_files{l},1))';
                 %use this for 1 session
-                matlabbatch{gi}.spm.spatial.realignunwarp.data(l).pmscan = {ins_letter(phase_file,'vdm5_sc',['_session' num2str(l)])};
-                matlabbatch{gi}.spm.spatial.realignunwarp.data(l).pmscan = {ins_letter(phase_file,'vdm5_sc')};
+                unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.data(l).pmscan = {ins_letter(phase_file,'vdm5_sc',['_session' num2str(l)])};
+                unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.data(l).pmscan = {ins_letter(phase_file,'vdm5_sc')};
             end
-            matlabbatch{gi}.spm.spatial.realignunwarp.eoptions.quality = 0.9;
-            matlabbatch{gi}.spm.spatial.realignunwarp.eoptions.sep = 4;
-            matlabbatch{gi}.spm.spatial.realignunwarp.eoptions.fwhm = 5;
-            matlabbatch{gi}.spm.spatial.realignunwarp.eoptions.rtm = 0;
-            matlabbatch{gi}.spm.spatial.realignunwarp.eoptions.einterp = 2;
-            matlabbatch{gi}.spm.spatial.realignunwarp.eoptions.ewrap = [0 0 0];
-            matlabbatch{gi}.spm.spatial.realignunwarp.eoptions.weight = '';
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.basfcn = [12 12];
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.regorder = 1;
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.lambda = 100000;
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.jm = 0;
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.fot = [4 5];
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.sot = [];
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.uwfwhm = 4;
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.rem = 1;
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.noi = 5;
-            matlabbatch{gi}.spm.spatial.realignunwarp.uweoptions.expround = 'First';
-            matlabbatch{gi}.spm.spatial.realignunwarp.uwroptions.uwwhich = [2 1];
-            matlabbatch{gi}.spm.spatial.realignunwarp.uwroptions.rinterp = 4;
-            matlabbatch{gi}.spm.spatial.realignunwarp.uwroptions.wrap = [0 0 0];
-            matlabbatch{gi}.spm.spatial.realignunwarp.uwroptions.mask = 1;
-            matlabbatch{gi}.spm.spatial.realignunwarp.uwroptions.prefix = 'u';
-            gi = gi + 1;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.eoptions.quality = 0.9;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.eoptions.sep = 4;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.eoptions.fwhm = 5;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.eoptions.rtm = 0;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.eoptions.einterp = 2;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.eoptions.ewrap = [0 0 0];
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.eoptions.weight = '';
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.basfcn = [12 12];
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.regorder = 1;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.lambda = 100000;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.jm = 0;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.fot = [4 5];
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.sot = [];
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.uwfwhm = 4;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.rem = 1;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.noi = 5;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uweoptions.expround = 'First';
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uwroptions.uwwhich = [2 1];
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uwroptions.rinterp = 4;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uwroptions.wrap = [0 0 0];
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uwroptions.mask = 1;
+            unwarp_batch{unwarp_i}.spm.spatial.realignunwarp.uwroptions.prefix = 'u';
+            unwarp_i = unwarp_i + 1;
             
         end
         %-------------------------------
-        %Do Coregistration mean rfMRI to T1
+        %Do Coreback_istration mean rfMRI to T1
         if do_coreg
-            matlabbatch{gi}.spm.spatial.coreg.estimate.source = cellstr(struc_file);
-            matlabbatch{gi}.spm.spatial.coreg.estimate.ref    = cellstr(mean_file);
-            matlabbatch{gi}.spm.spatial.coreg.estimate.other  = {''};
-            matlabbatch{gi}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
-            matlabbatch{gi}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
-            matlabbatch{gi}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
-            matlabbatch{gi}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
-            gi = gi + 1;
+            coreg_batch{coreg_i}.spm.spatial.coreg.estimate.source = cellstr(struc_file);
+            coreg_batch{coreg_i}.spm.spatial.coreg.estimate.ref    = cellstr(mean_file);
+            coreg_batch{coreg_i}.spm.spatial.coreg.estimate.other  = {''};
+            coreg_batch{coreg_i}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
+            coreg_batch{coreg_i}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
+            coreg_batch{coreg_i}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
+            coreg_batch{coreg_i}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
+            coreg_i = coreg_i + 1;
         end
         %-------------------------------
         %Do Segmentation
         if do_seg
-            matlabbatch{gi}.spm.spatial.preproc.channel.vols     = cellstr(struc_file);
-            matlabbatch{gi}.spm.spatial.preproc.channel.biasreg  = 0.001;
-            matlabbatch{gi}.spm.spatial.preproc.channel.biasfwhm = 60;
-            matlabbatch{gi}.spm.spatial.preproc.channel.write    = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(1).tpm    = {[tpm_path 'enhanced_TPM.nii,1']};
-            matlabbatch{gi}.spm.spatial.preproc.tissue(1).ngaus  = 2; %LOrio ... Draganski et al. NI2016
-            matlabbatch{gi}.spm.spatial.preproc.tissue(1).native = [1 1];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(1).warped = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(2).tpm    = {[tpm_path 'enhanced_TPM.nii,2']};
-            matlabbatch{gi}.spm.spatial.preproc.tissue(2).ngaus  = 1;
-            matlabbatch{gi}.spm.spatial.preproc.tissue(2).native = [1 1];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(2).warped = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(3).tpm    = {[tpm_path 'enhanced_TPM.nii,3']};
-            matlabbatch{gi}.spm.spatial.preproc.tissue(3).ngaus  = 2;
-            matlabbatch{gi}.spm.spatial.preproc.tissue(3).native = [1 1];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(3).warped = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(4).tpm    = {[tpm_path 'enhanced_TPM.nii,4']};
-            matlabbatch{gi}.spm.spatial.preproc.tissue(4).ngaus  = 3;
-            matlabbatch{gi}.spm.spatial.preproc.tissue(4).native = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(4).warped = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(5).tpm    = {[tpm_path 'enhanced_TPM.nii,5']};
-            matlabbatch{gi}.spm.spatial.preproc.tissue(5).ngaus  = 4;
-            matlabbatch{gi}.spm.spatial.preproc.tissue(5).native = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(5).warped = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(6).tpm    = {[tpm_path 'enhanced_TPM.nii,6']};
-            matlabbatch{gi}.spm.spatial.preproc.tissue(6).ngaus  = 2;
-            matlabbatch{gi}.spm.spatial.preproc.tissue(6).native = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.tissue(6).warped = [0 0];
-            matlabbatch{gi}.spm.spatial.preproc.warp.mrf         = 1;
-            matlabbatch{gi}.spm.spatial.preproc.warp.cleanup     = 1;
-            matlabbatch{gi}.spm.spatial.preproc.warp.reg         = [0 0.001 0.5 0.05 0.2];
-            matlabbatch{gi}.spm.spatial.preproc.warp.affreg      = 'mni';
-            matlabbatch{gi}.spm.spatial.preproc.warp.fwhm        = 0;
-            matlabbatch{gi}.spm.spatial.preproc.warp.samp        = 3;
-            matlabbatch{gi}.spm.spatial.preproc.warp.write       = [0 0];
-            gi = gi + 1;
+            seg_batch{seg_i}.spm.spatial.preproc.channel.vols     = cellstr(struc_file);
+            seg_batch{seg_i}.spm.spatial.preproc.channel.biasreg  = 0.001;
+            seg_batch{seg_i}.spm.spatial.preproc.channel.biasfwhm = 60;
+            seg_batch{seg_i}.spm.spatial.preproc.channel.write    = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(1).tpm    = {[tpm_path 'enhanced_TPM.nii,1']};
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(1).ngaus  = 2; %LOrio ... Draganski et al. NI2016
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(1).native = [1 1];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(1).warped = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(2).tpm    = {[tpm_path 'enhanced_TPM.nii,2']};
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(2).ngaus  = 1;
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(2).native = [1 1];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(2).warped = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(3).tpm    = {[tpm_path 'enhanced_TPM.nii,3']};
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(3).ngaus  = 2;
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(3).native = [1 1];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(3).warped = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(4).tpm    = {[tpm_path 'enhanced_TPM.nii,4']};
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(4).ngaus  = 3;
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(4).native = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(4).warped = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(5).tpm    = {[tpm_path 'enhanced_TPM.nii,5']};
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(5).ngaus  = 4;
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(5).native = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(5).warped = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(6).tpm    = {[tpm_path 'enhanced_TPM.nii,6']};
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(6).ngaus  = 2;
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(6).native = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.tissue(6).warped = [0 0];
+            seg_batch{seg_i}.spm.spatial.preproc.warp.mrf         = 1;
+            seg_batch{seg_i}.spm.spatial.preproc.warp.cleanup     = 1;
+            seg_batch{seg_i}.spm.spatial.preproc.warp.reg         = [0 0.001 0.5 0.05 0.2];
+            seg_batch{seg_i}.spm.spatial.preproc.warp.affreg      = 'mni';
+            seg_batch{seg_i}.spm.spatial.preproc.warp.fwhm        = 0;
+            seg_batch{seg_i}.spm.spatial.preproc.warp.samp        = 3;
+            seg_batch{seg_i}.spm.spatial.preproc.warp.write       = [0 0];
+            seg_i = seg_i + 1;
         end
         
         %-------------------------------
         %Do skull strip
         if do_skull
             Vfnames      = strvcat(struc_file,c1_file,c2_file);
-            matlabbatch{gi}.spm.util.imcalc.input            = cellstr(Vfnames);
-            matlabbatch{gi}.spm.util.imcalc.output           = skullstrip_name;
-            matlabbatch{gi}.spm.util.imcalc.outdir           = {st_dir};
-            matlabbatch{gi}.spm.util.imcalc.expression       = 'i1.*((i2+i3)>0.2)';
-            matlabbatch{gi}.spm.util.imcalc.options.dmtx     = 0;
-            matlabbatch{gi}.spm.util.imcalc.options.mask     = 0;
-            matlabbatch{gi}.spm.util.imcalc.options.interp   = 1;
-            matlabbatch{gi}.spm.util.imcalc.options.dtype    = 4;
-            gi = gi + 1;
+            skull_batch{skull_i}.spm.util.imcalc.input            = cellstr(Vfnames);
+            skull_batch{skull_i}.spm.util.imcalc.output           = skullstrip_name;
+            skull_batch{skull_i}.spm.util.imcalc.outdir           = {st_dir};
+            skull_batch{skull_i}.spm.util.imcalc.expression       = 'i1.*((i2+i3)>0.2)';
+            skull_batch{skull_i}.spm.util.imcalc.options.dmtx     = 0;
+            skull_batch{skull_i}.spm.util.imcalc.options.mask     = 0;
+            skull_batch{skull_i}.spm.util.imcalc.options.interp   = 1;
+            skull_batch{skull_i}.spm.util.imcalc.options.dtype    = 4;
+            skull_i = skull_i + 1;
         end
         %-------------------------------
         %Dartel norm to template
         if do_norm
-            matlabbatch{gi}.spm.tools.dartel.warp1.images = {cellstr(rc1_file),cellstr(rc2_file)};
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.rform = 0;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(1).its = 3;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(1).rparam = [4 2 1e-06];
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(1).K = 0;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(1).template = {[template_path 'Template_1_IXI555_MNI152.nii']};
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(2).its = 3;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(2).rparam = [2 1 1e-06];
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(2).K = 0;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(2).template = {[template_path 'Template_2_IXI555_MNI152.nii']};
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(3).its = 3;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(3).rparam = [1 0.5 1e-06];
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(3).K = 1;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(3).template = {[template_path 'Template_3_IXI555_MNI152.nii']};
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(4).its = 3;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(4).rparam = [0.5 0.25 1e-06];
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(4).K = 2;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(4).template = {[template_path 'Template_4_IXI555_MNI152.nii']};
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(5).its = 3;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(5).rparam = [0.25 0.125 1e-06];
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(5).K = 4;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(5).template = {[template_path 'Template_5_IXI555_MNI152.nii']};
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(6).its = 3;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(6).rparam = [0.25 0.125 1e-06];
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(6).K = 6;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.param(6).template = {[template_path 'Template_6_IXI555_MNI152.nii']};
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.optim.lmreg = 0.01;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.optim.cyc = 3;
-            matlabbatch{gi}.spm.tools.dartel.warp1.settings.optim.its = 3;
-            gi = gi + 1;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.images = {cellstr(rc1_file),cellstr(rc2_file)};
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.rform = 0;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(1).its = 3;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(1).rparam = [4 2 1e-06];
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(1).K = 0;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(1).template = {[template_path 'Template_1_IXI555_MNI152.nii']};
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(2).its = 3;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(2).rparam = [2 1 1e-06];
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(2).K = 0;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(2).template = {[template_path 'Template_2_IXI555_MNI152.nii']};
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(3).its = 3;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(3).rparam = [1 0.5 1e-06];
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(3).K = 1;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(3).template = {[template_path 'Template_3_IXI555_MNI152.nii']};
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(4).its = 3;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(4).rparam = [0.5 0.25 1e-06];
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(4).K = 2;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(4).template = {[template_path 'Template_4_IXI555_MNI152.nii']};
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(5).its = 3;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(5).rparam = [0.25 0.125 1e-06];
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(5).K = 4;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(5).template = {[template_path 'Template_5_IXI555_MNI152.nii']};
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(6).its = 3;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(6).rparam = [0.25 0.125 1e-06];
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(6).K = 6;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.param(6).template = {[template_path 'Template_6_IXI555_MNI152.nii']};
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.optim.lmreg = 0.01;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.optim.cyc = 3;
+            norm_batch{norm_i}.spm.tools.dartel.warp1.settings.optim.its = 3;
+            norm_i = norm_i + 1;
         end
         %-------------------------------
         %Get backwards deformations
         if do_back
-            matlabbatch{gi}.spm.util.defs.comp{1}.dartel.flowfield = {u_rc1_file};
-            matlabbatch{gi}.spm.util.defs.comp{1}.dartel.times     = [1 0];
-            matlabbatch{gi}.spm.util.defs.comp{1}.dartel.K         = 6;
-            matlabbatch{gi}.spm.util.defs.comp{1}.dartel.template  = {''};
-            matlabbatch{gi}.spm.util.defs.out{1}.savedef.ofname    = 'backwards';
-            matlabbatch{gi}.spm.util.defs.out{1}.savedef.savedir.saveusr = {st_dir};
-            gi = gi + 1;
+            back_batch{back_i}.spm.util.defs.comp{1}.dartel.flowfield = {u_rc1_file};
+            back_batch{back_i}.spm.util.defs.comp{1}.dartel.times     = [1 0];
+            back_batch{back_i}.spm.util.defs.comp{1}.dartel.K         = 6;
+            back_batch{back_i}.spm.util.defs.comp{1}.dartel.template  = {''};
+            back_batch{back_i}.spm.util.defs.out{1}.savedef.ofname    = 'backwards';
+            back_batch{back_i}.spm.util.defs.out{1}.savedef.savedir.saveusr = {st_dir};
+            back_i = back_i + 1;
         end
         
         %-------------------------------
         %Create warped T1 and mean EPI
         if do_warp
-            matlabbatch{gi}.spm.tools.dartel.crt_warped.flowfields = cellstr(strvcat(u_rc1_file,u_rc1_file,u_rc1_file,u_rc1_file));
-            matlabbatch{gi}.spm.tools.dartel.crt_warped.images = {cellstr(strvcat(mean_file,strip_file,c1_file,c2_file))};
-            matlabbatch{gi}.spm.tools.dartel.crt_warped.jactransf = 0;
-            matlabbatch{gi}.spm.tools.dartel.crt_warped.K = 6;
-            matlabbatch{gi}.spm.tools.dartel.crt_warped.interp = 1;
-            gi = gi + 1;
+            warp_batch{warp_i}.spm.tools.dartel.crt_warped.flowfields = cellstr(strvcat(u_rc1_file,u_rc1_file,u_rc1_file,u_rc1_file));
+            warp_batch{warp_i}.spm.tools.dartel.crt_warped.images = {cellstr(strvcat(mean_file,strip_file,c1_file,c2_file))};
+            warp_batch{warp_i}.spm.tools.dartel.crt_warped.jactransf = 0;
+            warp_batch{warp_i}.spm.tools.dartel.crt_warped.K = 6;
+            warp_batch{warp_i}.spm.tools.dartel.crt_warped.interp = 1;
+            warp_i = warp_i + 1;
         end
         %-------------------------------
         %Create smoothed skullstrip
         if do_sm_skull
             skern = 3;
-            matlabbatch{gi}.spm.spatial.smooth.data   = cellstr(strip_file);
-            matlabbatch{gi}.spm.spatial.smooth.fwhm   = repmat(skern,1,3);
-            matlabbatch{gi}.spm.spatial.smooth.prefix = ['s' num2str(skern)];
-            gi = gi + 1;
+            sm_skull_batch{sm_skull_i}.spm.spatial.smooth.data   = cellstr(strip_file);
+            sm_skull_batch{sm_skull_i}.spm.spatial.smooth.fwhm   = repmat(skern,1,3);
+            sm_skull_batch{sm_skull_i}.spm.spatial.smooth.prefix = ['s' num2str(skern)];
+            sm_skull_i = sm_skull_i + 1;
         end
     end
-    if ~isempty(matlabbatch)
-        run_matlab(np, matlabbatch, check);
-    end
 end
+
+% Start batches
+run_spm_parallel(4d_batch, n_proc);
+run_spm_parallel(slicetime_batch, n_proc);
+run_spm_parallel(realign_batch, n_proc);
+run_spm_parallel(coreg_batch, n_proc);
+run_spm_parallel(seg_batch, n_proc);
+run_spm_parallel(skull_batch, n_proc);
+run_spm_parallel(sm_skull_batch, n_proc);
+run_spm_parallel(back_batch, n_proc);
+run_spm_parallel(warp_batch, n_proc);
+
 
 if do_avg_norm
     matlabbatch = [];
@@ -441,16 +453,14 @@ if do_avg_norm
     all_wc1_files    = [];
     
     for g = 1:size(all_subs,2)
-        name = sprintf('sub-%02d',all_subs(g));
-        strip_file        = [base_dir name filesep 'T1' filesep skullstrip_name];
+        name = sprintf('sub%03d',all_subs(g));
+        strip_file        = fullfile(base_dir, name,'run000/mrt/',skullstrip_name];
         wskull_file       = ins_letter(strip_file,'w');
         
-        mean_file        = [base_dir name filesep 'T1' filesep mean_func_name];
+        mean_file        = fullfile(base_dir, name, 'run000/mrt/', mean_func_name];
         wmean_file       = ins_letter(mean_file,'w');
         
-        
-        
-        st_dir       = [base_dir name filesep 'T1' filesep];
+        st_dir       = fullfile(base_dir, name, 'run000/mrt/');
         struc_file   = spm_select('FPList', st_dir, struc_templ);
         wc1_file     = ins_letter(struc_file,'wc1');
         
