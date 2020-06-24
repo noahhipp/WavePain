@@ -6,9 +6,9 @@ base_dir          = '/projects/crunchie/hipp/wavepain';
 check          = 1;
 
 do_dcm_convert = 1;
-do_move        = 1;
+do_move        = 0;
 
-subs = [6:53];
+subs = [16];
 
 dummies           = 5;
 
@@ -23,37 +23,37 @@ for g = 1:size(subs,2)
     if do_dcm_convert      
         gi = 1;
         
-        % Loop over runs (including epis and both fmaps)
-        for run = 1:n_runs
-            run_name = fullfile(sprintf('run%03d',run), 'mrt/');
-            
-            % Loop over datatypes
-            for i = 1:numel(data_names)
-                data_name = data_names{i};
-                
-                files = spm_select('FPList', fullfile(base_dir, name, run_name, data_name), '^MR');
-                matlabbatch{gi}.spm.util.import.dicom.data = cellstr(files);
-                matlabbatch{gi}.spm.util.import.dicom.outdir = {fullfile(base_dir, name, run_name, data_name)};
-                
-                matlabbatch{gi}.spm.util.import.dicom.root             = 'flat';
-                matlabbatch{gi}.spm.util.import.dicom.protfilter       = '.*';
-                matlabbatch{gi}.spm.util.import.dicom.convopts.format  = 'nii';
-                matlabbatch{gi}.spm.util.import.dicom.convopts.meta    = 0;
-                matlabbatch{gi}.spm.util.import.dicom.convopts.icedims = 0;
-                gi = gi + 1;
-                % and delete DICOMs
-                matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.files         =  cellstr(files);
-                matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.action.delete = false;
-                gi = gi + 1;
-            end % datatype loop
-        end % run loop
+%         % Loop over runs (including epis and both fmaps)
+%         for run = 1:n_runs
+%             run_name = fullfile(sprintf('run%03d',run), 'mrt/');
+%             
+%             % Loop over datatypes
+%             for i = 1:numel(data_names)
+%                 data_name = data_names{i};
+%                 
+%                 files = spm_select('FPList', fullfile(base_dir, name, run_name, data_name), '^MR');
+%                 matlabbatch{gi}.spm.util.import.dicom.data = cellstr(files);
+%                 matlabbatch{gi}.spm.util.import.dicom.outdir = {fullfile(base_dir, name, run_name, data_name)};
+%                 
+%                 matlabbatch{gi}.spm.util.import.dicom.root             = 'flat';
+%                 matlabbatch{gi}.spm.util.import.dicom.protfilter       = '.*';
+%                 matlabbatch{gi}.spm.util.import.dicom.convopts.format  = 'nii';
+%                 matlabbatch{gi}.spm.util.import.dicom.convopts.meta    = 0;
+%                 matlabbatch{gi}.spm.util.import.dicom.convopts.icedims = 0;
+%                 gi = gi + 1;
+%                 % and delete DICOMs
+%                 matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.files         =  cellstr(files);
+%                 matlabbatch{gi}.cfg_basicio.file_dir.file_ops.file_move.action.delete = false;
+%                 gi = gi + 1;
+%             end % datatype loop
+%         end % run loop
         
         % T1
         if ~ismember(subs(g),[5,13])
             
             files = spm_select('FPList', fullfile(base_dir, name, 'run000/mrt/'), '^MR');
             matlabbatch{gi}.spm.util.import.dicom.data = cellstr(files);
-            matlabbatch{gi}.spm.util.import.dicom.outdir = fullfile(base_dir, name, 'run000/mrt/');
+            matlabbatch{gi}.spm.util.import.dicom.outdir = cellstr(fullfile(base_dir, name, 'run000/mrt/'));
             matlabbatch{gi}.spm.util.import.dicom.root             = 'flat';
             matlabbatch{gi}.spm.util.import.dicom.protfilter       = '.*';
             matlabbatch{gi}.spm.util.import.dicom.convopts.format  = 'nii';

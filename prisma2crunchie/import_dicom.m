@@ -1,3 +1,4 @@
+function import_dicom
 % Collect mapping
 mapping = readtable('mapping.csv');
 
@@ -16,17 +17,20 @@ mapping_names = {'','',...
 % each column corresponds to one
 
 % Loop through subjects
-for i = 1 
+for i = 1:height(mapping)
     %:height(mapping)
     subject = mapping.subject(i);
     prisma = mapping.prisma_id(i);
     
     % mkdir for subject
     subdir = fullfile(destination, sprintf('sub%03d',subject));
-    mkdir(subdir);            
+    if ~exist(subdir,'dir')
+        mkdir(subdir);            
+    end
     
     % Loop through series
-    for j = 3:width(mapping)                
+    % for j = 3:width(mapping)                
+    for j = 9
         series = mapping{i,j};
         
         if isnan(series)
@@ -36,6 +40,9 @@ for i = 1
         % Construct directory string
         destination_folder = fullfile(subdir,mapping_names{j});
         if ~exist(destination_folder,'dir')
+            mkdir(destination_folder);
+        else
+            unix(sprintf('rm -r -f %s', destination_folder));
             mkdir(destination_folder);
         end
         
