@@ -18,12 +18,12 @@ end
 
 check          = 0;
 
-do_4d          = 1;
+do_4d          = 0;
 do_field       = 0;%1
-do_slicetime   = 1;%1
-do_realign     = 1;
+do_slicetime   = 0;%1
+do_realign     = 0;
 do_real_unwarp = 0;%1
-do_coreg       = 1;%1
+do_coreg       = 0;%1
 do_seg         = 1;%1
 do_skull       = 1;%1
 do_sm_skull    = 1;%1
@@ -33,7 +33,7 @@ do_warp        = 1;%1
 do_avg_norm    = 0;%1
 
 
-all_subs = [5:8];
+all_subs = [6:9];
 %DEBUG
 %all_subs    = [19 25 35]; %they have only 1 EPI session
 
@@ -67,6 +67,10 @@ dummies           = 0; %already taken care of at import
 spm_path = fileparts(which('spm')); %get spm path
 template_path = [spm_path filesep 'toolbox/cat12/templates_1.50mm' filesep]; % get newest toolbox
 tpm_path = [spm_path filesep 'tpm' filesep];
+if strcmp(hostname, 'revelations')
+    tpm_path = '/projects/crunchie/hipp/wavepain/tpm/';
+end
+
 
 % Initialize batch indices
 fourd_i 		= 1;
@@ -436,7 +440,7 @@ for g = 1:size(all_subs,2)
 
 
 % Start batches
-run_spm_parallel(fourd_batch, n_proc);
+if do_4drun_spm_parallel(fourd_batch, n_proc);
 run_spm_parallel(slicetime_batch, n_proc);
 run_spm_parallel(realign_batch, n_proc);
 run_spm_parallel(coreg_batch, n_proc);

@@ -16,7 +16,7 @@ mapping_names = {'','',...
 % each column corresponds to one
 
 % Loop through subjects
-for i = 1 
+for i = 17
     %:height(mapping)
     subject = mapping.subject(i);
     prisma = mapping.prisma_id(i);
@@ -26,7 +26,8 @@ for i = 1
     mkdir(subdir);            
     
     % Loop through series
-    for j = 3:width(mapping)                
+    for j = 8
+    %for j = 3:width(mapping)                
         series = mapping{i,j};
         
         if isnan(series)

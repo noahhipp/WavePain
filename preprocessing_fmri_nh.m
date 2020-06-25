@@ -33,7 +33,7 @@ do_warp        = 1;%1
 do_avg_norm    = 0;%1
 
 
-all_subs = [6:9];
+all_subs = [10:12 14:53];
 %DEBUG
 %all_subs    = [19 25 35]; %they have only 1 EPI session
 
@@ -67,6 +67,10 @@ dummies           = 0; %already taken care of at import
 spm_path = fileparts(which('spm')); %get spm path
 template_path = [spm_path filesep 'toolbox/cat12/templates_1.50mm' filesep]; % get newest toolbox
 tpm_path = [spm_path filesep 'tpm' filesep];
+if strcmp(hostname, 'revelations')
+    tpm_path = '/projects/crunchie/hipp/wavepain/tpm/';
+end
+
 
 % Initialize batch indices
 fourd_i 		= 1;
@@ -174,7 +178,7 @@ for g = 1:size(all_subs,2)
             rc1_file     = ins_letter(struc_file,'rc1');
             rc2_file     = ins_letter(struc_file,'rc2');
             u_rc1_file   = ins_letter(struc_file,'u_rc1');
-            strip_file   = [base_dir name filesep 'T1' filesep skullstrip_name];
+            strip_file   = fullfile(base_dir,name,'run000/mrt/',skullstrip_name);
         end
         if ~check
             fprintf(['Doing volunteer ' name '\n']);
@@ -436,15 +440,16 @@ for g = 1:size(all_subs,2)
 
 
 % Start batches
-run_spm_parallel(fourd_batch, n_proc);
-run_spm_parallel(slicetime_batch, n_proc);
-run_spm_parallel(realign_batch, n_proc);
-run_spm_parallel(coreg_batch, n_proc);
-run_spm_parallel(seg_batch, n_proc);
-run_spm_parallel(skull_batch, n_proc);
-run_spm_parallel(sm_skull_batch, n_proc);
-run_spm_parallel(back_batch, n_proc);
-run_spm_parallel(warp_batch, n_proc);
+if do_4d;run_spm_parallel(fourd_batch, n_proc); end
+if do_slicetime; run_spm_parallel(slicetime_batch, n_proc); end
+if do_realign; run_spm_parallel(realign_batch, n_proc); end
+if do_coreg; run_spm_parallel(coreg_batch, n_proc); end
+if do_seg; run_spm_parallel(seg_batch, n_proc); end
+if do_skull; run_spm_parallel(skull_batch, n_proc); end
+if do_sm_skull; run_spm_parallel(sm_skull_batch, n_proc); end
+if do_norm; run_spm_parallel(norm_batch, n_proc); end
+if do_back; run_spm_parallel(back_batch, n_proc); end
+if do_warp; run_spm_parallel(warp_batch, n_proc); end
 
 
 if do_avg_norm
