@@ -8,7 +8,7 @@ switch hostname
         base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
         n_proc            = 2;
     case 'revelations'
-        base_dir          = '/projects/crunchie/hipp/wavepain';
+        base_dir          = '/projects/crunchie/hipp/wavepain/';
         n_proc            = 4;
 	
     otherwise
@@ -16,24 +16,24 @@ switch hostname
         error('Only hosts noahs isn laptop or revelations accepted');
 end
 
-check          = 1;
+check          = 0;
 
-do_4d          = 0;
+do_4d          = 1;
 do_field       = 0;%1
-do_slicetime   = 0;%1
-do_realign     = 0;
+do_slicetime   = 1;%1
+do_realign     = 1;
 do_real_unwarp = 0;%1
-do_coreg       = 0;%1
-do_seg         = 0;%1
-do_skull       = 0;%1
-do_sm_skull    = 0;%1
-do_norm        = 0;%1
-do_back        = 0;%1
-do_warp        = 0;%1
+do_coreg       = 1;%1
+do_seg         = 1;%1
+do_skull       = 1;%1
+do_sm_skull    = 1;%1
+do_norm        = 1;%1
+do_back        = 1;%1
+do_warp        = 1;%1
 do_avg_norm    = 0;%1
 
 
-all_subs = [5:53];
+all_subs = [10:12 14:53];
 %DEBUG
 %all_subs    = [19 25 35]; %they have only 1 EPI session
 
@@ -57,19 +57,24 @@ mean_func_name    = 'meanafMRI.nii';
 
 skullstrip_name   = 'skull_strip.nii';
 
-epi_folders       = {'run001\mrt','run002\mrt'};
-run_folders      = {'run001\mrt', 'run002\mrt'};
+epi_folders       = {'run001/mrt','run002/mrt'};
+run_folders      = {'run001/mrt', 'run002/mrt'};
 dummies           = 0; %already taken care of at import
 
 
 
 % Collect spm path
 spm_path = fileparts(which('spm')); %get spm path
-template_path = [spm_path filesep 'toolbox\cat12\templates_1.50mm' filesep]; % get newest toolbox
+template_path = [spm_path filesep 'toolbox/cat12/templates_1.50mm' filesep]; % get newest toolbox
 tpm_path = [spm_path filesep 'tpm' filesep];
+if strcmp(hostname, 'revelations')
+    tpm_path = '/projects/crunchie/hipp/wavepain/tpm/';
+end
+
 
 % Initialize batch indices
-4d_i 		= 1;
+fourd_i 	= 1;
+del_i 		= 1;
 field_i 	= 1;
 slicetime_i	= 1;
 realign_i 	= 1;
@@ -174,7 +179,7 @@ for g = 1:size(all_subs,2)
             rc1_file     = ins_letter(struc_file,'rc1');
             rc2_file     = ins_letter(struc_file,'rc2');
             u_rc1_file   = ins_letter(struc_file,'u_rc1');
-            strip_file   = [base_dir name filesep 'T1' filesep skullstrip_name];
+            strip_file   = fullfile(base_dir,name,'run000/mrt/',skullstrip_name);
         end
         if ~check
             fprintf(['Doing volunteer ' name '\n']);
@@ -183,19 +188,20 @@ for g = 1:size(all_subs,2)
         %Do 4D NIFTI conversion
         if do_4d
             for l=1:size(epi_folders,2)
-                4d_batch{4d_i}.spm.util.cat.vols  = cellstr(epi_files{l}(dummies+1:end,:));
-                4d_batch{4d_i}.spm.util.cat.name  = func_name;
-                4d_batch{4d_i}.spm.util.cat.dtype = 0;
-                4d_batch{4d_i}.spm.util.cat.RT    = TR; %???
-                4d_i = 4d_i + 1;                
+                fourd_batch{fourd_i}.spm.util.cat.vols  = cellstr(epi_files{l}(dummies+1:end,:));
+                fourd_batch{fourd_i}.spm.util.cat.name  = func_name;
+                fourd_batch{fourd_i}.spm.util.cat.dtype = 0;
+                fourd_batch{fourd_i}.spm.util.cat.RT    = TR; %???
+                fourd_i = fourd_i + 1;                
                 
                 % Get rid of 3D-niftis
-                4d_batch{4d_i}.cfg_basicio.file_dir.file_ops.file_move.files = cellstr(epi_files{l});
-                4d_batch{4d_i}.cfg_basicio.file_dir.file_ops.file_move.action.delete = false;
-                4d_i = 4d_i + 1;
+                del_batch{del_i}.cfg_basicio.file_dir.file_ops.file_move.files = cellstr(epi_files{l});
+                del_batch{del_i}.cfg_basicio.file_dir.file_ops.file_move.action.delete = false;
+                del_i = del_i + 1;
             end
+                    save('4D.mat','fourd_batch');
+
         end
-        save('4D.mat','4d_batch');
         
         
         %-------------------------------
@@ -432,18 +438,20 @@ for g = 1:size(all_subs,2)
             sm_skull_i = sm_skull_i + 1;
         end
     end
-end
+
 
 % Start batches
-run_spm_parallel(4d_batch, n_proc);
-run_spm_parallel(slicetime_batch, n_proc);
-run_spm_parallel(realign_batch, n_proc);
-run_spm_parallel(coreg_batch, n_proc);
-run_spm_parallel(seg_batch, n_proc);
-run_spm_parallel(skull_batch, n_proc);
-run_spm_parallel(sm_skull_batch, n_proc);
-run_spm_parallel(back_batch, n_proc);
-run_spm_parallel(warp_batch, n_proc);
+if do_4d;run_spm_parallel(fourd_batch, n_proc); end
+if do_4d;run_spm_parallel(del_batch, n_proc);end
+if do_slicetime; run_spm_parallel(slicetime_batch, n_proc); end
+if do_realign; run_spm_parallel(realign_batch, n_proc); end
+if do_coreg; run_spm_parallel(coreg_batch, n_proc); end
+if do_seg; run_spm_parallel(seg_batch, n_proc); end
+if do_skull; run_spm_parallel(skull_batch, n_proc); end
+if do_sm_skull; run_spm_parallel(sm_skull_batch, n_proc); end
+if do_norm; run_spm_parallel(norm_batch, n_proc); end
+if do_back; run_spm_parallel(back_batch, n_proc); end
+if do_warp; run_spm_parallel(warp_batch, n_proc); end
 
 
 if do_avg_norm
@@ -454,10 +462,10 @@ if do_avg_norm
     
     for g = 1:size(all_subs,2)
         name = sprintf('sub%03d',all_subs(g));
-        strip_file        = fullfile(base_dir, name,'run000/mrt/',skullstrip_name];
+        strip_file        = fullfile(base_dir, name,'run000/mrt/',skullstrip_name);
         wskull_file       = ins_letter(strip_file,'w');
         
-        mean_file        = fullfile(base_dir, name, 'run000/mrt/', mean_func_name];
+        mean_file        = fullfile(base_dir, name, 'run000/mrt/', mean_func_name);
         wmean_file       = ins_letter(mean_file,'w');
         
         st_dir       = fullfile(base_dir, name, 'run000/mrt/');
@@ -490,6 +498,7 @@ if do_avg_norm
     spm_jobman('initcfg');
     spm_jobman('run',matlabbatch);
 end
+end
 
 function chuckCell = splitvect(v, n)
 % Splits a vector into number of n chunks of  the same size (if possible).
@@ -504,10 +513,12 @@ for i = 1:n
     chuckCell{end + 1} = v(idxs);
 end
 
+end
 
 function f_files = create_func_files(s_dir,f_templ,n_files)
 for i=1:n_files
     f_files{i} = [s_dir filesep f_templ ',' num2str(i)];
+end
 end
 
 
@@ -518,6 +529,7 @@ end
 for a=1:size(pscan,1)
     [p , f, e] = fileparts(pscan(a,:));
     out(a,:) = [p filesep letter_start f letter_end e];
+end
 end
 
 function run_matlab(np, matlabbatch, check) 
@@ -536,11 +548,12 @@ end_cmd = ['delete(''' fname ''');'];
 if ~check
     system(['start matlab.exe -nodesktop -nosplash  -logfile ' num2str(np) '_' mat_name '.log -r "' lo_cmd ex_cmd end_cmd 'exit"']);
 end
+end
 
 function out = dis_fname(pfname)
 
 for i = 1:size(pfname,1)
-    [p fname ext] = fileparts(pfname(i,:));
+    [p, fname, ext] = fileparts(pfname(i,:));
     
     
     us = strfind(fname,'_');
@@ -554,4 +567,5 @@ for i = 1:size(pfname,1)
     out(i).ind2   = str2num(fname(hy(3)+1:hy(4)-1));
     out(i).count  = str2num(fname(hy(4)+1:end));
     out(i).ext    = ext;
+end
 end
