@@ -1,3 +1,4 @@
+
 function preprocessing_fmri_nh
 	% to safely use parallel computing we first fill task specific batches (e.g. 4d_batch, slice_timing_batch...) with all subjects and then
 	% pass them to run_spm_parallel back to back
@@ -16,20 +17,21 @@ switch hostname
         error('Only hosts noahs isn laptop or revelations accepted');
 end
 
-check          = 0;
+check          = 1;
 
-do_4d          = 1;
+do_4d          = 0;
+do_del         = 0;
 do_field       = 0;%1
-do_slicetime   = 1;%1
-do_realign     = 1;
+do_slicetime   = 0;%1
+do_realign     = 0;
 do_real_unwarp = 0;%1
-do_coreg       = 1;%1
-do_seg         = 1;%1
-do_skull       = 1;%1
-do_sm_skull    = 1;%1
-do_norm        = 1;%1
-do_back        = 1;%1
-do_warp        = 1;%1
+do_coreg       = 0;%1
+do_seg         = 0;%1
+do_skull       = 0;%1
+do_sm_skull    = 0;%1
+do_norm        = 0;%1
+do_back        = 0;%1
+do_warp        = 0;%1
 do_avg_norm    = 0;%1
 
 
@@ -122,14 +124,18 @@ for g = 1:size(all_subs,2)
             fourD   = fullfile(base_dir, name, epi_folders{i}, func_name);
             afourD  = fullfile(base_dir, name, epi_folders{i}, a_func_name);
             rafourD = fullfile(base_dir, name, epi_folders{i}, ra_func_name);
-            if exist(fourD, 'file') 
-                epi_files{i} = cellstr(spm_select('expand',fourD));
-            elseif exist(afourD, 'file')
-                epi_files{i} = cellstr(spm_select('expand',afourD));
-            elseif exist(rafourD, 'file')
-                 epi_files{i} = cellstr(spm_select('expand',rafourD));
-            else
-                epi_files{i} = spm_select('FPList', [base_dir filesep name filesep epi_folders{i}], sfunc_templ);
+            
+            epi_files{i} = spm_select('FPList', [base_dir filesep name filesep epi_folders{i}], sfunc_templ);
+            
+            if isempty(epi_files{1})
+                if exist(rafourD, 'file') 
+                    epi_files{i} = cellstr(spm_select('expand',fourD));
+                    fprintf('ra4D is here');
+                elseif exist(afourD, 'file')
+                    epi_files{i} = cellstr(spm_select('expand',afourD));
+                elseif exist(rafourD, 'file')
+                     epi_files{i} = cellstr(spm_select('expand',rafourD));
+                end
             end
         end
         
@@ -169,6 +175,8 @@ for g = 1:size(all_subs,2)
             end
             fprintf('\n')
             
+          
+            
         end
         
         if ~isempty(struc_file)
@@ -194,15 +202,21 @@ for g = 1:size(all_subs,2)
                 fourd_batch{fourd_i}.spm.util.cat.RT    = TR; %???
                 fourd_i = fourd_i + 1;                
                 
-                % Get rid of 3D-niftis
-                del_batch{del_i}.cfg_basicio.file_dir.file_ops.file_move.files = cellstr(epi_files{l});
-                del_batch{del_i}.cfg_basicio.file_dir.file_ops.file_move.action.delete = false;
-                del_i = del_i + 1;
+                
             end
                     save('4D.mat','fourd_batch');
 
         end
         
+        %-------------------------------
+        % Get rid of 3D-niftis
+        if do_del
+            for l = 1:size(epi_folders,2)
+                del_batch{del_i}.cfg_basicio.file_dir.file_ops.file_move.files = cellstr(epi_files{l});
+                del_batch{del_i}.cfg_basicio.file_dir.file_ops.file_move.action.delete = false;
+                del_i = del_i + 1;
+            end
+        end
         
         %-------------------------------
         %Do Fieldmap
@@ -442,7 +456,7 @@ for g = 1:size(all_subs,2)
 
 % Start batches
 if do_4d;run_spm_parallel(fourd_batch, n_proc); end
-if do_4d;run_spm_parallel(del_batch, n_proc);end
+if do_del;run_spm_parallel(del_batch, n_proc);end
 if do_slicetime; run_spm_parallel(slicetime_batch, n_proc); end
 if do_realign; run_spm_parallel(realign_batch, n_proc); end
 if do_coreg; run_spm_parallel(coreg_batch, n_proc); end

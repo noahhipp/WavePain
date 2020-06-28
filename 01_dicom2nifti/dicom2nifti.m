@@ -8,7 +8,7 @@ check          = 1;
 do_dcm_convert = 1;
 do_move        = 1;
 
-subs = [6:53];
+subs = [10:12, 14:53];
 
 dummies           = 5;
 
