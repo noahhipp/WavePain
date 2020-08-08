@@ -10,32 +10,32 @@ switch hostname
         n_proc            = 2;
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 4;
+        n_proc            = 7;
 	
     otherwise
            
         error('Only hosts noahs isn laptop or revelations accepted');
 end
 
-check          = 1;
+check          = 0;
 
 do_4d          = 0;
 do_del         = 0;
 do_field       = 0;%1
-do_slicetime   = 0;%1
-do_realign     = 0;
+do_slicetime   = 1;%1
+do_realign     = 1;
 do_real_unwarp = 0;%1
-do_coreg       = 0;%1
-do_seg         = 0;%1
-do_skull       = 0;%1
-do_sm_skull    = 0;%1
-do_norm        = 0;%1
-do_back        = 0;%1
-do_warp        = 0;%1
+do_coreg       = 1;%1
+do_seg         = 1;%1
+do_skull       = 1;%1
+do_sm_skull    = 1;%1
+do_norm        = 1;%1
+do_back        = 1;%1
+do_warp        = 1;%1
 do_avg_norm    = 0;%1
 
 
-all_subs = [10:12 14:53];
+all_subs = [17 21 24 31 39 46 53];
 %DEBUG
 %all_subs    = [19 25 35]; %they have only 1 EPI session
 
@@ -127,8 +127,8 @@ for g = 1:size(all_subs,2)
             
             epi_files{i} = spm_select('FPList', [base_dir filesep name filesep epi_folders{i}], sfunc_templ);
             
-            if isempty(epi_files{1})
-                if exist(rafourD, 'file') 
+            if isempty(epi_files{i})
+                if exist(fourD, 'file') 
                     epi_files{i} = cellstr(spm_select('expand',fourD));
                     fprintf('ra4D is here');
                 elseif exist(afourD, 'file')
