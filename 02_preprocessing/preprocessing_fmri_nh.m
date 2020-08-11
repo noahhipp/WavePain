@@ -10,7 +10,7 @@ switch hostname
         n_proc            = 2;
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 7;
+        n_proc            = 8;
 	
     otherwise
            
@@ -22,22 +22,20 @@ check          = 0;
 do_4d          = 0;
 do_del         = 0;
 do_field       = 0;%1
-do_slicetime   = 1;%1
-do_realign     = 1;
+do_slicetime   = 0;%1
+do_realign     = 0;
 do_real_unwarp = 0;%1
-do_coreg       = 1;%1
-do_seg         = 1;%1
-do_skull       = 1;%1
-do_sm_skull    = 1;%1
-do_norm        = 1;%1
-do_back        = 1;%1
-do_warp        = 1;%1
-do_avg_norm    = 0;%1
+do_coreg       = 0;%1
+do_seg         = 0;%1
+do_skull       = 0;%1
+do_sm_skull    = 0;%1
+do_norm        = 0;%1
+do_back        = 0;%1
+do_warp        = 0;%1
+do_avg_norm    = 1;%1
 
 
-all_subs = [17 21 24 31 39 46 53];
-%DEBUG
-%all_subs    = [19 25 35]; %they have only 1 EPI session
+all_subs    = [5:12 14:53]; %they have only 1 EPI session
 
 
 TR           = 1.599;
@@ -129,8 +127,7 @@ for g = 1:size(all_subs,2)
             
             if isempty(epi_files{i})
                 if exist(fourD, 'file') 
-                    epi_files{i} = cellstr(spm_select('expand',fourD));
-                    fprintf('ra4D is here');
+                    epi_files{i} = cellstr(spm_select('expand',fourD));                    
                 elseif exist(afourD, 'file')
                     epi_files{i} = cellstr(spm_select('expand',afourD));
                 elseif exist(rafourD, 'file')
@@ -173,8 +170,15 @@ for g = 1:size(all_subs,2)
                     fprintf('OK: %d volumes\n',size(epi_files{l},1));
                 end
             end
-            fprintf('\n')
             
+            
+            fprintf('Mean EPI: ');
+            m_dir        = [base_dir name filesep epi_folders{1}];
+            if isempty([m_dir filesep mean_func_name])
+                fprintf('missing\n\n')
+            else
+                fprintf('OK file(s)\n\n')
+            end
           
             
         end

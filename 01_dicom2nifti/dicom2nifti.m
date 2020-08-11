@@ -8,7 +8,7 @@ check          = 1;
 do_dcm_convert = 1;
 do_move        = 1;
 
-subs = [10:12, 14:53];
+subs = [53];
 
 dummies           = 5;
 
@@ -24,11 +24,11 @@ for g = 1:size(subs,2)
         gi = 1;
         
         % Loop over runs (including epis and both fmaps)
-        for run = 1:n_runs
+        for run = 2:n_runs
             run_name = fullfile(sprintf('run%03d',run), 'mrt/');
             
             % Loop over datatypes
-            for i = 1:numel(data_names)
+            for i = 1:1%numel(data_names)
                 data_name = data_names{i};
                 
                 files = spm_select('FPList', fullfile(base_dir, name, run_name, data_name), '^MR');
