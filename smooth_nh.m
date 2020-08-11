@@ -7,7 +7,7 @@ switch hostname
         
         case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 8;
+        n_proc            = 4;
 	
        otherwise
         error('Only hosts noahs isn laptop accepted');
@@ -19,7 +19,7 @@ subs = [5:12, 14:53];
 
 ra_func_name      = 'rafMRI.nii';
 
-epi_folders       = {'run001\mrt','run002\mrt'};
+epi_folders       = {'run001/mrt','run002/mrt'};
 
 spm_path = fileparts(which('spm')); %get spm path
 template_path = [spm_path filesep 'toolbox\cat12\templates_1.50mm' filesep]; % get newest toolbox
@@ -33,8 +33,8 @@ matlabbatch = [];
 gi = 1;
     
     for g = 1:numel(subs)
-        name = sprintf('sub%03d',subs);
-        fprintf(['Doing volunteer ' name '\n']);
+        name = sprintf('sub%03d',subs(g));
+        fprintf('Doing volunteer %s\n', name);
         
         % collect epis
         for i=1:size(epi_folders,2)
