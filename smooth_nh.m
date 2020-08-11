@@ -4,45 +4,50 @@ switch hostname
     case 'DESKTOP-3UBJ04S'
         base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
         n_proc            = 4;
+        
+        case 'revelations'
+        base_dir          = '/projects/crunchie/hipp/wavepain/';
+        n_proc            = 8;
+	
        otherwise
         error('Only hosts noahs isn laptop accepted');
 end
 
 check = 0;
 
-all_subs = [16];
+subs = [5:12, 14:53];
 
 ra_func_name      = 'rafMRI.nii';
 
 epi_folders       = {'run001\mrt','run002\mrt'};
 
-% Calculate multiprocessor stuff
-if size(all_subs) < n_proc
-    n_proc = size(all_subs,2);
-end
-subs     = splitvect(all_subs, n_proc);
 spm_path = fileparts(which('spm')); %get spm path
 template_path = [spm_path filesep 'toolbox\cat12\templates_1.50mm' filesep]; % get newest toolbox
 tpm_path = [spm_path filesep 'tpm' filesep];
+if strcmp(hostname, 'revelations')
+    tpm_path = '/projects/crunchie/hipp/wavepain/tpm/';
+end
 
-for np = 1:size(subs,2)
-    matlabbatch = [];
-    gi = 1;
+
+matlabbatch = [];
+gi = 1;
     
-    for g = 1:size(subs{np},2)
-        name = sprintf('sub%03d',subs{np}(g));
+    for g = 1:numel(subs)
+        name = sprintf('sub%03d',subs);
         fprintf(['Doing volunteer ' name '\n']);
         
         % collect epis
         for i=1:size(epi_folders,2)
             % already did 4D conversion and deleted 3D                        
             rafourD = fullfile(base_dir, name, epi_folders{i}, ra_func_name);            
-            if exist(rafourD, 'file')
+            if exist(rafourD, 'file')                
                  epi_files{i} = cellstr(spm_select('expand',rafourD));
+                 fprintf('sess%d: %d epis found', i, numel(epi_files{i}));
             else
                 error('epis missing');
-            end
+            end            
         end % epi folder loop
+        fprintf('\n\n');
         
         % Smooth
         for i = 1:size(epi_folders,2)
@@ -56,9 +61,9 @@ for np = 1:size(subs,2)
     
     end % subject loop
     if ~isempty(matlabbatch)
-        run_matlab(np, matlabbatch, check);
+        run_spm_parallel(matlabbatch, n_proc);
     end
-end % multiprocessing loop
+
 
 
 
