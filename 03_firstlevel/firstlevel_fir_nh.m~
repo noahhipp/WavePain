@@ -112,7 +112,7 @@ for i = 1:numel(subs)
         % Collect movement parameters        
         realign_file = fullfile(s_dir, realign_str);
         if exist(realign_file, 'file'); fprintf('movement parameters found\n\n');
-        else; warning('no movement file\n\n'); end
+        else warning('no movement file\n\n'); end
         
         matlabbatch{mbi}.spm.stats.fmri_spec.sess(sess).multi_reg = {realign_file};
         matlabbatch{mbi}.spm.stats.fmri_spec.sess(sess).hpf = 360;                
