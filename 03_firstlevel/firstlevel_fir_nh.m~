@@ -142,7 +142,7 @@ for i = 1:numel(subs)
 end % subject loop
 
 % Run batches
-parallel = 1;
+parallel = ;
 if parallel
     if do_specify; run_spm_parallel(matlabbatch, n_proc); end
     if do_estimate; run_spm_parallel(estimationbatch, n_proc); end
