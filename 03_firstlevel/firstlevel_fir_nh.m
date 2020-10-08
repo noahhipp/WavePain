@@ -7,7 +7,7 @@ switch hostname
         n_proc            = 2;
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 4;
+        n_proc            = 1;
     otherwise
         error('Only hosts noahs isn laptop accepted');
 end
@@ -18,8 +18,8 @@ end
 do_specify      = 1;
 do_estimate     = 1;
 
-
-subs = [5:12 14:53];
+subs = 10;
+%subs = [5:12 14:53];
 
 TR = 1.599;
 
@@ -27,7 +27,7 @@ ana_dirname     = 'fir_firstlevel';
 
 struc_templ       = '^sPRISMA.*\.nii';
 
-func_file       = '^srafMRI.nii';
+func_file       = '^rafMRI.nii';
 realign_str     =  'rp_afMRI.txt';
 
 epi_folders     = {'run001/mrt/', 'run002/mrt/'};
@@ -60,9 +60,11 @@ for i = 1:numel(subs)
     % Collect T1
     st_dir       = fullfile(base_dir, name,'run000/mrt/');
     struc_file   = spm_select('FPList', st_dir, struc_templ);
+    skull_file   = spm_select('FPList', st_dir, '^skull_strip.nii');
     
     % Collect epis
     for j=1:n_sess
+    
         epi_files{j} = spm_select('ExtFPList', fullfile(base_dir, name, epi_folders{j}), func_file);
         fprintf('session %d: %d smoothed epis found\n', j, size(epi_files{j},1));
     end    
@@ -86,12 +88,21 @@ for i = 1:numel(subs)
     matlabbatch{mbi}.spm.stats.fmri_spec.bases.fir.length = 120;
     matlabbatch{mbi}.spm.stats.fmri_spec.bases.fir.order  = 60;
     matlabbatch{mbi}.spm.stats.fmri_spec.volt             = 1;
-    matlabbatch{mbi}.spm.stats.fmri_spec.mthresh          = .8;
+    
     matlabbatch{mbi}.spm.stats.fmri_spec.global           = 'None';
     
-    % Collect mask
-    matlabbatch{mbi}.spm.stats.fmri_spec.cvi              = 'Fast';
-    matlabbatch{mbi}.spm.stats.fmri_spec.mask             = cellstr('');
+    % CB FRAGEN !!!
+    matlabbatch{mbi}.spm.stats.fmri_spec.cvi              = 'None';
+    
+    % Collect mask oder so
+    unsmoothed = 1;
+    if unsmoothed
+        matlabbatch{mbi}.spm.stats.fmri_spec.mask             = cellstr(skull_file);
+        matlabbatch{mbi}.spm.stats.fmri_spec.mthresh          = -inf;
+    else
+        matlabbatch{mbi}.spm.stats.fmri_spec.mask             = cellstr('');
+        matlabbatch{mbi}.spm.stats.fmri_spec.mthresh          = .8;
+    end
     
     for sess = 1:n_sess % Session loop
         s_dir    = [base_dir name filesep epi_folders{sess}];
@@ -131,8 +142,14 @@ for i = 1:numel(subs)
 end % subject loop
 
 % Run batches
-if do_specify; run_spm_parallel(matlabbatch, n_proc); end
-if do_estimate; run_spm_parallel(estimationbatch, n_proc); end
+parallel = 0;
+if parallel
+    if do_specify; run_spm_parallel(matlabbatch, n_proc); end
+    if do_estimate; run_spm_parallel(estimationbatch, n_proc); end
+else
+    spm_jobman('run', matlabbatch);
+    spm_jobman('run', estimationbatch);
+end
 
 
 %_______________________________________________________________
