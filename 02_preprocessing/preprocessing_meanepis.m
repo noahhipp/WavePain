@@ -21,6 +21,7 @@ do_seg         = 0;
 do_norm        = 0;
 do_skull       = 0;
 do_warp_skull  = 0;
+do_back        = 0;
 do_avg_norm    = 1;
 
 mean_func_templ     = 'meanafMRI.nii'; % raw mean epi
@@ -178,6 +179,15 @@ for np = 1:size(subs,2)
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.jactransf = 0;
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.K = 6;
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.interp = 1;
+        end
+        if do_back
+            mbi = mbi + 1;
+            matlabbatch{mbi}.spm.util.defs.comp{1}.dartel.flowfield = {u_rc1_file};
+            matlabbatch{mbi}.spm.util.defs.comp{1}.dartel.times     = [1 0];
+            matlabbatch{mbi}.spm.util.defs.comp{1}.dartel.K         = 6;
+            matlabbatch{mbi}.spm.util.defs.comp{1}.dartel.template  = {''};
+            matlabbatch{mbi}.spm.util.defs.out{1}.savedef.ofname    = 'backwards';
+            matlabbatch{mbi}.spm.util.defs.out{1}.savedef.savedir.saveusr = {st_dir};
         end
         
     if do_warp_skull
