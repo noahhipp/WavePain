@@ -214,7 +214,7 @@ if do_avg_norm
     end
     
     matlabbatch{1}.spm.util.imcalc.input = cellstr(all_wskull_files);
-    matlabbatch{1}.spm.util.imcalc.output = 'meanepi_mean_wskull';
+    matlabbatch{1}.spm.util.imcalc.output = 'mean_wskull';
     matlabbatch{1}.spm.util.imcalc.outdir = cellstr(base_dir);
     matlabbatch{1}.spm.util.imcalc.expression = 'mean(X)';
     matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
