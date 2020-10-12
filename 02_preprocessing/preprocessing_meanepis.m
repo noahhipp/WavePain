@@ -14,15 +14,16 @@ switch hostname
 end
 
 % Settings
-all_subs    = [5:12 14:53];
+all_subs        = 5:8;
+%all_subs    = [5:12 14:53];
 TR          = 1.599;
 
-do_seg         = 0;
-do_norm        = 0;
-do_skull       = 0;
-do_warp_skull  = 0;
-do_back        = 0;
-do_avg_norm    = 1;
+do_seg         = 1;
+do_norm        = 1;
+do_skull       = 1;
+do_warp_skull  = 1;
+do_back        = 1;
+do_avg_norm    = 0;
 
 mean_func_templ     = 'meanafMRI.nii'; % raw mean epi
 mean_func_dir       = 'run001/mrt/'; % where to collect mean_epi
@@ -193,7 +194,7 @@ for np = 1:size(subs,2)
     if do_warp_skull
             mbi = mbi + 1;            
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.flowfields = cellstr(u_rc1_file);
-            matlabbatch{mbi}.spm.tools.dartel.crt_warped.images = {cellstr(skull_file)};
+            matlabbatch{mbi}.spm.tools.dartel.crt_warped.images = {cellstr(strip_file)};
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.jactransf = 0;
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.K = 6;
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.interp = 1;
@@ -284,7 +285,24 @@ save([num2str(np) '_' mat_name],'matlabbatch');
 lo_cmd  = ['clear matlabbatch;load(''' fname ''');'];
 ex_cmd  = ['addpath(''' spm_path ''');spm(''defaults'',''FMRI'');spm_jobman(''initcfg'');spm_jobman(''run'',matlabbatch);'];
 end_cmd = ['delete(''' fname ''');'];
+
+% Because matlab from bash can only execute one statement upon startup we
+% have to detour via a function
+str                 = strcat(lo_cmd, ex_cmd, end_cmd, 'exit');
+[~, name_stem]  = fileparts(fname); 
+function_name       = strcat(name_stem, '.m'); 
+log_name            = strcat(name_stem, '.log');
+fh                  = fopen(function_name, 'w');
+nbytes              = fprintf(fh, '%s', str);
+if ~nbytes
+    warning('Nothing written to %s', function_name)
+else
+    fprintf('\n%d bytes written to %s\n', function_name);
+end
+fclose(fh);
+
 if ~check
-    system(['matlab -nodesktop -nosplash  -logfile ' num2str(np) '_' mat_name '.log -r "' lo_cmd ex_cmd end_cmd 'exit" &']);
+    cmd = sprintf('matlab -nodesktop -nosplash  -logfile %s -r "%s" &', log_name, function_name); 
+    system(cmd);
 end
 end
