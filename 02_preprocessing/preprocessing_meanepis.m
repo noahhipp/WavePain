@@ -14,15 +14,15 @@ switch hostname
 end
 
 % Settings
-all_subs    = [9:12 14:53];
+all_subs    = [5:12 14:53];
 TR          = 1.599;
 
 do_seg         = 0;
-do_norm        = 1;
-do_skull       = 1;
-do_warp_skull  = 1;
-do_back        = 1;
-do_avg_norm    = 0;
+do_norm        = 0;
+do_skull       = 0;
+do_warp_skull  = 0;
+do_back        = 0;
+do_avg_norm    = 1;
 
 mean_func_templ     = 'meanafMRI.nii'; % raw mean epi
 mean_func_dir       = 'run001/mrt/'; % where to collect mean_epi
@@ -210,27 +210,32 @@ end
 
 if do_avg_norm
     matlabbatch = [];
-    all_wskull_files = [];
+    all_wskull_files = [];    
+    
     
     % Collect all warped brains
     for g = 1:size(all_subs,2)
         name                = sprintf('sub%03d',all_subs(g));        
         st_dir              = fullfile(base_dir, name, struct_dir, dup_mean);       
-        strip_file          = fullfile(st_dir, [skullstrip_name mean_func_templ]);
+        
+        strip_file          = fullfile(st_dir, skullstrip_name);
         wskull_file         = ins_letter(strip_file,'w');               
         
-        all_wskull_files    = char(all_wskull_files,wskull_file);
+        all_wskull_files    = char(all_wskull_files, wskull_file);
     end
     
-    matlabbatch{1}.spm.util.imcalc.input = cellstr(all_wskull_files);
-    matlabbatch{1}.spm.util.imcalc.output = 'meanepi_mean_wskull';
-    matlabbatch{1}.spm.util.imcalc.outdir = cellstr(base_dir);
-    matlabbatch{1}.spm.util.imcalc.expression = 'mean(X)';
-    matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
-    matlabbatch{1}.spm.util.imcalc.options.dmtx = 1;
-    matlabbatch{1}.spm.util.imcalc.options.mask = 0;
-    matlabbatch{1}.spm.util.imcalc.options.interp = 1;
-    matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
+    all_epi_dir         = fullfile(base_dir, 'all_meanepis');        
+    cmd = sprintf('mkdir %s', all_epi_dir); system(cmd);    
+    
+    matlabbatch{1}.spm.util.imcalc.input            = cellstr(all_wskull_files);
+    matlabbatch{1}.spm.util.imcalc.output           = 'meanepi_mean_wskull';  
+    matlabbatch{1}.spm.util.imcalc.outdir           = cellstr(all_epi_dir);
+    matlabbatch{1}.spm.util.imcalc.expression       = 'mean(X)';
+    matlabbatch{1}.spm.util.imcalc.var              = struct('name', {}, 'value', {});
+    matlabbatch{1}.spm.util.imcalc.options.dmtx     = 1;
+    matlabbatch{1}.spm.util.imcalc.options.mask     = 0;
+    matlabbatch{1}.spm.util.imcalc.options.interp   = 1;
+    matlabbatch{1}.spm.util.imcalc.options.dtype    = 4;
     
     spm_jobman('initcfg');
     spm_jobman('run',matlabbatch);

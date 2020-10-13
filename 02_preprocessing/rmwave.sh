@@ -14,16 +14,16 @@ for folder in $folders; do
     $folder"
     
     for run_folder in $run_folders; do
-	    if [[ "sub013/" == *$folder* ]];
+	    if [[ "sub010/" == *$folder* ]];
             then
               continue 
     	    fi
-	    cd $run_folder
-	    echo "$run_folder"
+	    #cd $run_folder
+	    #echo "$run_folder"
 
         # Do stuff
-	    rm *skull* -I
-	    cd ../../../
+	    rm *fir* -r -f	    I
+	   # cd ../
     done
     echo  "________________
     "

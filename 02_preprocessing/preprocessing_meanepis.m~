@@ -14,15 +14,14 @@ switch hostname
 end
 
 % Settings
-all_subs        = 5:8;
-%all_subs    = [5:12 14:53];
+all_subs    = [5:12 14:53];
 TR          = 1.599;
 
-do_seg         = 1;
-do_norm        = 1;
-do_skull       = 1;
-do_warp_skull  = 1;
-do_back        = 1;
+do_seg         = 0;
+do_norm        = 0;
+do_skull       = 0;
+do_warp_skull  = 0;
+do_back        = 0;
 do_avg_norm    = 0;
 
 mean_func_templ     = 'meanafMRI.nii'; % raw mean epi
@@ -70,7 +69,7 @@ for np = 1:size(subs,2)
         rc1_file        = ins_letter(struc_file,'rc1');
         rc2_file        = ins_letter(struc_file,'rc2');
         u_rc1_file      = ins_letter(struc_file,'u_rc1');        
-        strip_file      = ins_letter(struc_file,'skull_strip');        
+        strip_file      = fullfile(st_dir, skullstrip_name);
         
         if do_seg
             mbi = mbi + 1;
@@ -172,11 +171,10 @@ for np = 1:size(subs,2)
             
             %-------------------------------
             %Create warped mean EPI
-            mbi = mbi + 1;                          
-            mean_file   = [st_dir mean_func_templ];
+            mbi = mbi + 1;                                      
             
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.flowfields = cellstr(u_rc1_file);
-            matlabbatch{mbi}.spm.tools.dartel.crt_warped.images = {cellstr(mean_file)};
+            matlabbatch{mbi}.spm.tools.dartel.crt_warped.images = {cellstr(struc_file)};
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.jactransf = 0;
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.K = 6;
             matlabbatch{mbi}.spm.tools.dartel.crt_warped.interp = 1;
@@ -216,17 +214,19 @@ if do_avg_norm
     
     % Collect all warped brains
     for g = 1:size(all_subs,2)
-        name = sprintf('sub%03d',all_subs(g));        
-        st_dir     = fullfile(base_dir, name, struct_dir, dup_mean);       
-        strip_file        = [st_dir skullstrip_name];
-        wskull_file       = ins_letter(strip_file,'w');               
+        name                = sprintf('sub%03d',all_subs(g));        
+        st_dir              = fullfile(base_dir, name, struct_dir, dup_mean);       
+        all_epi_dir         = fullfile(base_dir, 'all_meanepis');
+        mkdir
+        strip_file          = fullfile(st_dir, skullstrip_name);
+        wskull_file         = ins_letter(strip_file,'w');               
         
-        all_wskull_files  = char(all_wskull_files,wskull_file);
+        all_wskull_files    = char(all_wskull_files, wskull_file);
     end
     
     matlabbatch{1}.spm.util.imcalc.input = cellstr(all_wskull_files);
-    matlabbatch{1}.spm.util.imcalc.output = 'meanepi_mean_wskull';
-    matlabbatch{1}.spm.util.imcalc.outdir = cellstr(base_dir);
+    matlabbatch{1}.spm.util.imcalc.output = 'meanepi_mean_wskull';  
+    matlabbatch{1}.spm.util.imcalc.outdir = cellstr(fullfile(base_dir, 'all_meanepis'));
     matlabbatch{1}.spm.util.imcalc.expression = 'mean(X)';
     matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
     matlabbatch{1}.spm.util.imcalc.options.dmtx = 1;
@@ -298,7 +298,7 @@ nbytes              = fprintf(fh, '%s', str); % write commands
 if ~nbytes
     warning('Nothing written to %s', function_name)
 else
-    fprintf('\n%d bytes written to %s\n', function_name);
+    fprintf('\n%d bytes written to %s \n', function_name);
 end
 fclose(fh);
 
