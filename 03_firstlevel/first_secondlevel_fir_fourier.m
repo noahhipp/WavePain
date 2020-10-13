@@ -16,7 +16,15 @@ end
 % all_subs = [5:12 14:53];
 all_subs = [5:8];
 
-fourier           = 0; %if 1 hanning windowed fourier, else FIR
+fourier           = 0;%if 1 hanning windowed fourier, else FIR
+mean_epi          = 0; % if 1 we use mean_epi to get to normalized space, else t1 coreg
+
+do_model    = 1;
+do_cons     = 1;
+do_warp     = 0;
+do_smooth   = 0;
+do_anova    = 0;
+do_anovacon = 0;
 
 TR                = 1.599;
 
@@ -27,7 +35,7 @@ if fourier
     cond_use          = [1:(1+fourier_order*2)*numel(epi_folders)]; %order*2(sin/cos)+1(hanning window)
     anadirname        = ['fourier'];
     addon             = 'anova'; %for second level
-else    
+else
     fir_window        = 120; % seconds
     %fir_res           = 4;  % seconds
     fir_res           = 2;  % seconds
@@ -37,7 +45,7 @@ else
     %anadirname        = ['20bin_FIR_physio_zan_mov'];
     anadirname        = ['fir'];
     addon             = 'anova'; %for second level
-end    
+end
 
 shift             = 0; %no onset shift
 skern             = 6;
@@ -58,30 +66,23 @@ anova_conditions    = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
 to_warp             = 'con_%04.4d.nii'; %files to warp
 % to_warp           = 'beta_%04.4d.nii'; %files to warp
 
-n_sess            = size(epi_folders,2);
-n_cond            = size(conditions,2);
-dummies           = 0;
-
-do_model    = 0;
-
-do_cons     = 0;
-do_warp     = 0;
-do_smooth   = 0;
-do_anova    = 0;
-do_anovacon = 1;
-
-
+% SPM and accessory files
 spm_path          = fileparts(which('spm')); %get spm path
 mat_name          = which(mfilename);
 [~,mat_name,~]    = fileparts(mat_name);
 
+onset_file = fullfile(base_dir, 'all_onsets.mat');
+load(onset_file, 'all_RES');
+
+n_sess            = size(epi_folders,2);
+n_cond            = size(conditions,2);
+dummies           = 0;
 
 %prepare for multiprocessing
 if size(all_subs) < n_proc
     n_proc = size(all_subs,2);
 end
 subs              = splitvect(all_subs, n_proc);
-
 
 i_sub = 0;
 
@@ -92,29 +93,28 @@ for np = 1:size(subs,2)
     for g = 1:size(subs{np},2)
         %-------------------------------
         %House keeping stuff
-        i_sub        = i_sub + 1;
-        name         = sprintf('%02.2d',subs{np}(g));
-        st_dir       = [base_dir name filesep 'fmri\mprage' filesep];
-        struc_file   = spm_select('FPList', st_dir, struc_templ);
-        u_rc1_file   = ins_letter(struc_file,'u_rc1');
+        i_sub           = i_sub + 1;
+        name            = sprintf('%03d',subs{np}(g));
+        st_dir          = fullfile(base_dir, name,'run000/mrt/');
+        sub_res         = all_RES.(name); % condition onsets 
+        struc_file      = spm_select('FPList', st_dir, struc_templ);
+        u_rc1_file      = ins_letter(struc_file,'u_rc1');
         
         %reorder sessions here so that we have the same order cond
         %(CS+/CS-) and test (CS+/CS-)
         
-        s_order = block_UR(subjects_P==subs{np}(g));
-        
         % not necessary
-        for l=1:n_sess      %l is session index for SPM, but s_order(l) is where we get our data from TAKE care!!!
-            l_shuffle       = s_order(l);
-            ind             = find((subjects_P==subs{np}(g)) & (block_P==l_shuffle));
-            final_image     = image_count(ind);
-            dummies         = dummy_count(ind);
-            all_images      = 1:(final_image-dummies);
-            epi_files{l}    = spm_select('ExtFPList', [base_dir filesep name filesep 'fmri\epi\' epi_folders{l_shuffle}], rfunc_file,all_images);
-        end
+        %         s_order = block_UR(subjects_P==subs{np}(g));
+        %         for l=1:n_sess      %l is session index for SPM, but s_order(l) is where we get our data from TAKE care!!!
+        %             l_shuffle       = s_order(l);
+        %             ind             = find((subjects_P==subs{np}(g)) & (block_P==l_shuffle));
+        %             final_image     = image_count(ind);
+        %             dummies         = dummy_count(ind);
+        %             all_images      = 1:(final_image-dummies);
+        %             epi_files{l}    = spm_select('ExtFPList', [base_dir filesep name filesep 'fmri\epi\' epi_folders{l_shuffle}], rfunc_file,all_images);
+        %         end
         
         a_dir    = [base_dir name filesep anadirname];
-        
         template = [];
         template.spm.stats.fmri_spec.timing.units   = 'scans';
         template.spm.stats.fmri_spec.timing.RT      = TR;
@@ -124,10 +124,8 @@ for np = 1:size(subs,2)
         template.spm.stats.fmri_spec.fact           = struct('name', {}, 'levels', {});
         
         if fourier
-            %template.spm.stats.fmri_spec.bases.fourier_han.length = fourier_window;
-            %template.spm.stats.fmri_spec.bases.fourier_han.order  = fourier_order;              
             template.spm.stats.fmri_spec.bases.fourier.length = fourier_window;
-            template.spm.stats.fmri_spec.bases.fourier.order  = fourier_order;              
+            template.spm.stats.fmri_spec.bases.fourier.order  = fourier_order;
         else
             template.spm.stats.fmri_spec.bases.fir.length = fir_window;
             template.spm.stats.fmri_spec.bases.fir.order  = fir_order;
@@ -136,19 +134,17 @@ for np = 1:size(subs,2)
         template.spm.stats.fmri_spec.mthresh          = -Inf;
         template.spm.stats.fmri_spec.global           = 'None';
         template.spm.stats.fmri_spec.mask             = cellstr([st_dir 's3skull_strip.nii']);
-        
         template.spm.stats.fmri_spec.cvi              = 'None';
+        
         for l = 1:n_sess
-            l_shuffle = s_order(l);
-            s_dir     = [base_dir name filesep 'fmri\epi\' epi_folders{l_shuffle}];
-            fm        = spm_select('FPList', s_dir, realign_str);
-            movement  = normit(load(fm));
-            
-            
+            %             l_shuffle = s_order(l);
+            s_dir           =  [base_dir name filesep epi_folders{sess}];
+            epi_files{l}    = spm_select('ExtFPList', fullfile(s_dir, func_file));
+            fm              = spm_select('FPList', s_dir, realign_str);
+            movement        = normit(load(fm));                        
             
             %movement = [];
-            all_nuis{l} = [movement];
-            %all_nuis{sess} = [];
+            all_nuis{l} = [movement];            
             n_nuis         = size(all_nuis{l},2);
             
             %n_nuis         = 0;
@@ -161,13 +157,13 @@ for np = 1:size(subs,2)
             template.spm.stats.fmri_spec.sess(l).multi = {''};
             
             
-            %now do conditions --> RES
+            % Collect RES and create conditions
+            RES = sub_res{sess};
             for conds = 1:numel(conditions)
-                template.spm.stats.fmri_spec.sess(l).cond(conds).name     = conditions{conds};
-                template.spm.stats.fmri_spec.sess(l).cond(conds).onset    = a.Time_Onset+shift;
+                template.spm.stats.fmri_spec.sess(l).cond(conds).name     = RES{conds}.name;
+                template.spm.stats.fmri_spec.sess(l).cond(conds).onset    = (RES{conds}.onset ./ TR) - 1;
                 template.spm.stats.fmri_spec.sess(l).cond(conds).duration = 0;
-            end
-            
+            end            
             
             template.spm.stats.fmri_spec.sess(l).multi_reg = {''};
             template.spm.stats.fmri_spec.sess(l).hpf = 360;
@@ -183,7 +179,7 @@ for np = 1:size(subs,2)
             matlabbatch{mbi} = template;
             mkdir(a_dir);
             copyfile(which(mfilename),a_dir);
-            matlabbatch{mbi}.spm.stats.fmri_spec.dir = {[a_dir]};
+            matlabbatch{mbi}.spm.stats.fmri_spec.dir = {a_dir};
             
             mbi = mbi + 1;
             matlabbatch{mbi}.spm.stats.fmri_est.spmmat           = {[a_dir filesep 'SPM.mat']};
@@ -217,8 +213,7 @@ for np = 1:size(subs,2)
                 template.spm.stats.con.consess{co_i+fco}.tcon.name    = [conditions{co} '_' num2str(i_fir)];
                 template.spm.stats.con.consess{co_i+fco}.tcon.convec  = [convec zeros(1,size(epi_folders,2))];
                 template.spm.stats.con.consess{co_i+fco}.tcon.sessrep = 'none';
-            end
-            
+            end            
         end
         
         
@@ -293,10 +288,8 @@ for np = 1:size(subs,2)
         end
     end
     if ~isempty(matlabbatch)
-        save([num2str(np) '_' mat_name],'matlabbatch');
-        lo_cmd = ['clear matlabbatch;load(''' num2str(np) '_' mat_name ''');'];
-        ex_cmd = ['addpath(''' spm_path ''');spm(''defaults'',''FMRI'');spm_jobman(''initcfg'');spm_jobman(''run'',matlabbatch);exit'];
-        system(['matlab -nodesktop -nosplash  -logfile ' num2str(np) '_' mat_name '.log -r "' lo_cmd ex_cmd ';exit" &']); % check this one
+        check = 0;
+        run_matlab(np, matlabbatch, check);
     end
 end
 if do_anova
@@ -314,11 +307,11 @@ if do_anova
     anovabatch{1}.spm.stats.factorial_design.globalc.g_omit = 1;
     anovabatch{1}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
     anovabatch{1}.spm.stats.factorial_design.globalm.glonorm = 1;
-
+    
     %% --------------------- MODEL ESTIMATION --------------------- %
     anovabatch{2}.spm.stats.fmri_est.spmmat = {[out_dir '\SPM.mat']};
     anovabatch{2}.spm.stats.fmri_est.method.Classical = 1;
-
+    
     %need to estimate first, than load SPM.mat to use FcUtil!!!
     
     %matlabbatch = anovabatch;
@@ -354,7 +347,7 @@ if do_anovacon
         Fcc{con_i} = Fc.c';
         co = co + 1; %increment by 1
     end
-      
+    
     %diff_con = [1 2; 3 4];
     diff_con = [2 1; 4 3; 3 1; 4 2];
     
@@ -398,6 +391,41 @@ function out = chng_path(pscan,pa)
 for a=1:size(pscan,1)
     [p , f, e] = fileparts(pscan(a,:));
     out(a,:) = [pa filesep f e];
+end
+
+function run_matlab(np, matlabbatch, check)
+
+spm_path          = fileparts(which('spm')); %get spm path
+mat_name          = which(mfilename);
+[~,mat_name,~]    = fileparts(mat_name);
+
+
+fname = [mat_name '_'  num2str(np) '.mat'];
+
+save(fname,'matlabbatch');
+lo_cmd  = ['clear matlabbatch;load(''' fname ''');'];
+ex_cmd  = ['addpath(''' spm_path ''');spm(''defaults'',''FMRI'');spm_jobman(''initcfg'');spm_jobman(''run'',matlabbatch);'];
+end_cmd = ['delete(''' fname ''');'];
+
+% Because matlab from bash can only execute one statement upon startup we
+% have to detour via a function
+str                 = strcat(lo_cmd, ex_cmd, end_cmd, 'exit');
+[~, name_stem]      = fileparts(fname); 
+function_name       = strcat(name_stem, '.m'); 
+log_name            = strcat(name_stem, '.log');
+fh                  = fopen(function_name, 'w');
+                      fprintf(fh, 'function %s\n', name_stem); % write header                        
+nbytes              = fprintf(fh, '%s', str); % write commands
+if ~nbytes
+    warning('Nothing written to %s', function_name)
+else
+    fprintf('\n%d bytes written to %s \n', function_name);
+end
+fclose(fh);
+
+if ~check
+    cmd = sprintf('matlab -nodesktop -nosplash  -logfile %s -r "%s" &', log_name, name_stem); 
+    system(cmd);
 end
 
 

@@ -19,8 +19,6 @@ all_subs = [5:8];
 fourier           = 0; %if 1 hanning windowed fourier, else FIR
 
 TR                = 1.599;
-epi_folders     = {'run001/mrt/', 'run002/mrt/'};
-
 
 if fourier
     fourier_window    = 120;
@@ -45,47 +43,46 @@ shift             = 0; %no onset shift
 skern             = 6;
 skernel           = repmat(skern,1,3);
 
+
 % Specify paths and directories
-out_dir           = [base_dir 'second_Level' filesep anadirname '_' addon '_' num2str(skern)];
+out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_' num2str(skern)];
+struc_templ         = '^sPRISMA.*\.nii';
 
+rfunc_file          = 'rafMRI.nii';
+realign_str         =  '^rp_afMR.*\.txt';
 
+epi_folders         = {'run001/mrt/', 'run002/mrt/'};
+conditions          = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
+anova_conditions    = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
 
-struc_templ       = '^sTRIO.*\.nii';
-
-rfunc_file        = 'rfMRI.nii';
-realign_str       =  '^rp_fMR.*\.txt';
-
-epi_folders       = {'s1','s2','s3','s4'};
-conditions        = {'Condition_1'}; % same same
-anova_conditions  = {'Acq_Control','Acq_Dyspnea','Test_Control','Test_Dyspnea'}
-
-to_warp           = 'con_%04.4d.nii'; %files to warp
+to_warp             = 'con_%04.4d.nii'; %files to warp
 % to_warp           = 'beta_%04.4d.nii'; %files to warp
+
+% SPM and accessory files
+spm_path          = fileparts(which('spm')); %get spm path
+mat_name          = which(mfilename);
+[~,mat_name,~]    = fileparts(mat_name);
+
+onset_file = fullfile(base_dir, 'all_onsets.mat');
+load(onset_file, 'all_RES');
 
 n_sess            = size(epi_folders,2);
 n_cond            = size(conditions,2);
 dummies           = 0;
 
-do_model    = 0;
+do_model    = 1;
 
-do_cons     = 0;
-do_warp     = 0;
-do_smooth   = 0;
+do_cons     = 1;
+do_warp     = 1;
+do_smooth   = 1;
 do_anova    = 0;
-do_anovacon = 1;
-
-
-spm_path          = fileparts(which('spm')); %get spm path
-mat_name          = which(mfilename);
-[~,mat_name,~]    = fileparts(mat_name);
-
+do_anovacon = 0;
 
 %prepare for multiprocessing
 if size(all_subs) < n_proc
     n_proc = size(all_subs,2);
 end
 subs              = splitvect(all_subs, n_proc);
-
 
 i_sub = 0;
 
@@ -97,28 +94,26 @@ for np = 1:size(subs,2)
         %-------------------------------
         %House keeping stuff
         i_sub        = i_sub + 1;
-        name         = sprintf('%02.2d',subs{np}(g));
-        st_dir       = [base_dir name filesep 'fmri\mprage' filesep];
+        name         = sprintf('%03d',subs{np}(g));
+        st_dir       = fullfile(base_dir, name,'run000/mrt/');
         struc_file   = spm_select('FPList', st_dir, struc_templ);
         u_rc1_file   = ins_letter(struc_file,'u_rc1');
         
         %reorder sessions here so that we have the same order cond
         %(CS+/CS-) and test (CS+/CS-)
         
-        s_order = block_UR(subjects_P==subs{np}(g));
-        
         % not necessary
-        for l=1:n_sess      %l is session index for SPM, but s_order(l) is where we get our data from TAKE care!!!
-            l_shuffle       = s_order(l);
-            ind             = find((subjects_P==subs{np}(g)) & (block_P==l_shuffle));
-            final_image     = image_count(ind);
-            dummies         = dummy_count(ind);
-            all_images      = 1:(final_image-dummies);
-            epi_files{l}    = spm_select('ExtFPList', [base_dir filesep name filesep 'fmri\epi\' epi_folders{l_shuffle}], rfunc_file,all_images);
-        end
+%         s_order = block_UR(subjects_P==subs{np}(g));                
+%         for l=1:n_sess      %l is session index for SPM, but s_order(l) is where we get our data from TAKE care!!!
+%             l_shuffle       = s_order(l);
+%             ind             = find((subjects_P==subs{np}(g)) & (block_P==l_shuffle));
+%             final_image     = image_count(ind);
+%             dummies         = dummy_count(ind);
+%             all_images      = 1:(final_image-dummies);
+%             epi_files{l}    = spm_select('ExtFPList', [base_dir filesep name filesep 'fmri\epi\' epi_folders{l_shuffle}], rfunc_file,all_images);
+%         end
         
-        a_dir    = [base_dir name filesep anadirname];
-        
+        a_dir    = [base_dir name filesep anadirname];        
         template = [];
         template.spm.stats.fmri_spec.timing.units   = 'scans';
         template.spm.stats.fmri_spec.timing.RT      = TR;
