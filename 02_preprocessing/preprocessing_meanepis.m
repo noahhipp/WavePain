@@ -17,7 +17,7 @@ end
 all_subs    = [9:12 14:53];
 TR          = 1.599;
 
-do_seg         = 1;
+do_seg         = 0;
 do_norm        = 1;
 do_skull       = 1;
 do_warp_skull  = 1;
@@ -69,7 +69,7 @@ for np = 1:size(subs,2)
         rc1_file        = ins_letter(struc_file,'rc1');
         rc2_file        = ins_letter(struc_file,'rc2');
         u_rc1_file      = ins_letter(struc_file,'u_rc1');        
-        strip_file      = ins_letter(struc_file,'skull_strip');        
+        strip_file      = fullfile(st_dir, skullstrip_name);
         
         if do_seg
             mbi = mbi + 1;
