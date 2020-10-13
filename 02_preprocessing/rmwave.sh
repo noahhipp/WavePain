@@ -4,7 +4,7 @@
 cd /projects/crunchie/hipp/wavepain
 
 # Collect folders
-folders=$(ls)
+folders=$(ls -d sub*/)
 run_folders="run000/mrt/mean_epi"
 
 for folder in $folders; do
@@ -14,7 +14,7 @@ for folder in $folders; do
     $folder"
     
     for run_folder in $run_folders; do
-	    if [[ "sub013" == *$folder* ]];
+	    if [[ "sub013/" == *$folder* ]];
             then
               continue 
     	    fi
@@ -23,7 +23,7 @@ for folder in $folders; do
 
         # Do stuff
 	    rm *skull* -I
-	    cd ../../
+	    cd ../../../
     done
     echo  "________________
     "
