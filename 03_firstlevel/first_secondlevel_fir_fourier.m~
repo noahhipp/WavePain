@@ -13,16 +13,16 @@ switch hostname
 end
 
 % Subs
-all_subs = [9:12 14:53];
-%all_subs = [5:8];
+% all_subs = [5:12 14:53];
+all_subs = [5:8];
 
 fourier           = 0;%if 1 hanning windowed fourier, else FIR
 mean_epi          = 0; % if 1 we use mean_epi to get to normalized space, else t1 coreg
 
-do_model    = 1;
-do_cons     = 1;
-do_warp     = 1;
-do_smooth   = 1;
+do_model    = 0;
+do_cons     = 0;
+do_warp     = 0;
+do_smooth   = ;
 do_anova    = 0;
 do_anovacon = 0;
 
@@ -230,7 +230,7 @@ for np = 1:size(subs,2)
         template    = [];
         con_files   = '';
         
-        all_warp = 1:(n_cond * basis_order);
+        all_warp = 1;%:(n_cond * basis_order);
         eoi_ind  = all_warp; % used a iterator for selecting cons for anova later
 %         if all_warp(1) == 1
 %             all_warp(1) = []; % kill the first one as it doesnt exist
@@ -331,7 +331,9 @@ if do_anova
     %matlabbatch = anovabatch;
     %save('anovabatch','matlabbatch')
     
-    run_matlab(1, anovabatch, 0);
+    spm_jobman('initcfg');
+    spm('defaults', 'FMRI');
+    spm_jobman('run',anovabatch);
     copyfile(which(mfilename),out_dir);
 end
 
