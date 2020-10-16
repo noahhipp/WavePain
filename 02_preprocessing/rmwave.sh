@@ -5,7 +5,7 @@ cd /projects/crunchie/hipp/wavepain
 
 # Collect folders
 folders=$(ls -d sub*/)
-run_folders="run000/mrt/mean_epi"
+run_folders="fir"
 
 for folder in $folders; do
     # Move in 
@@ -18,16 +18,16 @@ for folder in $folders; do
             then
               continue 
     	    fi
-	    #cd $run_folder
-	    #echo "$run_folder"
+	    cd $run_folder
+	    echo "$run_folder"
 
         # Do stuff
-	    rm *fir* -r -f	    I
-	   # cd ../
+	    rm  spmT*  -r -f	    I
+	    cd ../ # leave run_folder
     done
     echo  "________________
     "
-    cd ../
+    cd ../ # leave sub_folder
     
 done
 

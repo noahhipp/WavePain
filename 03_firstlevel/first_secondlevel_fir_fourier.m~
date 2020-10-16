@@ -13,16 +13,16 @@ switch hostname
 end
 
 % Subs
-% all_subs = [5:12 14:53];
-all_subs = [5:8];
+all_subs = [5:12 14:53];
+%all_subs = [5:8];
 
 fourier           = 0;%if 1 hanning windowed fourier, else FIR
 mean_epi          = 0; % if 1 we use mean_epi to get to normalized space, else t1 coreg
 
-do_model    = 0;
-do_cons     = 0;
-do_warp     = 0;
-do_smooth   = ;
+do_model    = 1;
+do_cons     = 1;
+do_warp     = 1;
+do_smooth   = 1;
 do_anova    = 0;
 do_anovacon = 0;
 
@@ -230,7 +230,7 @@ for np = 1:size(subs,2)
         template    = [];
         con_files   = '';
         
-        all_warp = 1;%:(n_cond * basis_order);
+        all_warp = 1:(n_cond * basis_order);
         eoi_ind  = all_warp; % used a iterator for selecting cons for anova later
 %         if all_warp(1) == 1
 %             all_warp(1) = []; % kill the first one as it doesnt exist
@@ -289,9 +289,9 @@ for np = 1:size(subs,2)
             all_files = [];assemb_cons = [];
             for co = 1:size(eoi_ind,2)
                 if skern == 0
-                    sw_templ      = sprintf('w_dartelbeta_%0.4d.nii', eoi_ind(co));
+                    sw_templ      = sprintf('%s%0.4d.nii', dartel_prefix, eoi_ind(co));
                 else
-                    sw_templ      = sprintf('s%dw_dartelbeta_%0.4d.nii', skern, eoi_ind(co));
+                    sw_templ      = sprintf('s%d%scon_%0.4d.nii', skern, dartel_prefix , eoi_ind(co));
                 end
                 all_files = strvcat(all_files,[base_dir name filesep anadirname filesep sw_templ]);
                 %assemb_cons = [assemb_cons eoi_ind(co)];
@@ -331,9 +331,7 @@ if do_anova
     %matlabbatch = anovabatch;
     %save('anovabatch','matlabbatch')
     
-    spm_jobman('initcfg');
-    spm('defaults', 'FMRI');
-    spm_jobman('run',anovabatch);
+    run_matlab(1, anovabatch, 0);
     copyfile(which(mfilename),out_dir);
 end
 

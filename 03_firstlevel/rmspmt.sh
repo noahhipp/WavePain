@@ -14,7 +14,7 @@ for folder in $folders; do
     $folder"
     
     for run_folder in $run_folders; do
-	    if [[ "sub010/" == *$folder* ]];
+	    if [[ "sub013/" == *$folder* ]];
             then
               continue 
     	    fi

@@ -13,17 +13,17 @@ switch hostname
 end
 
 % Subs
-all_subs = [9:12 14:53];
+all_subs = [5:12 14:53];
 %all_subs = [5:8];
 
 fourier           = 0;%if 1 hanning windowed fourier, else FIR
 mean_epi          = 0; % if 1 we use mean_epi to get to normalized space, else t1 coreg
 
-do_model    = 1;
-do_cons     = 1;
-do_warp     = 1;
-do_smooth   = 1;
-do_anova    = 0;
+do_model    = 0;
+do_cons     = 0;
+do_warp     = 0;
+do_smooth   = 0;
+do_anova    = 1;
 do_anovacon = 0;
 
 TR                = 1.599;
@@ -57,6 +57,9 @@ end
 
 % Specify paths and directories
 out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_' num2str(skern)];
+if ~exist(out_dir, 'dir')
+    mkdir(out_dir)
+end
 struc_templ         = '^sPRISMA.*\.nii';
 
 rfunc_file          = '^rafMRI.nii';
@@ -289,9 +292,9 @@ for np = 1:size(subs,2)
             all_files = [];assemb_cons = [];
             for co = 1:size(eoi_ind,2)
                 if skern == 0
-                    sw_templ      = sprintf('w_dartelbeta_%0.4d.nii', eoi_ind(co));
+                    sw_templ      = sprintf('%s%0.4d.nii', dartel_prefix, eoi_ind(co));
                 else
-                    sw_templ      = sprintf('s%dw_dartelbeta_%0.4d.nii', skern, eoi_ind(co));
+                    sw_templ      = sprintf('s%d%scon_%0.4d.nii', skern, dartel_prefix , eoi_ind(co));
                 end
                 all_files = strvcat(all_files,[base_dir name filesep anadirname filesep sw_templ]);
                 %assemb_cons = [assemb_cons eoi_ind(co)];
