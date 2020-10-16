@@ -106,9 +106,8 @@ for np = 1:size(subs,2)
         % loop end
         
     end
-    if ~isempty(matlabbatch)
-        run_matlab(np, matlabbatch, check)
-    end
+    if ~isempty(matlabbatch,
+    run_matlab(np, matlabbatch, check)
 end
 
 if do_agg

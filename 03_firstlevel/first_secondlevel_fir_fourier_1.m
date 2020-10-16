@@ -1,0 +1,2 @@
+function first_secondlevel_fir_fourier_1
+clear matlabbatch;load('first_secondlevel_fir_fourier_1.mat');addpath('/common/apps/spm12-7771');spm('defaults','FMRI');spm_jobman('initcfg');spm_jobman('run',matlabbatch);delete('first_secondlevel_fir_fourier_1.mat');exit

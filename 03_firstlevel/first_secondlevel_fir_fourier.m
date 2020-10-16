@@ -326,7 +326,7 @@ if do_anova
     anovabatch{1}.spm.stats.factorial_design.globalm.glonorm = 1;
     
     %% --------------------- MODEL ESTIMATION --------------------- %
-    anovabatch{2}.spm.stats.fmri_est.spmmat = {[out_dir '\SPM.mat']};
+    anovabatch{2}.spm.stats.fmri_est.spmmat = {fullfile(out_dir, 'SPM.mat')};
     anovabatch{2}.spm.stats.fmri_est.method.Classical = 1;
     
     %need to estimate first, than load SPM.mat to use FcUtil!!!
