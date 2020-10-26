@@ -23,8 +23,8 @@ do_model    = 0;
 do_cons     = 0;
 do_warp     = 0;
 do_smooth   = 0;
-do_anova    = 1;
-do_anovacon = 0;
+do_anova    = 0;
+do_anovacon = 1;
 
 TR                = 1.599;
 
@@ -339,42 +339,58 @@ if do_anova
 end
 
 if do_anovacon
-    anovabatch = []
+    anovabatch = [];
     
-    sub_const = [size(cond_use,2)+1:size(cond_use,2)+size(all_subs,2)];
-    clear SPM; load([out_dir '\SPM.mat']); %should exist by now
-    anovabatch{1}.spm.stats.con.spmmat = {[out_dir '\SPM.mat']};
+    sub_weights = repmat(1/numel(all_subs),1,numel(all_subs)) ;
+    
+    sub_const = [size(cond_use,2)+1:size(cond_use,2)+size(all_subs,2)]; % sub_const --> subject constante 
+    clear SPM; load(fullfile(out_dir, 'SPM.mat')); %should exist by now
+    anovabatch{1}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
     anovabatch{1}.spm.stats.con.delete = 1;
     
     co = 1;
-    anovabatch{1}.spm.stats.con.consess{co}.fcon.name   = 'eff_of_int';
-    Fc = spm_FcUtil('Set','F_iXO_Test','F','iX0',sub_const,SPM.xX.X);
-    anovabatch{1}.spm.stats.con.consess{co}.fcon.convec = {Fc.c'};
-    co = co + 1; %increment by 1
+%     anovabatch{1}.spm.stats.con.consess{co}.fcon.name   = 'eff_of_int';
+%     Fc = spm_FcUtil('Set','F_iXO_Test','F','iX0',sub_const,SPM.xX.X);
+%     anovabatch{1}.spm.stats.con.consess{co}.fcon.convec = {Fc.c'};
+%     co = co + 1; %increment by 1
     
     
-    for con_i =1:size(anova_conditions,2)
-        anovabatch{1}.spm.stats.con.consess{co}.fcon.name   = anova_conditions{con_i};
-        all = 1:size(anova_conditions,2)*basis_order;
-        all((con_i-1)*basis_order+1:con_i*basis_order) = [];
-        Fc = spm_FcUtil('Set','F_iXO_Test','F','iX0',[all sub_const],SPM.xX.X);
-        anovabatch{1}.spm.stats.con.consess{co}.fcon.convec = {Fc.c'};
-        Fcc{con_i} = Fc.c';
-        co = co + 1; %increment by 1
+%     for con_i =1:size(anova_conditions,2)
+%         anovabatch{1}.spm.stats.con.consess{co}.fcon.name   = anova_conditions{con_i};
+%         all = 1:size(anova_conditions,2)*basis_order;
+%         all((con_i-1)*basis_order+1:con_i*basis_order) = [];
+%         Fc = spm_FcUtil('Set','F_iXO_Test','F','iX0',[all sub_const],SPM.xX.X);
+%         anovabatch{1}.spm.stats.con.consess{co}.fcon.convec = {Fc.c'};
+%         Fcc{con_i} = Fc.c';
+%         co = co + 1; %increment by 1
+%     end
+
+for c = 1:size(anova_conditions,2)
+
+    for f = 1:fir_order
+        NBin = (c-1)*fir_order+f;
+
+        anovabatch{1}.spm.stats.con.consess{co}.tcon.name       = [anova_conditions{c} '_' num2str(f)];
+        anovabatch{1}.spm.stats.con.consess{co}.tcon.convec     = [zeros(1,NBin-1) 1 zeros(1,size(anova_conditions,2)*fir_order-NBin) sub_weights];
+        anovabatch{1}.spm.stats.con.consess{co}.tcon.sessrep    = "none";
+        co = co +1;
     end
+
+end 
+
     
-    %diff_con = [1 2; 3 4];
-    diff_con = [2 1; 4 3; 3 1; 4 2];
+%     %diff_con = [1 2; 3 4];
+%     diff_con = [2 1; 4 3; 3 1; 4 2];
+%     
+%     for con_i =1:size(diff_con,1)
+%         anovabatch{1}.spm.stats.con.consess{co}.fcon.name   = [anova_conditions{diff_con(con_i,1)} '-' anova_conditions{diff_con(con_i,2)}];
+%         anovabatch{1}.spm.stats.con.consess{co}.fcon.convec = round(Fcc{diff_con(con_i,1)} - Fcc{diff_con(con_i,2)}); %dirty hack with round()
+%         co = co + 1; %increment by 1
+%     end
+%     
     
-    for con_i =1:size(diff_con,1)
-        anovabatch{1}.spm.stats.con.consess{co}.fcon.name   = [anova_conditions{diff_con(con_i,1)} '-' anova_conditions{diff_con(con_i,2)}];
-        anovabatch{1}.spm.stats.con.consess{co}.fcon.convec = round(Fcc{diff_con(con_i,1)} - Fcc{diff_con(con_i,2)}); %dirty hack with round()
-        co = co + 1; %increment by 1
-    end
-    
-    
-    
-    spm_jobman('run',anovabatch);
+    spm_jobman('run', anovabatch);
+%     run_matlab(1 ,anovabatch, 0);
 end
 
 function chuckCell = splitvect(v, n)
