@@ -37,26 +37,35 @@ ind.post_task   = xx >= ticks(6);
 switch condition
     case 'M21'
         cs = [1, 3, 2, 1];
+        legend_labels = {'no task', '2back', '1back'};
     case 'M12'
         cs = [1, 2, 3, 1];
+        legend_labels = {'no task', '1back', '2back'};
     case 'W21'
         cs = [1, 3, 2, 1];
+        legend_labels = {'no task', '2back', '1back'};
     case 'W12'
-        cs = [1, 2, 3, 1];
+        cs = [1, 2, 3, 1];        
+        legend_labels = ['no task', '2back', '1back'];
     case 'Monline'
         cs = ones(1,4);
+        legend_labels = {'no task'};
     case 'Wonline'
         cs = ones(1,4);
+        legend_labels = {'no task'};
 end
 
 % Plot lines and shades
-for i = 1:4
+for i = 1:4    
     [line(i), shade(i)] = boundedline(x(ind{:,i}), y(ind{:,i}), error(ind{:,i}), 'cmap', colors(cs(i),:), 'alpha');
-    line(i).LineWidth = 4;
-    if cs(i) > 1
-        line(i).LineWidth = 6;
-    end
+    line(i).LineWidth = 4;            
 end
+
+% Customize graph
+legend(line(1:numel(legend_labels)), legend_labels, 'FontSize', 14);
+
+
+
 
 
 
