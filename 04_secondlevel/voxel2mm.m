@@ -5,8 +5,7 @@ function [mm] = voxel2mm(vox, xSPM)
 % space to mm space
 %
 % Expected input:
-%   mm:     3 x N matrix. If given as row vector, will be transformed
-    
+%   mm:     3 x N matrix. If given as row vector, will be transformed    
     transpose = false;
     if isrow(vox)
         vox = vox'; 
@@ -19,5 +18,4 @@ function [mm] = voxel2mm(vox, xSPM)
     if transpose
         mm = mm';
     end
-
 end
