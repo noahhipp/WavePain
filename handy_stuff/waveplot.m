@@ -1,13 +1,13 @@
 function line = waveplot(y, condition, varargin)
-% Takes time series and wavepain condition and plots it accordingly
-% to current axes. Condition must be specified with capital letter first.
+% Takes time series and wavepain condition and plots it colored according
+% to tasks to current axes. Condition must be specified with capital letter first.
 
 
 % optional arguments:
 %           - varargin{1} specifies error must be of the same length as y.
 %           defaults to zeros(numel(y), 1);           
-%           - varargin{2} specifies number of samples taken into account for wave
-%           calculation otherwise defaults to numel(y)
+%           - varargin{2} specifies number of samples taken into account for
+%           calculation of bins. Defaults to numel(y).
 
 index_test = 0;
 
@@ -29,12 +29,12 @@ colors = [0 0 0;... % no task
     
 [~,ticks] = getBinBarPos(n_wave);
 
-x               = linspace(0,120,n); % used for plotting
+x               = linspace(1,119,n); % each bin is 
 xx              = 1:n; % indices of x, used for constructing index table
 ind             = table;
-ind.pre_task    = xx <= ticks(2)+1.2;
-ind.task1       = xx >= ticks(2)+.5 & xx <= ticks(4)+1;
-ind.task2       = xx >= ticks(4) & xx <= ticks(6)+1;
+ind.pre_task    = xx <= ticks(2);
+ind.task1       = xx >= ticks(2) & xx <= ticks(4);
+ind.task2       = xx >= ticks(4) & xx <= ticks(6);
 ind.post_task   = xx >= ticks(6);
 
 if index_test
@@ -78,7 +78,7 @@ end
 
 % Plot lines and shades
 for i = 1:4    
-    [line(i), shade(i)] = boundedline(x(ind{:,i}), y(ind{:,i}), error(ind{:,i}), 'cmap', colors(cs(i),:), 'alpha');
+    [line(i), shade(i)] = boundedline(x(ind{:,i}), y(ind{:,i}), error(ind{:,i}), 'cmap', colors(cs(i),:), 'alpha', 'Marker','*');
     line(i).LineWidth = 4;            
 end
 
