@@ -193,8 +193,8 @@ for np = 1:size(subs,2)
         %%template for contrasts
         template = [];
         template.spm.stats.con.spmmat = {[a_dir filesep 'SPM.mat']};
-        template.spm.stats.con.delete = 1;
-        fco = 0;
+        
+        fco = 0;template.spm.stats.con.delete = 1;
 %         fco = fco + 1; %counter for f-contrasts
 %         template.spm.stats.con.consess{fco}.fcon.name   = 'eff_of_int';
 %         

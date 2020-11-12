@@ -21,8 +21,8 @@ lead_out            = zeros(1,lead_out_samples);
 m                   = [lead_in, wave, lead_out];
 w                   = [lead_in, wave .* -1, lead_out];
 
-% fprintf('=======\n waveit2: created waves with\n%d samples(%d lead in, %d wave, %d lead_out)\n=======\n',...
-%     samples, lead_in_samples, wave_samples, lead_out_samples);
+fprintf('=======\n waveit2: created waves with\n%d samples(%d lead in, %d wave, %d lead_out)\n=======\n',...
+    samples, lead_in_samples, wave_samples, lead_out_samples);
     
 
 
