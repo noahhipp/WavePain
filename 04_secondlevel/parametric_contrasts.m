@@ -66,7 +66,7 @@ if do_plot
         xlim([0,360]);        
         title(con_names{i}, 'interpreter','none');        
     end
-    check = input('press y and enter to proceed, else just hit enter\n');
+    check = input('press y and enter to proceed, else just hit enter\n', 's');
     if ~strcmp(check,'y')
         close(name);
         fprintf('ABORTING\n\n')
@@ -75,6 +75,6 @@ if do_plot
 end
 
 if do_cons
-    spm_jobman('run', anovabatch);
+    spm_jobman('run', matlabbatch);
 end
 
