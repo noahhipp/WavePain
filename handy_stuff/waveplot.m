@@ -1,4 +1,4 @@
-function line = waveplot(y, condition, varargin)
+function [line, legend_labels] = waveplot(y, condition, varargin)
 % Takes time series and wavepain condition and plots it colored according
 % to tasks to current axes. Condition must be specified with capital letter first.
 
@@ -32,9 +32,9 @@ colors = [0 0 0;... % no task
 x               = linspace(1,119,n); % each bin is 
 xx              = 1:n; % indices of x, used for constructing index table
 ind             = table;
-ind.pre_task    = xx <= ticks(2);
-ind.task1       = xx >= ticks(2) & xx <= ticks(4);
-ind.task2       = xx >= ticks(4) & xx <= ticks(6);
+ind.pre_task    = xx <= ticks(2) + 1;
+ind.task1       = xx >= ticks(2) & xx <= ticks(4) +1 ;
+ind.task2       = xx >= ticks(4) & xx <= ticks(6)+1;
 ind.post_task   = xx >= ticks(6);
 
 if index_test
@@ -52,44 +52,32 @@ end
 switch condition
     case 'M21'
         cs = [1, 3, 2, 1];
-        legend_labels = {'no task', '2back', '1back'};
+        legend_labels = {'FIR (no task)', 'FIR (FIR (2back))', 'FIR (FIR (1back))'};
     case 'M12'
         cs = [1, 2, 3, 1];
-        legend_labels = {'no task', '1back', '2back'};
+        legend_labels = {'FIR (no task)', 'FIR (1back)', 'FIR (2back)'};
     case 'M21vsM12'
         cs = [1, 4, 5, 1];
-        legend_labels = {'no task', '2back-1back', '1back-2back'};
+        legend_labels = {'FIR (no task)', 'FIR (2back)-FIR (1back)', 'FIR (1back)-FIR (2back)'};
     case 'W21'
         cs = [1, 3, 2, 1];
-        legend_labels = {'no task', '2back', '1back'};
+        legend_labels = {'FIR (no task)', 'FIR (2back)', 'FIR (1back)'};
     case 'W12'
         cs = [1, 2, 3, 1];        
-        legend_labels = {'no task', '2back', '1back'};
+        legend_labels = {'FIR (no task)', 'FIR (2back)', 'FIR (1back)'};
     case 'W21vsW12'
         cs = [1, 4, 5, 1];
-        legend_labels = {'no task', '2back-1back', '1back-2back'};
+        legend_labels = {'FIR (no task)', 'FIR (2back)-FIR (1back)', 'FIR (1back)-FIR (2back)'};
     case 'Monline'
         cs = ones(1,4);
-        legend_labels = {'no task'};
+        legend_labels = {'FIR (no task)'};
     case 'Wonline'
         cs = ones(1,4);
-        legend_labels = {'no task'};
+        legend_labels = {'FIR (no task)'};
 end
 
 % Plot lines and shades
 for i = 1:4    
-    [line(i), shade(i)] = boundedline(x(ind{:,i}), y(ind{:,i}), error(ind{:,i}), 'cmap', colors(cs(i),:), 'alpha', 'Marker','*');
+    [line(i), shade(i)] = boundedline(x(ind{:,i}), y(ind{:,i}), error(ind{:,i}),'k-*', 'cmap', colors(cs(i),:), 'alpha');
     line(i).LineWidth = 4;            
-end
-
-% Customize graph
-legend(line(1:numel(legend_labels)), legend_labels, 'FontSize', 14);
-
-
-
-
-
-
-    
-
-
+end    

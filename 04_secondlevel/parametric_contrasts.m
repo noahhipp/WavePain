@@ -42,7 +42,7 @@ tbob                    = parametric_contrasts.tbob;
 convec(1,:) = [m m w w m w]; % heat
 convec(2,:) = [tbob obtb tbob obtb, zeros(1,120)]; % working memory
 convec(3,:) = convec(1,:).*convec(2,:);
-
+e
 % SPM code
 matlabbatch                                                 = [];
 matlabbatch{1}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
