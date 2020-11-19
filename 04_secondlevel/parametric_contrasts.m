@@ -22,7 +22,7 @@ end
 % Settings
 do_plot = 1;
 do_cons = 1;
-con_names = {'heat', 'working_memory', 'heat_X_working_memory'};
+con_names = {'heat', 'working_memory', 'heat_X_working_memory','heat_X_working_memory_flipped', 'down_slope_2back_vs_1back'};
 
 skern               = 6;
 addon               = 'anova';
@@ -38,11 +38,26 @@ w                       = parametric_contrasts.w;
 obtb                    = parametric_contrasts.obtb;
 tbob                    = parametric_contrasts.tbob;
 
+m21                     = parametric_contrasts.m21;
+m12                     = parametric_contrasts.m12;
+w21                     = parametric_contrasts.w21;
+w12                     = parametric_contrasts.w12;
+
 % Construct convectors
 convec(1,:) = [m m w w m w]; % heat
 convec(2,:) = [tbob obtb tbob obtb, zeros(1,120)]; % working memory
-convec(3,:) = convec(1,:).*convec(2,:);
-e
+convec(3,:) = convec(1,:).*convec(2,:); % interaction
+convec(4,:) = -convec(3,:); % interaction flipped
+
+
+convec(5,:) = [m21(1:28), zeros(1,32),... % task effect on down slope
+              m12(1:28), zeros(1,32),...
+              zeros(1,28), w21(29:end),...
+              zeros(1,28), w12(29:end), zeros(1,120)];
+
+
+
+
 % SPM code
 matlabbatch                                                 = [];
 matlabbatch{1}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
