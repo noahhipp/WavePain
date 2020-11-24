@@ -1,6 +1,6 @@
 function parametric_contrasts = plot_parametric_contrasts(varargin)
-% Clarifies where values from parametric contrats stem from and returns
-% corresponding timeseries. Plotting can be toggled with show
+% Does all the arithemtic for parametric_cotnrasts. 
+% Flag toggles visualisation.
 
 if nargin
     show = varargin{1};
@@ -8,11 +8,18 @@ else
     show = 1;
 end
 
+
 % Get high res waves
-[m, w]  = waveit2(55000);
+[m, w]      = waveit2(55000);
+[dm, dw]    = waveit_derivatives(55000);
+
 pm = [m, zeros(1,5000)]; % for plotting later
-m       = zscore([m, zeros(1,5000)]); % zscore and append zeros at the end
+m       = zscore([m, zeros(1,5000)]); % append zeros and zscore
 w       = zscore([w, zeros(1,5000)]);
+
+dm       = zscore([dm, zeros(1,5000)]);
+dw       = zscore([dw, zeros(1,5000)]);
+
 
 x       = linspace(0,120, 60000);
 xq      = linspace(1,119, 60);
@@ -20,6 +27,9 @@ xq      = linspace(1,119, 60);
 % Sample down
 dsm     = interp1(x,m,xq);
 dsw     = interp1(x,w,xq);
+
+dsdm     = interp1(x,dm,xq);
+dsdw     = interp1(x,dw,xq);
 
 % Task regressors;
 obtb = [zeros(1,11) -ones(1,17) ones(1,17), zeros(1,15)];
@@ -35,6 +45,9 @@ w12 = dsw .* obtb;
 parametric_contrasts    = struct;
 parametric_contrasts.m  = dsm;
 parametric_contrasts.w  = dsw;
+
+parametric_contrasts.dm = dsdm;
+parametric_contrasts.dw = dsdw;
 
 parametric_contrasts.obtb = obtb;
 parametric_contrasts.tbob = tbob;
