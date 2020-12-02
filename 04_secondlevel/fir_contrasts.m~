@@ -108,13 +108,15 @@ interaction_names   = {'m21','m12','w21','w12',...
                     'down_slope_2back_>_1back3', 'down_slope_2back_<_1back3'};% interaction: dheat_X_wm (not heat_X_wm as above)
 
                 
-tconvec(tcon_i,:)   = zscore([zeros(1,0), m21 zeros(1,300)]);   tcon_i = tcon_i + 1; % m21
-tconvec(tcon_i,:)   = zscore([zeros(1,60), m12 zeros(1,240)]);  tcon_i = tcon_i + 1; % m12
-tconvec(tcon_i,:)   = zscore([zeros(1,120), w21 zeros(1,180)]); tcon_i = tcon_i + 1; % w21
-tconvec(tcon_i,:)   = zscore([zeros(1,180), w12 zeros(1,120)]); tcon_i = tcon_i + 1; % w12
+tconvec(tcon_i,:)   = [zeros(1,0), m21 zeros(1,300)];   tcon_i = tcon_i + 1; % m21
+tconvec(tcon_i,:)   = [zeros(1,60), m12 zeros(1,240)];  tcon_i = tcon_i + 1; % m12
+tconvec(tcon_i,:)   = [zeros(1,120), w21 zeros(1,180)]; tcon_i = tcon_i + 1; % w21
+tconvec(tcon_i,:)   = [zeros(1,180), w12 zeros(1,120)]; tcon_i = tcon_i + 1; % w12
 
-tconvec(tcon_i,:)   = zscore([zeros(1,60), m12 w21 zeros(1,180)]); tcon_i = tcon_i + 1; % placebo aka down conditions
-tconvec(tcon_i,:)   = zscore([zeros(1,0), m21 zeros(1,120) w12 zeros(1,120)]); tcon_i = tcon_i + 1; % nocebo aka up conditions                
+tconvec(tcon_i,:)   = [zeros(1,0), m21 zeros(1,300)]; tcon_i = tcon_i + 1;
+tconvec(tcon_i,:)   = [zeros(1,0), m21 zeros(1,300)]; tcon_i = tcon_i + 1;
+
+                
                 
                 
 tconvec(tcon_i,:)   =  [m, m, w, w, m, w].*[tbob obtb tbob obtb, zeros(1,120)]; tcon_i = tcon_i + 1;
@@ -156,9 +158,9 @@ mbi = 1;
 % fcon_names                          = [eoi_names, baseline_difference_names];
 % matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
 % matlabbatch{mbi}.spm.stats.con.delete = 1; % we want a clean slate
-% for i = 1:6
+% for i = 1:size(fcon_names,2)
 %     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.name       = fcon_names{i};
-%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.convec     = fconvec(i,:);
+%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.convec     = fconmat(:,:,i);
 %     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.sessrep    = "none";
 % end
 % mbi = mbi +1;
