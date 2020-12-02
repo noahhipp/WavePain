@@ -61,7 +61,7 @@ parametric_contrasts.w12 = w12;
 if show
     [~,ticks] = getBinBarPos(110);
     
-    for i = 1:12
+    for i = 1:16
         switch i
             case 1
                 figure('Color',[1 1 1], 'Name', 'M heat regressor ');

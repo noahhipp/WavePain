@@ -7,7 +7,9 @@ function [line, legend_labels] = waveplot(y, condition, varargin)
 %           - varargin{1} specifies error must be of the same length as y.
 %           defaults to zeros(numel(y), 1);           
 %           - varargin{2} specifies number of samples taken into account for
-%           calculation of bins. Defaults to numel(y).
+%           calculation of bins. This stems from first FIR being 120s long
+%           but wave calulation only being applied to 120s.
+%           Defaults to numel(y).
 
 index_test = 0;
 

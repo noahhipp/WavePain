@@ -101,7 +101,11 @@ w21                 = parametric_contrasts.w21;
 w12                 = parametric_contrasts.w12;
 interaction_names   = {'heat_X_working_memory','heat_X_working_memory_flipped',...
                     'down_slope_2back_>_1back', 'down_slope_2back_<_1back',...
-                    'down_slope_2back_>_1back2', 'down_slope_2back_<_1back2'}; % contrasts shifted completely
+                    'down_slope_2back_>_1back2', 'down_slope_2back_<_1back2',... % contrasts shifted completely
+                    'dheat_X_working_memory', 'dheat_X_working_memory_flipped',...
+                    'down_slope_2back_>_1back3', 'down_slope_2back_<_1back3'};% interaction: dheat_X_wm (not heat_X_wm as above)
+                    
+                
                 
 tconvec(tcon_i,:)   =  [m, m, w, w, m, w].*[tbob obtb tbob obtb, zeros(1,120)]; tcon_i = tcon_i + 1;
 tconvec(tcon_i,:)   = -[m, m, w, w, m, w].*[tbob obtb tbob obtb, zeros(1,120)]; tcon_i = tcon_i + 1;                
@@ -123,6 +127,16 @@ tconvec(tcon_i,:)   =   -[m21(1:11),(m21(12:28) - min(m21(12:28))), zeros(1,32),
                         zeros(1,28), (w21(29:45)-max(w21(29:45))), w21(46:end),...
                         zeros(1,28), (w12(29:45)-min(w12(29:45))), w12(46:end), zeros(1,120)]; tcon_i = tcon_i + 1;
 
+dheat               = [dm, dm, dw, dw, dm, dw];                    
+dheat_X_wm          = dheat.* [tbob obtb tbob obtb zeros(1,120)];
+tconvec(tcon_i,:)    = dheat_X_wm; tcon_i = tcon_i + 1;  % dheat_X_working_memory
+tconvec(tcon_i,:)    = -dheat_X_wm; tcon_i = tcon_i + 1; % dheat_X_working_memory_flipped
+
+not_down_slope= logical([ones(1,11), zeros(1,17), ones(1,32), ones(1,11), zeros(1,17), ones(1,32), ones(1,28),zeros(1,17),ones(1,15), ones(1,28),zeros(1,17),ones(1,15), ones(1,11), zeros(1,17), ones(1,32), ones(1,28),zeros(1,17),ones(1,15)]);
+dheat_X_wm_down_slope       = dheat_X_wm;
+dheat_X_wm_down_slope(not_down_slope) = 0;
+tconvec(tcon_i,:)   = dheat_X_wm_down_slope; tcon_i = tcon_i+1; % down_slope_2back_>_1back3
+tconvec(tcon_i,:)   = -dheat_X_wm_down_slope; tcon_i = tcon_i+1; % down_slope_2back_<_1back3                                        
 
 % SPM code
 matlabbatch                                                 = [];
@@ -163,6 +177,12 @@ if do_plot
     figure('Name','T-Contrasts', 'Color', [1 1 1]);
     sgtitle('T-CONTRASTS', 'FontSize', 24, 'FontWeight', 'bold');
     for i = 1:size(tcon_names,2)
+        
+        if ismember(i,[1,6])
+            ajfafkl = 1;
+        end
+        
+        
         subplot(size(tcon_names,2), 1, i);       
         tcon_plot(tconvec(i,:));
         title(tcon_names{i}, 'interpreter','none')
