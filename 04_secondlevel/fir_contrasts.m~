@@ -35,7 +35,8 @@ parametric_contrasts    = plot_parametric_contrasts(0); % arithmetic for paramet
 
 %%%%%%%%%%%%%%%%%%%%%%
 fcon_i = 1;         %%
-fconmat= [];        %% each fcon is a matrix!!!
+% fconmat= [];        %% each fcon is a matrix!!!
+fconvec=[] % matrix doesnt work yet
 %%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -44,26 +45,37 @@ tconvec= [];        %% each tcon is a row!!!
 %%%%%%%%%%%%%%%%%%%%%%
 
 
+
+
 % Eoi contrasts
-eoi_names       = {'eoi_all', 'eoi_m21', 'eoi_m12', 'eoi_w21', 'eoi_w12', 'eoi_monline', 'eoi_wonline'};
-fconmat(:,:,fcon_i) = [eye(60), eye(60), eye(60), eye(60),eye(60),eye(60)]; fcon_i = fcon_i+1; 
-fconmat(:,:,fcon_i) = [zeros(60,0), eye(60),   zeros(60,300)]; fcon_i = fcon_i+1; 
-fconmat(:,:,fcon_i) = [zeros(60,60), eye(60),  zeros(60,240)]; fcon_i = fcon_i+1; 
-fconmat(:,:,fcon_i) = [zeros(60,120), eye(60), zeros(60,180)]; fcon_i = fcon_i+1; 
-fconmat(:,:,fcon_i) = [zeros(60,180), eye(60), zeros(60,120)]; fcon_i = fcon_i+1; 
-fconmat(:,:,fcon_i) = [zeros(60,240), eye(60), zeros(60,60)]; fcon_i = fcon_i+1; 
-fconmat(:,:,fcon_i) = [zeros(60,300), eye(60), zeros(60,0)]; fcon_i = fcon_i+1; 
+% eoi_names       = {'eoi_all', 'eoi_m21', 'eoi_m12', 'eoi_w21', 'eoi_w12', 'eoi_monline', 'eoi_wonline'};
+% fconmat(:,:,fcon_i) = [eye(60), eye(60), eye(60), eye(60),eye(60),eye(60)]; fcon_i = fcon_i+1; 
+% fconmat(:,:,fcon_i) = [zeros(60,0), eye(60),   zeros(60,300)]; fcon_i = fcon_i+1; 
+% fconmat(:,:,fcon_i) = [zeros(60,60), eye(60),  zeros(60,240)]; fcon_i = fcon_i+1; 
+% fconmat(:,:,fcon_i) = [zeros(60,120), eye(60), zeros(60,180)]; fcon_i = fcon_i+1; 
+% fconmat(:,:,fcon_i) = [zeros(60,180), eye(60), zeros(60,120)]; fcon_i = fcon_i+1; 
+% fconmat(:,:,fcon_i) = [zeros(60,240), eye(60), zeros(60,60)]; fcon_i = fcon_i+1; 
+% fconmat(:,:,fcon_i) = [zeros(60,300), eye(60), zeros(60,0)]; fcon_i = fcon_i+1; 
 
 
 % Online aka (baseline) difference contrasts
-baseline_difference_names = {'m21_vs_monline', 'm12_vs_monline', 'w21_vs_wonline', 'w12_vs_wonline',...
-                            'm21_vs_m12', 'w21_vs_w12'};                        
-fconmat(:,:,fcon_i) = [zeros(60,0),   eye(60), zeros(60,180), -eye(60), zeros(60,60)]; fcon_i = fcon_i +1;                       
-fconmat(:,:,fcon_i) = [zeros(60,60),  eye(60), zeros(60,120), -eye(60), zeros(60,60)]; fcon_i = fcon_i +1;                        
-fconmat(:,:,fcon_i) = [zeros(60,120), eye(60), zeros(60,120), -eye(60), zeros(60,0)]; fcon_i = fcon_i +1;                        
-fconmat(:,:,fcon_i) = [zeros(60,180), eye(60), zeros(60,60),  -eye(60), zeros(60,0)]; fcon_i = fcon_i +1;                        
-fconmat(:,:,fcon_i) = [zeros(60,0),   eye(60), zeros(60,0),   -eye(60), zeros(60,240)]; fcon_i = fcon_i +1;                        
-fconmat(:,:,fcon_i) = [zeros(60,120), eye(60), zeros(60,0),   -eye(60), zeros(60,120)]; fcon_i = fcon_i +1;                        
+% baseline_difference_names = {'m21_vs_monline', 'm12_vs_monline', 'w21_vs_wonline', 'w12_vs_wonline',...
+%                             'm21_vs_m12', 'w21_vs_w12'};                        
+% fconmat(:,:,fcon_i) = [zeros(60,0),   eye(60), zeros(60,180), -eye(60), zeros(60,60)]; fcon_i = fcon_i +1;                       
+% fconmat(:,:,fcon_i) = [zeros(60,60),  eye(60), zeros(60,120), -eye(60), zeros(60,60)]; fcon_i = fcon_i +1;                        
+% fconmat(:,:,fcon_i) = [zeros(60,120), eye(60), zeros(60,120), -eye(60), zeros(60,0)]; fcon_i = fcon_i +1;                        
+% fconmat(:,:,fcon_i) = [zeros(60,180), eye(60), zeros(60,60),  -eye(60), zeros(60,0)]; fcon_i = fcon_i +1;                        
+% fconmat(:,:,fcon_i) = [zeros(60,0),   eye(60), zeros(60,0),   -eye(60), zeros(60,240)]; fcon_i = fcon_i +1;                        
+% fconmat(:,:,fcon_i) = [zeros(60,120), eye(60), zeros(60,0),   -eye(60), zeros(60,120)]; fcon_i = fcon_i +1;                        
+
+% Eoi contrasts V2
+eoi_names       = {'eoi_m21', 'eoi_m12', 'eoi_w21', 'eoi_w12', 'eoi_monline', 'eoi_wonline'};
+fconvec(fcon_i,:)    =         61:408 ; fcon_i = fcon_i + 1;
+fconvec(fcon_i,:)    = [1:60  121:408]; fcon_i = fcon_i + 1;
+fconvec(fcon_i,:)    = [1:120 181:408]; fcon_i = fcon_i + 1;
+fconvec(fcon_i,:)    = [1:180 241:408]; fcon_i = fcon_i + 1;
+fconvec(fcon_i,:)    = [1:240 301:408]; fcon_i = fcon_i + 1;
+fconvec(fcon_i,:)    = [1:300 361:408]; fcon_i = fcon_i + 1;
 
 
 % Working memory contrasts
@@ -100,7 +112,7 @@ m12                 = parametric_contrasts.m12;
 w21                 = parametric_contrasts.w21;
 w12                 = parametric_contrasts.w12;
 interaction_names   = {'m21','m12','w21','w12',...
-                    'placebo','nocebo',...
+                    'placebo','nocebo','placebo>nocebo','placebo<nocebo', ...
                     'heat_X_working_memory','heat_X_working_memory_flipped',...
                     'down_slope_2back_>_1back', 'down_slope_2back_<_1back',...
                     'down_slope_2back_>_1back2', 'down_slope_2back_<_1back2',... % contrasts shifted completely
@@ -108,15 +120,15 @@ interaction_names   = {'m21','m12','w21','w12',...
                     'down_slope_2back_>_1back3', 'down_slope_2back_<_1back3'};% interaction: dheat_X_wm (not heat_X_wm as above)
 
                 
-tconvec(tcon_i,:)   = [zeros(1,0), m21 zeros(1,300)];   tcon_i = tcon_i + 1; % m21
-tconvec(tcon_i,:)   = [zeros(1,60), m12 zeros(1,240)];  tcon_i = tcon_i + 1; % m12
-tconvec(tcon_i,:)   = [zeros(1,120), w21 zeros(1,180)]; tcon_i = tcon_i + 1; % w21
-tconvec(tcon_i,:)   = [zeros(1,180), w12 zeros(1,120)]; tcon_i = tcon_i + 1; % w12
+tconvec(tcon_i,:)   = zscore([zeros(1,0), m21 zeros(1,300)]);   tcon_i = tcon_i + 1; % m21
+tconvec(tcon_i,:)   = zscore([zeros(1,60), m12 zeros(1,240)]);  tcon_i = tcon_i + 1; % m12
+tconvec(tcon_i,:)   = zscore([zeros(1,120), w21 zeros(1,180)]); tcon_i = tcon_i + 1; % w21
+tconvec(tcon_i,:)   = zscore([zeros(1,180), w12 zeros(1,120)]); tcon_i = tcon_i + 1; % w12
 
-tconvec(tcon_i,:)   = [zeros(1,0), m21 zeros(1,300)]; tcon_i = tcon_i + 1;
-tconvec(tcon_i,:)   = [zeros(1,0), m21 zeros(1,300)]; tcon_i = tcon_i + 1;
-
-                
+tconvec(tcon_i,:)   = zscore([zeros(1,60), m12 w21 zeros(1,180)]); tcon_i = tcon_i + 1; % placebo aka down conditions
+tconvec(tcon_i,:)   = zscore([zeros(1,0), m21 zeros(1,120) w12 zeros(1,120)]); tcon_i = tcon_i + 1; % nocebo aka up conditions                
+tconvec(tcon_i,:)   = [-m21 m12 w21 -w12 zeros(1,120)]; tcon_i = tcon_i + 1; % placebo>nocebo
+tconvec(tcon_i,:)   = [m21 -m12 -w21 w12 zeros(1,120)]; tcon_i = tcon_i + 1; % placebo<nocebo
                 
                 
 tconvec(tcon_i,:)   =  [m, m, w, w, m, w].*[tbob obtb tbob obtb, zeros(1,120)]; tcon_i = tcon_i + 1;
@@ -158,17 +170,29 @@ mbi = 1;
 % fcon_names                          = [eoi_names, baseline_difference_names];
 % matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
 % matlabbatch{mbi}.spm.stats.con.delete = 1; % we want a clean slate
-% for i = 1:size(fcon_names,2)
+% for i = 1:6
 %     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.name       = fcon_names{i};
-%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.convec     = fconmat(:,:,i);
+%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.convec     = fconvec(i,:);
 %     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.sessrep    = "none";
 % end
 % mbi = mbi +1;
 
-% Do T-Contrasts
+% Do F-Contrasts V2
+load(fullfile(out_dir, 'SPM.mat'), 'SPM');
+matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
+for i = 1:size(eoi_names,2)    
+    matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.name = eoi_names{i};
+%     Fc = spm_FcUtil('Set','F_iXO_Test','F','c',fconvec(i,:),SPM.xX.X);
+
+    matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.convec = {Fc.c'};
+end
+mbi = mbi + 1;
+
+
+% Do t-Contrasts
 tcon_names                          = [working_memory_names, heat_names, interaction_names];
 matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
-matlabbatch{mbi}.spm.stats.con.delete = 1; % already cleaned during fcon defitnion
+matlabbatch{mbi}.spm.stats.con.delete = 0; % already cleaned during fcon defitnion
 for i = 1:size(tcon_names,2)
     matlabbatch{mbi}.spm.stats.con.consess{i}.tcon.name       = tcon_names{i};
     matlabbatch{mbi}.spm.stats.con.consess{i}.tcon.convec     = tconvec(i,:)';

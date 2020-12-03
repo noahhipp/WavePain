@@ -177,16 +177,16 @@ mbi = 1;
 % end
 % mbi = mbi +1;
 
-% Do F-Contrasts V2
-
-load(fullfile(out_dir, 'SPM.mat'), 'SPM');
-matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
-for i = 1:size(eoi_names,2)    
-    matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.name = eoi_names{i};
-    Fc = spm_FcUtil('Set','F_iXO_Test','F','c',fconvec(i,:)',SPM.xX.X);
-    matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.convec = {Fc.c'};
-end
-mbi = mbi + 1;
+% % Do F-Contrasts V2
+% load(fullfile(out_dir, 'SPM.mat'), 'SPM');
+% matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
+% for i = 1:size(eoi_names,2)    
+%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.name = eoi_names{i};
+% %     Fc = spm_FcUtil('Set','F_iXO_Test','F','c',fconvec(i,:),SPM.xX.X);
+% 
+%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.iX0 = fconvec(i,:);
+% end
+% mbi = mbi + 1;
 
 
 % Do t-Contrasts
