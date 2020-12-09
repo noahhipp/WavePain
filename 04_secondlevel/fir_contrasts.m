@@ -129,8 +129,8 @@ tconvec(tcon_i,:)   = zscore([zeros(1,180), w12 zeros(1,120)]); tcon_i = tcon_i 
 
 tconvec(tcon_i,:)   = zscore([zeros(1,60), m12 w21 zeros(1,180)]); tcon_i = tcon_i + 1; % placebo aka down conditions
 tconvec(tcon_i,:)   = zscore([zeros(1,0), m21 zeros(1,120) w12 zeros(1,120)]); tcon_i = tcon_i + 1; % nocebo aka up conditions                
-tconvec(tcon_i,:)   = [-m21 m12 w21 -w12 zeros(1,120)]; tcon_i = tcon_i + 1; % placebo>nocebo 
-tconvec(tcon_i,:)   = [m21 -m12 -w21 w12 zeros(1,120)]; tcon_i = tcon_i + 1; % placebo<nocebo
+tconvec(tcon_i,:)   = zscore([-m21 m12 w21 -w12 zeros(1,120)]); tcon_i = tcon_i + 1; % placebo>nocebo 
+tconvec(tcon_i,:)   = zscore([m21 -m12 -w21 w12 zeros(1,120)]); tcon_i = tcon_i + 1; % placebo<nocebo
                 
                 
 tconvec(tcon_i,:)   =  [m, m, w, w, m, w].*[tbob obtb tbob obtb, zeros(1,120)]; tcon_i = tcon_i + 1; % heat_X_working_memory
@@ -219,7 +219,7 @@ mbi = 1;
 % Do t-Contrasts
 tcon_names                          = [working_memory_names, heat_names, interaction_names];
 matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
-matlabbatch{mbi}.spm.stats.con.delete = 0; % already cleaned during fcon defitnion
+matlabbatch{mbi}.spm.stats.con.delete = 1; % already cleaned during fcon defitnion
 for i = 1:size(tcon_names,2)
     matlabbatch{mbi}.spm.stats.con.consess{i}.tcon.name       = tcon_names{i};
     matlabbatch{mbi}.spm.stats.con.consess{i}.tcon.convec     = tconvec(i,:)';
