@@ -43,7 +43,7 @@ colors = [0 0 0;... % no task
 
 
 f                       = n_wave / 110; % sampling frequency of y
-x_seconds               = linspace(0,110,n); % seconds
+x_seconds               = linspace(0,110+((n-n_wave) / f),n); % seconds
 x_samples               = x_seconds * f; 
 
 ind             = table;
@@ -51,6 +51,14 @@ ind.pre_task    = x_samples < ticks_samples(2);
 ind.task1       = x_samples >= ticks_samples(2) & x_samples < ticks_samples(4);
 ind.task2       = x_samples >= ticks_samples(4) & x_samples < ticks_samples(6);
 ind.post_task   = x_samples >= ticks_samples(6);
+
+% Extend at the end to prevent holes in graph
+ind.pre_task(find(ind.pre_task,1,'last')+1) = 1;
+ind.task1(find(ind.task1,1,'last')+1) = 1;
+ind.task2(find(ind.task2,1,'last')+1) = 1;
+ind.task2(find(ind.task2,1,'last')+1) = 1;
+ind.post_task(find(ind.post_task,1,'first')) = 0;
+
 
 if index_test
     figure;
