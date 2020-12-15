@@ -35,8 +35,8 @@ parametric_contrasts    = plot_parametric_contrasts(0); % arithmetic for paramet
 
 %%%%%%%%%%%%%%%%%%%%%%
 fcon_i = 1;         %%
-% fconmat= [];        %% each fcon is a matrix!!!
-fconvec=[] % matrix doesnt work yet
+fconmat= [];        %% each fcon is a matrix!!!
+%fconvec=[] % matrix doesnt work yet
 %%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -48,14 +48,15 @@ tconvec= [];        %% each tcon is a row!!!
 
 
 % Eoi contrasts
-% eoi_names       = {'eoi_all', 'eoi_m21', 'eoi_m12', 'eoi_w21', 'eoi_w12', 'eoi_monline', 'eoi_wonline'};
-% fconmat(:,:,fcon_i) = [eye(60), eye(60), eye(60), eye(60),eye(60),eye(60)]; fcon_i = fcon_i+1; 
-% fconmat(:,:,fcon_i) = [zeros(60,0), eye(60),   zeros(60,300)]; fcon_i = fcon_i+1; 
-% fconmat(:,:,fcon_i) = [zeros(60,60), eye(60),  zeros(60,240)]; fcon_i = fcon_i+1; 
-% fconmat(:,:,fcon_i) = [zeros(60,120), eye(60), zeros(60,180)]; fcon_i = fcon_i+1; 
-% fconmat(:,:,fcon_i) = [zeros(60,180), eye(60), zeros(60,120)]; fcon_i = fcon_i+1; 
-% fconmat(:,:,fcon_i) = [zeros(60,240), eye(60), zeros(60,60)]; fcon_i = fcon_i+1; 
-% fconmat(:,:,fcon_i) = [zeros(60,300), eye(60), zeros(60,0)]; fcon_i = fcon_i+1; 
+eoi_names       = {'eoi_m21', 'eoi_m12', 'eoi_w21', 'eoi_w12', 'eoi_monline', 'eoi_wonline'};
+
+fconeye = eye(60) - mean(eye(60));
+fconmat(:,:,fcon_i) = [zeros(60,0), fconeye,   zeros(60,300)]; fcon_i = fcon_i+1; 
+fconmat(:,:,fcon_i) = [zeros(60,60), fconeye,  zeros(60,240)]; fcon_i = fcon_i+1; 
+fconmat(:,:,fcon_i) = [zeros(60,120), fconeye, zeros(60,180)]; fcon_i = fcon_i+1; 
+fconmat(:,:,fcon_i) = [zeros(60,180), fconeye, zeros(60,120)]; fcon_i = fcon_i+1; 
+fconmat(:,:,fcon_i) = [zeros(60,240), fconeye, zeros(60,60)]; fcon_i = fcon_i+1; 
+fconmat(:,:,fcon_i) = [zeros(60,300), fconeye, zeros(60,0)]; fcon_i = fcon_i+1; 
 
 
 % Online aka (baseline) difference contrasts
@@ -69,13 +70,13 @@ tconvec= [];        %% each tcon is a row!!!
 % fconmat(:,:,fcon_i) = [zeros(60,120), eye(60), zeros(60,0),   -eye(60), zeros(60,120)]; fcon_i = fcon_i +1;                        
 
 % Eoi contrasts V2
-eoi_names       = {'eoi_m21', 'eoi_m12', 'eoi_w21', 'eoi_w12', 'eoi_monline', 'eoi_wonline'};
-fconvec(fcon_i,:)    =         61:408 ; fcon_i = fcon_i + 1;
-fconvec(fcon_i,:)    = [1:60  121:408]; fcon_i = fcon_i + 1;
-fconvec(fcon_i,:)    = [1:120 181:408]; fcon_i = fcon_i + 1;
-fconvec(fcon_i,:)    = [1:180 241:408]; fcon_i = fcon_i + 1;
-fconvec(fcon_i,:)    = [1:240 301:408]; fcon_i = fcon_i + 1;
-fconvec(fcon_i,:)    = [1:300 361:408]; fcon_i = fcon_i + 1;
+% eoi_names       = {'eoi_m21', 'eoi_m12', 'eoi_w21', 'eoi_w12', 'eoi_monline', 'eoi_wonline'};
+% fconvec(fcon_i,:)    =         61:408 ; fcon_i = fcon_i + 1;
+% fconvec(fcon_i,:)    = [1:60  121:408]; fcon_i = fcon_i + 1;
+% fconvec(fcon_i,:)    = [1:120 181:408]; fcon_i = fcon_i + 1;
+% fconvec(fcon_i,:)    = [1:180 241:408]; fcon_i = fcon_i + 1;
+% fconvec(fcon_i,:)    = [1:240 301:408]; fcon_i = fcon_i + 1;
+% fconvec(fcon_i,:)    = [1:300 361:408]; fcon_i = fcon_i + 1;
 
 
 % Working memory contrasts
@@ -119,7 +120,8 @@ interaction_names   = {'m21','m12','w21','w12',...
                     'down_slope_2back_>_1back', 'down_slope_2back_<_1back',...
                     'down_slope_2back_>_1back2', 'down_slope_2back_<_1back2',... % contrasts shifted completely
                     'dheat_X_working_memory', 'dheat_X_working_memory_flipped',...
-                    'down_slope_2back_>_1back3', 'down_slope_2back_<_1back3'};% interaction: dheat_X_wm (not heat_X_wm as above)
+                    'down_slope_2back_>_1back3', 'down_slope_2back_<_1back3',...
+                    'dheat_X_heat_working_memory', 'dheat_X_heat_working_memory_flipped'};% interaction: dheat_X_wm (not heat_X_wm as above)
 
                 
 tconvec(tcon_i,:)   = zscore([zeros(1,0), m21 zeros(1,300)]);   tcon_i = tcon_i + 1; % m21
@@ -187,24 +189,38 @@ not_down_slope= logical([ones(1,11), zeros(1,17), ones(1,32), ones(1,11), zeros(
 dheat_X_wm_down_slope       = dheat_X_wm;
 dheat_X_wm_down_slope(not_down_slope) = 0;
 tconvec(tcon_i,:)   = dheat_X_wm_down_slope; tcon_i = tcon_i+1; % down_slope_2back_>_1back3
-tconvec(tcon_i,:)   = -dheat_X_wm_down_slope; tcon_i = tcon_i+1; % down_slope_2back_<_1back3                                        
+tconvec(tcon_i,:)   = -dheat_X_wm_down_slope; tcon_i = tcon_i+1; % down_slope_2back_<_1back3 
+
+tconvec(tcon_i,:) = [dheat.*[m m w w m w] .* [tbob obtb tbob obtb zeros(1,120)]]; tcon_i = tcon_i +1; % dheat_X_heat_X_wm
+tconvec(tcon_i,:) = -[dheat.*[m m w w m w] .* [tbob obtb tbob obtb zeros(1,120)]]; tcon_i = tcon_i +1; % dheat_X_heat_X_wm
+
+
+% Now shift vector
+tconvec1 = circshift(tconvec,1,2);
+tconvec2 = circshift(tconvec,2,2);
+tconvec3 = circshift(tconvec,3,2);
+tconvec = vertcat(tconvec, tconvec1, tconvec2,tconvec3);
+
+
+
+
 
 % SPM code
 matlabbatch = [];
 mbi = 1;
 
 % Do F-Contrasts
-% fcon_names                          = [eoi_names, baseline_difference_names];
-% matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
-% matlabbatch{mbi}.spm.stats.con.delete = 1; % we want a clean slate
-% for i = 1:6
-%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.name       = fcon_names{i};
-%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.convec     = fconvec(i,:);
-%     matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.sessrep    = "none";
-% end
-% mbi = mbi +1;
+fcon_names                          = [eoi_names];
+matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
+matlabbatch{mbi}.spm.stats.con.delete = 1; % we want a clean slate
+for i = 1:numel(fcon_names)
+    matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.name       = fcon_names{i};
+    matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.convec     = fconmat(:,:,i);
+    matlabbatch{mbi}.spm.stats.con.consess{i}.fcon.sessrep    = "none";
+end
+mbi = mbi +1;
 
-% % Do F-Contrasts V2
+% % % Do F-Contrasts V2
 % load(fullfile(out_dir, 'SPM.mat'), 'SPM');
 % matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
 % for i = 1:size(eoi_names,2)    
@@ -218,6 +234,13 @@ mbi = 1;
 
 % Do t-Contrasts
 tcon_names                          = [working_memory_names, heat_names, interaction_names];
+
+% Make shift names and append to tcon
+shift1_names = suffix(tcon_names, '_shift1');
+shift2_names = suffix(tcon_names, '_shift2');
+shift3_names = suffix(tcon_names, '_shift3');
+tcon_names = [tcon_names, shift1_names, shift2_names, shift1_names]
+
 matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
 matlabbatch{mbi}.spm.stats.con.delete = 1; % already cleaned during fcon defitnion
 for i = 1:size(tcon_names,2)
@@ -295,4 +318,11 @@ v2 = v+abs(min(v));
 function v2 = shiftdown(v)
 % receives vector and shifts it below x axis that max(v) --> 0
 v2 = v-abs(max(v)); 
+
+function out = suffix(in, fix)
+out = in
+for i = 1:numel(in)
+    out{i} = strcat(in{i}, fix);
+end
+
 
