@@ -118,6 +118,7 @@ interaction_names   = {'m21','m12','w21','w12',...
                     'heat_X_working_memory2', 'heat_X_working_memory2_flipped',...
                     'heat_X_working_memory3', 'heat_X_working_memory3_flipped',...
                     'heat_X_working_memory4', 'heat_X_working_memory4_flipped',...
+                    'heat_X_working_memory5', 'heat_X_working_memory5_flipped',...
                     'bill','bob',...
                     'down_slope_2back_>_1back', 'down_slope_2back_<_1back',...
                     'down_slope_2back_>_1back2', 'down_slope_2back_<_1back2',... % contrasts shifted completely
@@ -172,6 +173,12 @@ tconvec(tcon_i,:)   = [[shiftup(m), shiftdown(m), shiftdown(w), shiftup(w), zero
 tconvec(tcon_i,:)   = -[[shiftup(m), shiftdown(m), shiftdown(w), shiftup(w), zeros(1,120)] .*...
                         [tbtb tbtb tbtb tbtb zeros(1,120)]]; tcon_i = tcon_i + 1; % heat_X_working_memory4 flipped designed to look like what we want to see                    
                     
+tconvec(tcon_i,:)   = [[shiftdown(m), shiftup(m), shiftup(w), shiftdown(w), zeros(1,120)] .*...
+                        [tbtb tbtb tbtb tbtb zeros(1,120)]]; tcon_i = tcon_i + 1; % heat_X_working_memory5 
+
+tconvec(tcon_i,:)   = -[[shiftdown(m), shiftup(m), shiftup(w), shiftdown(w), zeros(1,120)] .*...
+                        [tbtb tbtb tbtb tbtb zeros(1,120)]]; tcon_i = tcon_i + 1; % heat_X_working_memory5_flipped
+                    
 tconvec(tcon_i,:)   = [tbtb obob obob tbtb zeros(1,120)]; tcon_i = tcon_i + 1; % bill 
 tconvec(tcon_i,:)   = -[tbtb obob obob tbtb zeros(1,120)]; tcon_i = tcon_i + 1; % bob just honest working class boxcars 
 
@@ -208,6 +215,7 @@ tconvec(tcon_i,:)   = -dheat_X_wm_down_slope; tcon_i = tcon_i+1; % down_slope_2b
 tconvec(tcon_i,:) = [dheat.*[m m w w m w] .* [tbob obtb tbob obtb zeros(1,120)]]; tcon_i = tcon_i +1; % dheat_X_heat_X_wm
 tconvec(tcon_i,:) = -[dheat.*[m m w w m w] .* [tbob obtb tbob obtb zeros(1,120)]]; tcon_i = tcon_i +1; % dheat_X_heat_X_wm
 
+tcon_names                          = [working_memory_names, heat_names, interaction_names];
 
 % Now shift vector
 tconvec1 = circshift(tconvec,1,2);
@@ -249,7 +257,6 @@ mbi = mbi +1;
 
 
 % Do t-Contrasts
-tcon_names                          = [working_memory_names, heat_names, interaction_names];
 
 % Make shift names and append to tcon
 shift1_names = suffix(tcon_names, '_shift1');

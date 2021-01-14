@@ -15,19 +15,19 @@ n = numel(y);
 
 % only want 2 optional inputs at most
 numvarargs = length(varargin);
-if numvarargs > 2
+if numvarargs > 3
     error('waveplot2 requires at most 2 optional inputs');
 end
 
 % set defaults for optional inputs
-optargs = {zeros(n,1) n};
+optargs = {zeros(n,1) n, 0};
 
 % now put these defaults into the valuesToUse cell array, 
 % and overwrite the ones specified in varargin.
 optargs(1:numvarargs) = varargin;
 
 % Place optional args in memorable variable names
-[sem, n_wave] = optargs{:};
+[sem, n_wave, lag] = optargs{:};
 
 index_test = 0;
 
@@ -44,7 +44,9 @@ colors = [0 0 0;... % no task
 
 f                       = n_wave / 110; % sampling frequency of y
 x_seconds               = linspace(0,110+((n-n_wave) / f),n); % seconds
+x_seconds = x_seconds + lag;
 x_samples               = x_seconds * f; 
+
 
 ind             = table;
 ind.pre_task    = x_samples < ticks_samples(2);
