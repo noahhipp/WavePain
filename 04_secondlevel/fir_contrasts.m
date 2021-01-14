@@ -117,6 +117,8 @@ interaction_names   = {'m21','m12','w21','w12',...
                     'heat_X_working_memory','heat_X_working_memory_flipped',...
                     'heat_X_working_memory2', 'heat_X_working_memory2_flipped',...
                     'heat_X_working_memory3', 'heat_X_working_memory3_flipped',...
+                    'heat_X_working_memory4', 'heat_X_working_memory4_flipped',...
+                    'bill','bob',...
                     'down_slope_2back_>_1back', 'down_slope_2back_<_1back',...
                     'down_slope_2back_>_1back2', 'down_slope_2back_<_1back2',... % contrasts shifted completely
                     'dheat_X_working_memory', 'dheat_X_working_memory_flipped',...
@@ -161,6 +163,18 @@ tconvec(tcon_i,:)   =  -[m21(1:11), -shiftup(m21(12:28)), shiftdown(m21(29:45)),
                         w21(1:11), shiftup(w21(12:28)), -shiftdown(w21(29:45)), w21(46:end),...
                         w12(1:11), shiftdown(w12(12:28)), -shiftup(w12(29:45)), w12(46:end),...
                         zeros(1,120)]; tcon_i = tcon_i + 1; % heat_X_working_memory3_flipped % placebo slopes shifted below x axes, nocebo slopes shifted above                                        
+
+tbtb                = [tbob(1:28) obtb(29:end)];
+obob                = -[tbob(1:28) obtb(29:end)];
+tconvec(tcon_i,:)   = [[shiftup(m), shiftdown(m), shiftdown(w), shiftup(w), zeros(1,120)] .*...
+                        [tbtb tbtb tbtb tbtb zeros(1,120)]]; tcon_i = tcon_i + 1; % heat_X_working_memory4 designed to look like what we want to see
+
+tconvec(tcon_i,:)   = -[[shiftup(m), shiftdown(m), shiftdown(w), shiftup(w), zeros(1,120)] .*...
+                        [tbtb tbtb tbtb tbtb zeros(1,120)]]; tcon_i = tcon_i + 1; % heat_X_working_memory4 flipped designed to look like what we want to see                    
+                    
+tconvec(tcon_i,:)   = [tbtb obob obob tbtb zeros(1,120)]; tcon_i = tcon_i + 1; % bill 
+tconvec(tcon_i,:)   = -[tbtb obob obob tbtb zeros(1,120)]; tcon_i = tcon_i + 1; % bob just honest working class boxcars 
+
                     
 tconvec(tcon_i,:)   =  [m21(1:28), zeros(1,32),... % show areas where 2back > 1back
                         m12(1:28), zeros(1,32),...
@@ -199,7 +213,9 @@ tconvec(tcon_i,:) = -[dheat.*[m m w w m w] .* [tbob obtb tbob obtb zeros(1,120)]
 tconvec1 = circshift(tconvec,1,2);
 tconvec2 = circshift(tconvec,2,2);
 tconvec3 = circshift(tconvec,3,2);
-tconvec = vertcat(tconvec, tconvec1, tconvec2,tconvec3);
+tconvec4 = circshift(tconvec,4,2);
+tconvec5 = circshift(tconvec,5,2);
+tconvec = vertcat(tconvec, tconvec1, tconvec2,tconvec3,tconvec4,tconvec5);
 
 
 
@@ -239,7 +255,9 @@ tcon_names                          = [working_memory_names, heat_names, interac
 shift1_names = suffix(tcon_names, '_shift1');
 shift2_names = suffix(tcon_names, '_shift2');
 shift3_names = suffix(tcon_names, '_shift3');
-tcon_names = [tcon_names, shift1_names, shift2_names, shift3_names];
+shift4_names = suffix(tcon_names, '_shift4');
+shift5_names = suffix(tcon_names, '_shift5');
+tcon_names = [tcon_names, shift1_names, shift2_names, shift3_names,shift4_names,shift5_names];
 
 matlabbatch{mbi}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
 matlabbatch{mbi}.spm.stats.con.delete = 0; % already cleaned during fcon defitnion
