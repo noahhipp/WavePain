@@ -187,8 +187,8 @@ tconvec(tcon_i,:)   = -[m m w w m w] .* [obob tbtb tbtb obob zeros(1,120)]; tcon
 tconvec(tcon_i,:)   = [tbtb obob obob tbtb zeros(1,120)]; tcon_i = tcon_i + 1; % bill 
 tconvec(tcon_i,:)   = -[tbtb obob obob tbtb zeros(1,120)]; tcon_i = tcon_i + 1; % bob just honest working class boxcars 
 
-tconvec(tcon_i,:)   = [obtb obtb tbob tbob obtb tbob]; % slope
-tconvec(tcon_i,:)   = -[obtb obtb tbob tbob obtb tbob]; % slope_flipped
+tconvec(tcon_i,:)   = [obtb obtb tbob tbob obtb tbob]; tcon_i = tcon_i + 1; % slope
+tconvec(tcon_i,:)   = -[obtb obtb tbob tbob obtb tbob]; tcon_i = tcon_i + 1;% slope_flipped
                     
 tconvec(tcon_i,:)   =  [m21(1:28), zeros(1,32),... % show areas where 2back > 1back
                         m12(1:28), zeros(1,32),...
