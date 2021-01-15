@@ -120,6 +120,9 @@ interaction_names   = {'m21','m12','w21','w12',...
                     'heat_X_working_memory4', 'heat_X_working_memory4_flipped',...
                     'heat_X_working_memory5', 'heat_X_working_memory5_flipped',...
                     'heat_X_working_memory_X_slope', 'heat_X_working_X_slope_flipped',...
+                    'heat_X_working_memory_X_slope_centered', 'heat_X_working_X_slope__centered_flipped',...
+                    'heat_X_wm_sl_c_placebos', 'heat_X_wm_sl_c_nocebos',...
+                    'heat_X_wm_sl_c_placebos_flipped', 'heat_X_wm_sl_c_nocebos_flipped',...
                     'bill','bob',...
                     'slope','slope_flipped',...
                     'down_slope_2back_>_1back', 'down_slope_2back_<_1back',...
@@ -181,8 +184,19 @@ tconvec(tcon_i,:)   = [[shiftdown(m), shiftup(m), shiftup(w), shiftdown(w), zero
 tconvec(tcon_i,:)   = -[[shiftdown(m), shiftup(m), shiftup(w), shiftdown(w), zeros(1,120)] .*...
                         [tbtb tbtb tbtb tbtb zeros(1,120)]]; tcon_i = tcon_i + 1; % heat_X_working_memory5_flipped
                    
-tconvec(tcon_i,:)   = [m m w w m w] .* [obob tbtb tbtb obob zeros(1,120)]; tcon_i = tcon_i+1; % heat_X_working_memory_X_slope
-tconvec(tcon_i,:)   = -[m m w w m w] .* [obob tbtb tbtb obob zeros(1,120)]; tcon_i = tcon_i+1; % heat_X_working_memory_X_slope_flipped
+heat_X_wm_X_slope   = [m m w w m w] .* [obob tbtb tbtb obob zeros(1,120)]; % just to compare it to centered
+tconvec(tcon_i,:)   = heat_X_wm_X_slope; tcon_i = tcon_i + 1; % heat_X_working_memory_X_slope
+tconvec(tcon_i,:)   = -heat_X_wm_X_slope; tcon_i = tcon_i + 1; % heat_X_working_memory_X_slope_flipped
+
+heat_X_wm_X_slope_centered = center_tasks(heat_X_wm_X_slope); % heat_X_working_memory_X_slope_centered
+tconvec(tcon_i,:)   = heat_X_wm_X_slope_centered; tcon_i = tcon_i + 1; % heat_X_working_memory_X_slope_centered
+tconvec(tcon_i,:)   = -heat_X_wm_X_slope_centered; tcon_i = tcon_i + 1; % heat_X_working_memory_X_slope_centered_flipped
+
+tconvec(tcon_i,:)   = take_conds(heat_X_wm_X_slope_centered, [2,3]); tcon_i = tcon_i + 1;  % heat_X_wm_sl_c_placebos
+tconvec(tcon_i,:)   = take_conds(heat_X_wm_X_slope_centered, [1,4]); tcon_i = tcon_i + 1;  % heat_X_wm_sl_c_nocebos
+
+tconvec(tcon_i,:)   = -take_conds(heat_X_wm_X_slope_centered, [2,3]); tcon_i = tcon_i + 1;  % heat_X_wm_sl_c_placebos_flipped
+tconvec(tcon_i,:)   = -take_conds(heat_X_wm_X_slope_centered, [1,4]); tcon_i = tcon_i + 1;  % heat_X_wm_sl_c_nocebos_flipped
                     
 tconvec(tcon_i,:)   = [tbtb obob obob tbtb zeros(1,120)]; tcon_i = tcon_i + 1; % bill 
 tconvec(tcon_i,:)   = -[tbtb obob obob tbtb zeros(1,120)]; tcon_i = tcon_i + 1; % bob just honest working class boxcars 
@@ -357,4 +371,23 @@ for i = 1:numel(in)
     out{i} = strcat(in{i}, fix);
 end
 
+function out = center_tasks(in)
 
+for i = 12:60:312
+    to_shift = in(i:i+33);
+    in(i:i+33) = to_shift - mean(to_shift);
+end
+out = in;
+
+function out = take_conds(in, conds)
+% take only desired conds out of tcon, not wanted will become zero
+starts = 1:60:301;
+to_take = false(1,360);
+for i = 1:numel(conds)
+    start = starts(conds(i));
+    stop = start+60;
+    to_take(start:stop) = true;
+end
+% Use to take to index into in
+in(~to_take) = 0;
+out = in;
