@@ -84,7 +84,7 @@ usds = parametric_contrasts.usds;
 
 heat    = [m m w w m w];
 wm      = [tbob obtb tbob obtb, zeros(1,120)]; % 2back->1, 1back->-1, noback->1
-slope   = [dsus dsus usds usds]; % down slope->-1, up slope->1 
+slope   = [dsus dsus usds usds, dsus, usds]; % down slope->-1, up slope->1 
 
 cov_names = {'heat', 'wm', 'slope',...
                     'heat_X_wm', 'heat_X_slope','wm_X_slope',...
