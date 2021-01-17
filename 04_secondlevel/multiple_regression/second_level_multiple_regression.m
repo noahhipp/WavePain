@@ -90,12 +90,14 @@ cov_names = {'heat', 'wm', 'slope',...
                     'heat_X_wm', 'heat_X_slope','wm_X_slope',...
                     'heat_X_wm_slope'}; % regressor
                 
-A = vertcat(heat,wm,slope)'; % 360*3
-B = [1 0 0 1 1 0 1;...
-     0 1 0 1 0 1 1;...
-     0 0 1 0 1 1 1]; % 3*7;
-
-covs = A*B; % 360*7: our final regressors are all possible nonzero linear combinations of the base regressors 
+covs = []; covi = 1;
+covs(covi,:) = heat; covi=covi+1;
+covs(covi,:) = wm; covi=covi+1;
+covs(covi,:) = slope; covi=covi+1;
+covs(covi,:) = heat.*wm; covi=covi+1;
+covs(covi,:) = heat.*slope; covi=covi+1;
+covs(covi,:) = wm.*slope; covi=covi+1;
+covs(covi,:) = heat.*wm.*slope;                 
 
 % plot each con before we repmat them
 if do_plot
@@ -105,7 +107,7 @@ if do_plot
     end
 end
 
-covs = repmat(covs, numel(all_subs), 1);
+covs = repmat(covs', numel(all_subs), 1);
 
 
 
