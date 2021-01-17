@@ -21,7 +21,7 @@ save_dir = fullfile(base_dir, save_at);
 figure('Color', 'white', 'Position', [0 0 1920 1080]);
 
 % Loop through figures start
-for i = 1:numel(tcon_names)
+for i = 27:34%numel(tcon_names)
     % Plot contrast
     wave_tconplot(tcons(i,:), tcon_names{i}, ylims);
     
