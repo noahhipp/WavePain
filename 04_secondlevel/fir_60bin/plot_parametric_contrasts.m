@@ -35,6 +35,10 @@ dsdw     = interp1(x,dw,xq);
 obtb = [zeros(1,11) -ones(1,17) ones(1,17), zeros(1,15)];
 tbob = -obtb;
 
+% Slope regressors
+usds = [zeros(1,3), -ones(1,8), ones(1,17), -ones(1,17), ones(1,8), zeros(1,7)];
+dsus = -usds;
+
 % Interactions
 m21 = dsm .* tbob;
 m12 = dsm .* obtb;
@@ -51,6 +55,9 @@ parametric_contrasts.dw = dsdw;
 
 parametric_contrasts.obtb = obtb;
 parametric_contrasts.tbob = tbob;
+
+parametric_contrasts.dsus = dsus;
+parametric_contrasts.usds = usds;
 
 parametric_contrasts.m21 = m21;
 parametric_contrasts.m12 = m12;
