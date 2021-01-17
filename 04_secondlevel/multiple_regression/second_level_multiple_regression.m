@@ -21,7 +21,7 @@ end
 
 
 all_subs = [5:12 14:53];
-do_debug = 1;
+do_debug = 0;
 do_model = 1;
 
 skern = 6;
@@ -29,7 +29,7 @@ anadirname = 'mreg';
 addon = 'anova';
 old_ananame = 'fir'; % we need this to import files
 file_filter = 's6w_t1con';
-n_cons = nan(1,numel(subs));
+n_cons = nan(1,numel(all_subs));
 
 out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_' num2str(skern)];
 
@@ -37,6 +37,7 @@ out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_' 
 % Get con images from first level
 for i = 1:numel(all_subs)
     sname = sprintf('sub%03d', all_subs(i));
+    fprintf('doing %s...\n', sname);
     sdir = fullfile(base_dir, sname, old_ananame);
     sfiles = cellstr(spm_select('FPList',sdir,file_filter)); % use FPList for full path    
     
