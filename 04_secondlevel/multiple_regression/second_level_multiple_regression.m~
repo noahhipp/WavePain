@@ -40,19 +40,18 @@ for i = 1:numel(all_subs)
     disp(sfiles); 
     
     % Debug
-    if do_debug
-        prompt = 'Do you want more? y/n [y]: ';
-        str = input(prompt,'s');
-        if isempty(str)
-            str = 'y';
-        end
-
-        if strcmp(str, 'n')
-            fprintf('aborting\n\n');
-            return
-        elseif strcmp(str, 'y')
-            fprintf('proceeding to next sub...\n\n');
-        end   
+    
+    prompt = 'Do you want more? y/n [y]: ';
+    str = input(prompt,'s');
+    if isempty(str)
+        str = 'y';
     end
+    
+    if strcmp(str, 'n')
+        fprintf('aborting\n\n');
+        return
+    elseif strcmp(str, 'y')
+        fprintf('proceeding to next sub...\n\n');
+    end    
 end
 
