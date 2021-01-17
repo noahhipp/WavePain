@@ -21,6 +21,7 @@ end
 
 
 all_subs = [5:12 14:53];
+do_debug = 1;
 do_model = 1;
 
 skern = 6;
@@ -28,6 +29,7 @@ anadirname = 'mreg';
 addon = 'anova';
 old_ananame = 'fir'; % we need this to import files
 file_filter = 's6w_t1con';
+n_cons = nan(1,numel(subs));
 
 out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_' num2str(skern)];
 
@@ -36,11 +38,11 @@ out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_' 
 for i = 1:numel(all_subs)
     sname = sprintf('sub%03d', all_subs(i));
     sdir = fullfile(base_dir, sname, old_ananame);
-    [sfiles] = cellstr(spm_select('FPList',sdir,file_filter)); % use FPList for full path
-    disp(sfiles); 
+    sfiles = cellstr(spm_select('FPList',sdir,file_filter)); % use FPList for full path    
     
     % Debug
     if do_debug
+        disp(sfiles); 
         prompt = 'Do you want more? y/n [y]: ';
         str = input(prompt,'s');
         if isempty(str)
@@ -52,7 +54,14 @@ for i = 1:numel(all_subs)
             return
         elseif strcmp(str, 'y')
             fprintf('proceeding to next sub...\n\n');
-        end   
+        end                  
     end
+    n_cons(1,i) = numel(sfiles); % to plot files per subject later 
 end
 
+% Check if all have 360 cons
+figure();
+bar(all_subs, n_cons);
+title('CONS PER SUBJECT', 'FontWeight', 'bold', 'FontSize', 24);
+ylabel('Number of cons'); xlabel('Subject');
+ylim([0 400]); grid on;
