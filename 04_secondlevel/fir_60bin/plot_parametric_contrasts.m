@@ -13,12 +13,12 @@ end
 [m, w]      = waveit2(55000);
 [dm, dw]    = waveit_derivatives(55000);
 
+m_unit = [m, zeros(1,5000)];
+w_unit = [w, zeros(1,5000)];
+
 pm = [m, zeros(1,5000)]; % for plotting later
 m       = zscore([m, zeros(1,5000)]); % append zeros and zscore
 w       = zscore([w, zeros(1,5000)]);
-
-m_unit = [m, zeros(1,5000)];
-w_unit = [m, zeros(1,5000)];
 
 dm       = zscore([dm, zeros(1,5000)]);
 dw       = zscore([dw, zeros(1,5000)]);
