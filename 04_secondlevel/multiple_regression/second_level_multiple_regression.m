@@ -33,6 +33,9 @@ file_filter = 's6w_t1con';
 n_cons = nan(1,numel(all_subs));
 
 out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_' num2str(skern)];
+if ~exist(out_dir, 'dir')
+    mkdir(out_dir);
+end
 
 
 % Prepare images
@@ -99,15 +102,44 @@ covs(covi,:) = heat.*slope; covi=covi+1;
 covs(covi,:) = wm.*slope; covi=covi+1;
 covs(covi,:) = heat.*wm.*slope;                 
 
-% plot each con before we repmat them
+% plot each regressor *to be* before we repmat them
 if do_plot
     for i = 1:numel(cov_names)
         figure;
         wave_tconplot(covs(:,i), cov_names{i});
     end
 end
+covs = repmat(covs', numel(all_subs), 1); % repmat 
 
-covs = repmat(covs', numel(all_subs), 1);
 
+% Assemble model
+matlabbatch = [];
+matlabbatch{1}.spm.stats.factorial_design.dir = {out_dir};
+matlabbatch{1}.spm.stats.factorial_design.des.mreg.scans = con_images;
+
+for i = 1:numel(cov_names)
+    matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).c = covs(:,i);
+    matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).cname = cov_names{i};
+    matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).iCC = 1;    
+end
+
+if do_model
+    matlabbatch{1}.spm.stats.factorial_design.des.mreg.incint = 0;
+    matlabbatch{1}.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
+    matlabbatch{1}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
+    matlabbatch{1}.spm.stats.factorial_design.masking.tm.tm_none = 1;
+    matlabbatch{1}.spm.stats.factorial_design.masking.im = 1;
+    matlabbatch{1}.spm.stats.factorial_design.masking.em = {[base_dir 'AND_mask.nii']};
+    matlabbatch{1}.spm.stats.factorial_design.globalc.g_omit = 1;
+    matlabbatch{1}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
+    matlabbatch{1}.spm.stats.factorial_design.globalm.glonorm = 1;
+
+    % Estimate model
+    matlabbatch{2}.spm.stats.fmri_est.spmmat = {fullfile(out_dir, 'SPM.mat')};
+    matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
+
+    run_matlab(1, matlabbatch, 0);
+    copyfile(which(mfilename),out_dir);
+end
 
 
