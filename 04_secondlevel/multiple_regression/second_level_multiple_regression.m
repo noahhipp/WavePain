@@ -26,6 +26,7 @@ cd('/home/hipp/projects/WavePain/code/matlab/fmri/04_secondlevel/multiple_regres
 
 
 all_subs = [5:12 14:53];
+shift    = 2; % shift contrats
 do_debug = 0;
 do_plot  = 0; % there are a few sanity plots throughout the script
 do_model = 1;
@@ -37,7 +38,9 @@ old_ananame = 'fir'; % we need this to import files
 file_filter = 's6w_t1con';
 n_cons = nan(1,numel(all_subs));
 
-out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_' num2str(skern)];
+
+out_dir             = [base_dir 'second_Level' filesep anadirname '_' addon '_'...
+                       num2str(skern) '_shift' num2str(shift)];
 if ~exist(out_dir, 'dir')
     mkdir(out_dir);
 end
@@ -106,6 +109,10 @@ covs(covi,:) = heat.*wm; covi=covi+1;
 covs(covi,:) = heat.*slope; covi=covi+1;
 covs(covi,:) = wm.*slope; covi=covi+1;
 covs(covi,:) = heat.*wm.*slope;                 
+
+% Take care of shift
+covs = circshift(covs, shift, 2);
+cov_names = strcat(cov_names, sprintf('_shift%d', shift));
 
 % plot each regressor *to be* before we repmat them
 if do_plot
