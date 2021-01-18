@@ -26,9 +26,9 @@ cd('/home/hipp/projects/WavePain/code/matlab/fmri/04_secondlevel/multiple_regres
 
 
 all_subs = [5:12 14:53];
-shift    = 2; % shift contrats
+shift    = 1; % shift contrats
 do_debug = 0;
-do_plot  = 0; % there are a few sanity plots throughout the script
+do_plot  = 1; % there are a few sanity plots throughout the script
 do_model = 1;
 
 skern = 6;
