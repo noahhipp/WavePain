@@ -19,10 +19,15 @@ switch hostname
         error('Only hosts revelations or noahs isn laptop accepted');
 end
 
+% Always run analysis from log directory
+fallback = pwd;
+cd('/home/hipp/projects/WavePain/code/matlab/fmri/04_secondlevel/multiple_regression/logs');
+
+
 
 all_subs = [5:12 14:53];
 do_debug = 0;
-do_plot  = 1; % there are a few sanity plots throughout the script
+do_plot  = 0; % there are a few sanity plots throughout the script
 do_model = 1;
 
 skern = 6;
@@ -113,17 +118,17 @@ covs = repmat(covs', numel(all_subs), 1); % repmat
 
 
 % Assemble model
-matlabbatch = [];
-matlabbatch{1}.spm.stats.factorial_design.dir = {out_dir};
-matlabbatch{1}.spm.stats.factorial_design.des.mreg.scans = con_images;
-
-for i = 1:numel(cov_names)
-    matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).c = covs(:,i);
-    matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).cname = cov_names{i};
-    matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).iCC = 1;    
-end
-
 if do_model
+    matlabbatch = [];
+    matlabbatch{1}.spm.stats.factorial_design.dir = {out_dir};
+    matlabbatch{1}.spm.stats.factorial_design.des.mreg.scans = con_images;
+
+    for i = 1:numel(cov_names)
+        matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).c = covs(:,i);
+        matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).cname = cov_names{i};
+        matlabbatch{1}.spm.stats.factorial_design.des.mreg.mcov(i).iCC = 1;    
+    end
+
     matlabbatch{1}.spm.stats.factorial_design.des.mreg.incint = 0;
     matlabbatch{1}.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
     matlabbatch{1}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
@@ -140,6 +145,53 @@ if do_model
 
     run_matlab(1, matlabbatch, 0);
     copyfile(which(mfilename),out_dir);
+end
+
+% go back to where we came from
+cd(fallback);
+
+
+%-------------------------FUCNTION: run_matlab-----------------------------
+function run_matlab(np, matlabbatch, check)
+% works both for windows and linux now thanks to noah hipp
+
+spm_path          = fileparts(which('spm')); %get spm path
+mat_name          = which(mfilename);
+[~,mat_name,~]    = fileparts(mat_name);
+
+
+fname = [mat_name '_'  num2str(np) '.mat'];
+
+save(fname,'matlabbatch');
+lo_cmd  = ['clear matlabbatch;load(''' fname ''');'];
+ex_cmd  = ['addpath(''' spm_path ''');spm(''defaults'',''FMRI'');spm_jobman(''initcfg'');spm_jobman(''run'',matlabbatch);'];
+end_cmd = ['delete(''' fname ''');'];
+
+% Because matlab from bash can only execute one statement upon startup we
+% have to detour via a function
+if isunix    
+    str                 = strcat(lo_cmd, ex_cmd, end_cmd, 'exit');
+    [~, name_stem]      = fileparts(fname); 
+    function_name       = strcat(name_stem, '.m');  
+    log_name            = strcat(name_stem, '.log');
+    fh                  = fopen(function_name, 'w');
+                      fprintf(fh, 'function %s\n', name_stem); % write header                        
+    nbytes              = fprintf(fh, '%s', str); % write commands
+    if ~nbytes
+        warning('Nothing written to %s', function_name)
+    else
+        fprintf('\n%d bytes written to %s \n', function_name);
+    end
+    fclose(fh);
+    cmd = sprintf('matlab -nodesktop -nosplash  -logfile %s -r "%s" &', log_name, name_stem); 
+end
+
+if ispc
+    cmd = ['start matlab.exe -nodesktop -nosplash  -logfile ' num2str(np) '_' mat_name '.log -r "' lo_cmd ex_cmd ';exit"'];
+end
+
+if ~check    
+    system(cmd);
 end
 
 
