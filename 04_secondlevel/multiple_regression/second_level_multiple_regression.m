@@ -106,7 +106,7 @@ covs(covi,:) = heat.*wm.*slope;
 if do_plot
     for i = 1:numel(cov_names)
         figure;
-        wave_tconplot(covs(:,i), cov_names{i});
+        wave_tconplot(covs(i,:), cov_names{i});
     end
 end
 covs = repmat(covs', numel(all_subs), 1); % repmat 
