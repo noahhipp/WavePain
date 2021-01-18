@@ -17,6 +17,9 @@ pm = [m, zeros(1,5000)]; % for plotting later
 m       = zscore([m, zeros(1,5000)]); % append zeros and zscore
 w       = zscore([w, zeros(1,5000)]);
 
+m_unit = [m, zeros(1,5000)];
+w_unit = [m, zeros(1,5000)];
+
 dm       = zscore([dm, zeros(1,5000)]);
 dw       = zscore([dw, zeros(1,5000)]);
 
@@ -27,6 +30,9 @@ xq      = linspace(1,119, 60);
 % Sample down
 dsm     = interp1(x,m,xq);
 dsw     = interp1(x,w,xq);
+
+m_unit     = interp1(x,m_unit,xq);
+w_unit     = interp1(x,w_unit,xq);
 
 dsdm     = interp1(x,dm,xq);
 dsdw     = interp1(x,dw,xq);
@@ -49,6 +55,9 @@ w12 = dsw .* obtb;
 parametric_contrasts    = struct;
 parametric_contrasts.m  = dsm;
 parametric_contrasts.w  = dsw;
+
+parametric_contrasts.m_unit = m_unit;
+parametric_contrasts.w_unit = w_unit;
 
 parametric_contrasts.dm = dsdm;
 parametric_contrasts.dw = dsdw;

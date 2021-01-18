@@ -86,8 +86,8 @@ end
 
 % Prepare parametric regressors
 parametric_contrasts = plot_parametric_contrasts(0); % arithmetic for parametric contrasts is done here
-m = parametric_contrasts.m;
-w = parametric_contrasts.w;
+m = parametric_contrasts.m_unit;
+w = parametric_contrasts.w_unit;
 obtb = parametric_contrasts.obtb; 
 tbob = parametric_contrasts.tbob; 
 dsus = parametric_contrasts.dsus;
