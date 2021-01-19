@@ -1,11 +1,6 @@
 function second_level_multiple_regression
 
-% My scans have to look like this
-% {'/projects/crunchie/hipp/wavepain/sub053/fir/s6w_t1con_0347.nii'}
-%     {'/projects/crunchie/hipp/wavepain/sub053/fir/s6w_t1con_0348.nii'}
-%     {'/projects/crunchie/hipp/wavepain/sub053/fir/s6w_t1con_0349.nii'}
-%     {'/projects/crunchie/hipp/wavepain/sub053/fir/s6w_t1con_0350.nii'}
-%     {'/projects/crunchie/hipp/wavepain/sub053/fir/s6w_t1con_0351.nii'}
+% Takes about 30min
 
 hostname =  char(getHostName(java.net.InetAddress.getLocalHost));
 switch hostname
@@ -26,7 +21,7 @@ cd('/home/hipp/projects/WavePain/code/matlab/fmri/04_secondlevel/multiple_regres
 
 
 all_subs = [5:12 14:53];
-shift    = 1; % shift contrats
+shift    = 4; % shift contrats
 do_debug = 0;
 do_plot  = 0; % there are a few sanity plots throughout the script
 do_model = 1;
@@ -150,7 +145,7 @@ if do_model
     matlabbatch{2}.spm.stats.fmri_est.spmmat = {fullfile(out_dir, 'SPM.mat')};
     matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
 
-    run_matlab(1, matlabbatch, 0);
+    run_matlab(4, matlabbatch, 0);
     copyfile(which(mfilename),out_dir);
 end
 

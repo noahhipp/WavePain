@@ -1,0 +1,2 @@
+function second_level_multiple_regression_4
+clear matlabbatch;load('second_level_multiple_regression_4.mat');addpath('/common/apps/spm12-7771');spm('defaults','FMRI');spm_jobman('initcfg');spm_jobman('run',matlabbatch);delete('second_level_multiple_regression_4.mat');exit
