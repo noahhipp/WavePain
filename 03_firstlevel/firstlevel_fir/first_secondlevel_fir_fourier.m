@@ -92,7 +92,7 @@ i_sub = 0;
 for np = 1:size(subs,2)
     matlabbatch = [];
     mbi   = 0;
-    
+   
     for g = 1:size(subs{np},2)
         %-------------------------------
         %House keeping stuff
@@ -164,7 +164,7 @@ for np = 1:size(subs,2)
             RES = sub_res{l};
             for conds = 1:numel(conditions)
                 template.spm.stats.fmri_spec.sess(l).cond(conds).name     = RES{conds}.name;
-                template.spm.stats.fmri_spec.sess(l).cond(conds).onset    = (RES{conds}.onset ./ TR) - 1;
+                template.spm.stats.fmri_spec.sess(l).cond(conds).onset    = (RES{conds}.onset ./ TR) - 1; % this is extremely important and we shoud 
                 template.spm.stats.fmri_spec.sess(l).cond(conds).duration = 0;
             end            
             
