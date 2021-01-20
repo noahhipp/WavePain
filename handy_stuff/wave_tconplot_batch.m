@@ -5,7 +5,7 @@ function wave_tconplot_batch(tcons, tcon_names)
 
 
 do_save = 1;
-ylims = [-3.5, 3.5];
+ylims = [-2, 2];
 
 % Checks
 if size(tcons,1) ~= numel(tcon_names)
@@ -13,7 +13,7 @@ if size(tcons,1) ~= numel(tcon_names)
 end
 
 % Housekeeping
-save_at = '21_01_14_parametric_contrasts_cb3';
+save_at = '21_01_19_multipe_regression';
 base_dir = 'C:\Users\hipp\projects\WavePain\results';
 save_dir = fullfile(base_dir, save_at);
 
@@ -21,7 +21,7 @@ save_dir = fullfile(base_dir, save_at);
 figure('Color', 'white', 'Position', [0 0 1920 1080]);
 
 % Loop through figures start
-for i = 27:34%numel(tcon_names)
+for i = 1:numel(tcon_names)
     % Plot contrast
     wave_tconplot(tcons(i,:), tcon_names{i}, ylims);
     
