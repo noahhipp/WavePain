@@ -52,6 +52,7 @@ subs              = splitvect(all_subs, n_proc);
 
 for np = 1:size(subs,2) % core loop start
     matlabbatch = [];
+    mbi = 0;
     
     
     for i = 1:size(subs{np},2) % subject loop start
@@ -140,27 +141,95 @@ for np = 1:size(subs,2) % core loop start
         end
         
     end % subject loop end
+    
+    % hand over batch to core
+    if ~isempty(matlabbatch)
+        check = 0;
+        run_matlab(np, matlabbatch, check);
+    end
+    
 end % core loop end
 
+%==========================================================================
+% FUNCTION chuckCell = splitvect(v, n)
+%==========================================================================
+function chuckCell = splitvect(v, n)
+% Splits a vector into number of n chunks of  the same size (if possible).
+% In not possible the chunks are almost of equal size.
+%
+% based on http://code.activestate.com/recipes/425044/
+
+chuckCell = {};
+
+vectLength = numel(v);
 
 
+splitsize = 1/n*vectLength;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+for i = 1:n
+    %newVector(end + 1) =
+    idxs = [floor(round((i-1)*splitsize)):floor(round((i)*splitsize))-1]+1;
+    chuckCell{end + 1} = v(idxs);
+end
 
 %==========================================================================
-% FUNCTION varargout = spm_select_image(cmd, varargin)
+% FUNCTION out = ins_letter(pscan,letter)
 %==========================================================================
+function out = ins_letter(pscan,letter)
+for a=1:size(pscan,1)
+    [p , f, e] = fileparts(pscan(a,:));
+    out(a,:) = [p filesep letter f e];
+end
 
+%==========================================================================
+% FUNCTION out = chng_path(pscan,pa)
+%==========================================================================
+function out = chng_path(pscan,pa)
+for a=1:size(pscan,1)
+    [p , f, e] = fileparts(pscan(a,:));
+    out(a,:) = [pa filesep f e];
+end
+
+%==========================================================================
+% FUNCTION run_matlab(np, matlabbatch, check)
+%==========================================================================
+function run_matlab(np, matlabbatch, check)
+
+spm_path          = fileparts(which('spm')); %get spm path
+mat_name          = which(mfilename);
+[~,mat_name,~]    = fileparts(mat_name);
+
+
+fname = [mat_name '_'  num2str(np) '.mat'];
+
+save(fname,'matlabbatch');
+lo_cmd  = ['clear matlabbatch;load(''' fname ''');'];
+ex_cmd  = ['addpath(''' spm_path ''');spm(''defaults'',''FMRI'');spm_jobman(''initcfg'');spm_jobman(''run'',matlabbatch);'];
+end_cmd = ['delete(''' fname ''');'];
+
+% Because matlab from bash can only execute one statement upon startup we
+% have to detour via a function
+if isunix    
+    str                 = strcat(lo_cmd, ex_cmd, end_cmd, 'exit');
+    [~, name_stem]      = fileparts(fname); 
+    function_name       = strcat(name_stem, '.m');  
+    log_name            = strcat(name_stem, '.log');
+    fh                  = fopen(function_name, 'w');
+                      fprintf(fh, 'function %s\n', name_stem); % write header                        
+    nbytes              = fprintf(fh, '%s', str); % write commands
+    if ~nbytes
+        warning('Nothing written to %s', function_name)
+    else
+        fprintf('\n%d bytes written to %s \n', function_name);
+    end
+    fclose(fh);
+    cmd = sprintf('matlab -nodesktop -nosplash  -logfile %s -r "%s" &', log_name, name_stem); 
+end
+
+if ispc
+    cmd = ['start matlab.exe -nodesktop -nosplash  -logfile ' num2str(np) '_' mat_name '.log -r "' lo_cmd ex_cmd ';exit"'];
+end
+
+if ~check    
+    system(cmd);
+end
