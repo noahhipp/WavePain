@@ -94,7 +94,7 @@ slope   = [dsus dsus usds usds, dsus, usds]; % down slope->-1, up slope->1
 
 cov_names = {'heat', 'wm', 'slope',...
                     'heat_X_wm', 'heat_X_slope','wm_X_slope',...
-                    'heat_X_wm_slope'}; % regressor
+                    'heat_X_wm_X_slope'}; % regressor
                 
 covs = []; covi = 1;
 covs(covi,:) = heat; covi=covi+1;

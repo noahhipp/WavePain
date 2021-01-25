@@ -17,6 +17,7 @@ end
 all_subs = [5:12 14:53];
 
 % Settings
+do_model            = 0;
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
@@ -35,9 +36,9 @@ realign_str         =  '^rp_afMR.*\.txt';
 srfunc_file         = '^srafMRI.nii';
 conditions          = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
 pmod_names          = {'heat', 'wm', 'slope',...
-                    'heat_X_wm', 'heat_X_slope','wm_X_slope',...
-                    'heat_X_wm_X_slope'}; % regressor
-  mat_name          = which(mfilename);
+    'heat_X_wm', 'heat_X_slope','wm_X_slope',...
+    'heat_X_wm_X_slope'}; % regressor
+mat_name          = which(mfilename);
 
 n_sess            = size(epi_folders,2);
 n_cond            = size(conditions,2);
@@ -75,59 +76,69 @@ for np = 1:size(subs,2) % core loop start
         template.spm.stats.fmri_spec.timing.fmri_t0 = 8;
         template.spm.stats.fmri_spec.fact           = struct('name', {}, 'levels', {});
         
+        template.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];        
         template.spm.stats.fmri_spec.volt             = 1;
         template.spm.stats.fmri_spec.mthresh          = -Inf;
         template.spm.stats.fmri_spec.global           = 'None';
         template.spm.stats.fmri_spec.mask             = cellstr([st_dir 's3skull_strip.nii']);
         template.spm.stats.fmri_spec.cvi              = 'None';
         
-        for j = 1:ness % session loop start                       
-            % <MUY IMPORTANTE por wavepain!!!!>
-            template.spm.stats.fmri_spec.sess(l).hpf = 360;
-            % </MUY IMPORTANTE por wavepain!!!!>
+        for j = 1:ness % session loop start
             
-            s_dir           = fullfile(base_dir, name, epi_folders{j});                       
+            s_dir           = fullfile(base_dir, name, epi_folders{j});
             epi_files       = spm_select('ExtFPList', s_dir, srfunc_file);
             fm              = spm_select('FPList', s_dir, realign_str);
-            movement        = normalize(load(fm));                        
-            all_nuis{j}     = movement;            
+            movement        = normalize(load(fm));
+            all_nuis{j}     = movement;
             n_nuis          = size(all_nuis{j},2);
             
+            template.spm.stats.fmri_spec.sess(j).hpf = 360;
             template.spm.stats.fmri_spec.sess(j).scans = cellstr(epi_files{j});
             template.spm.stats.fmri_spec.sess(j).multi = {''};
             template.spm.stats.fmri_spec.sess(j).multi_reg = {''};
             
             % Collect onsets and create conditions
             RES = sub_res{j};
+            
             for conds = 1:numel(conditions) % condition loop start
                 onset       = (RES{conds}.onset ./ TR) - 1;
                 cond_name   = RES{conds}.name;
                 [onsets, pmods] = wave_getpmod(onset, cond_name, stick_resolution);
-                template.spm.stats.fmri_spec.sess(j).cond(conds).name     = RES{conds}.name;
-                template.spm.stats.fmri_spec.sess(j).cond(conds).onset    = (RES{conds}.onset ./ TR) - 1;
+                template.spm.stats.fmri_spec.sess(j).cond(conds).name     = cond_name;
+                template.spm.stats.fmri_spec.sess(j).cond(conds).onset    = onsets;
                 template.spm.stats.fmri_spec.sess(j).cond(conds).duration = 0;
+                template.spm.stats.fmri_spec.sess(j).cond(conds).orth = 1;
+                template.spm.stats.fmri_spec.sess(j).cond(conds).tmod = 0;
                 
                 for pmod = 1:numel(pmod_names) % parametric modulator loop start
-                    templatespm.stats.fmri_spec.sess.cond.tmod = 0;
-                    matlabbatch{1}.spm.stats.fmri_spec.sess.cond.pmod.name = 'wave';
-                    matlabbatch{1}.spm.stats.fmri_spec.sess.cond.pmod.poly = 1;
-
-                    
+                    template.spm.stats.fmri_spec.sess(j).cond(conds).pmod(pmod).name = pmod_names{pmod};
+                    template.spm.stats.fmri_spec.sess(j).cond(conds).pmod(pmod).param = pmods(:,pmod);
+                    template.spm.stats.fmri_spec.sess(j).cond(conds).pmod(pmod).poly = 1;
                 end % parametric modulator loop end
-                template.spm.stats.fmri_spec.sess.cond.orth = 1;
-            end % condition loop end            
+            end % condition loop end
             
             
-            
-            for nuis = 1:n_nuis
+            % Movement parameters black box
+            movement        = normalize(load(fm));
+            all_nuis{j}     = movement;
+            n_nuis          = size(all_nuis{j},2);
+            for nuis = 1:n_nuis % movement parameters loop start
                 template.spm.stats.fmri_spec.sess(j).regress(nuis) = struct('name', cellstr(num2str(nuis)), 'val', all_nuis{j}(:,nuis));
-            end
+            end % movement parameter loop end            
+        end % session loop end        
+        
+        if do_model
+            mbi = mbi + 1;
+            matlabbatch{mbi} = template;
+            mkdir(a_dir);
+            copyfile(which(mfilename),a_dir);
+            matlabbatch{mbi}.spm.stats.fmri_spec.dir = {a_dir};
             
-        end % session loop end
+            mbi = mbi + 1;
+            matlabbatch{mbi}.spm.stats.fmri_est.spmmat           = {[a_dir filesep 'SPM.mat']};
+            matlabbatch{mbi}.spm.stats.fmri_est.method.Classical = 1;
+        end
         
-        
-    
-    
     end % subject loop end
 end % core loop end
 
