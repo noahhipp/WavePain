@@ -14,7 +14,8 @@ switch hostname
 end
 
 % Subs
-all_subs = [5:12 14:53];
+%all_subs = [5:12 14:53];
+all_subs = 10;
 
 % Settings
 do_model            = 0;
@@ -43,6 +44,9 @@ mat_name          = which(mfilename);
 n_sess            = size(epi_folders,2);
 n_cond            = size(conditions,2);
 
+% Load onset file
+onset_file = fullfile(base_dir, 'all_onsets.mat');
+load(onset_file, 'all_RES');
 
 % Prepare multiprocessing
 if size(all_subs) < n_proc
@@ -84,7 +88,7 @@ for np = 1:size(subs,2) % core loop start
         template.spm.stats.fmri_spec.mask             = cellstr([st_dir 's3skull_strip.nii']);
         template.spm.stats.fmri_spec.cvi              = 'None';
         
-        for j = 1:ness % session loop start
+        for j = 1:n_sess % session loop start
             
             s_dir           = fullfile(base_dir, name, epi_folders{j});
             epi_files       = spm_select('ExtFPList', s_dir, srfunc_file);
@@ -94,7 +98,7 @@ for np = 1:size(subs,2) % core loop start
             n_nuis          = size(all_nuis{j},2);
             
             template.spm.stats.fmri_spec.sess(j).hpf = 360;
-            template.spm.stats.fmri_spec.sess(j).scans = cellstr(epi_files{j});
+            template.spm.stats.fmri_spec.sess(j).scans = cellstr(epi_files);
             template.spm.stats.fmri_spec.sess(j).multi = {''};
             template.spm.stats.fmri_spec.sess(j).multi_reg = {''};
             
