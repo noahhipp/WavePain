@@ -15,11 +15,12 @@ switch hostname
 end
 
 % Subs
-all_subs = [5:9 11:12 14:53];
+all_subs = [5:12 14:53];
 %all_subs = 10;
 
 % Settings
-do_model            = 1;
+do_model            = 0;
+do_cons             = 1;
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
@@ -144,14 +145,46 @@ for np = 1:size(subs,2) % core loop start
             matlabbatch{mbi}.spm.stats.fmri_est.method.Classical = 1;
         end
         
+        % Prepare con template              
+        template                        = [];
+        % only do this once
+        if ~exist(contrasts, 'var')
+            contrasts       = [];
+            con_names       = [pmod_names, strcat('-', pmod_names)];           
+            contrasts(1,:)  = repmat([repmat([0 1 0 0 0 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % heat
+            contrasts(2,:)  = repmat([repmat([0 0 1 0 0 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % wm
+            contrasts(3,:)  = repmat([repmat([0 0 0 1 0 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % slope
+            contrasts(4,:)  = repmat([repmat([0 0 0 0 1 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % heat_X_wm
+            contrasts(5,:)  = repmat([repmat([0 0 0 0 0 1 0 0],1,n_cond), zeros(1,6)],1,n_sess); % heat_X_slope
+            contrasts(6,:)  = repmat([repmat([0 0 0 0 0 0 1 0],1,n_cond), zeros(1,6)],1,n_sess); % wm_X_slope
+            contrasts(7,:)  = repmat([repmat([0 0 0 0 0 0 0 1],1,n_cond), zeros(1,6)],1,n_sess); % heat_X_wm_X_slope
+            
+            % set not estimatable regressors to 0 (background: wm,
+            % heat_X_wm, wm_X_slope and heat_X_wm_X_slope are all 0 for
+            % conditions 5 and 6)
+            contrasts([2 4 6 7], [34 36 38 39    88 90 92 93]) = 0;            
+        end        
+        
+        template.spm.stats.con.spmmat   = {[a_dir filesep 'SPM.mat']};
+        template.spm.stats.con.delete   = 1;        
+        for k = 1:numel(con_names) % contrast loop start
+                template.spm.stats.con.consess{k}.tcon.name     = con_names{k};
+                template.spm.stats.con.consess{k}.tcon.name     = contrasts(k,:);
+                template.spm.stats.con.consess{k}.tcon.sessrep  = 'none';
+        end % contrast loop end                
+        
+        % Pass con template to batch
+        if do_cons
+            mbi = mbi + 1;
+            matlabbatch{mbi} = template; 
+        end                
     end % subject loop end
     
     % hand over batch to core
     if ~isempty(matlabbatch)
         check = 0;
         run_matlab(np, matlabbatch, check);
-    end
-    
+    end    
 end % core loop end
 
 %==========================================================================
