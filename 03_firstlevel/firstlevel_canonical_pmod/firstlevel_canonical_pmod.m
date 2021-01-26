@@ -15,7 +15,7 @@ switch hostname
 end
 
 % Subs
-all_subs = [5:12 14:53];
+all_subs = [5];%:12 14:53];
 %all_subs = 10;
 
 % Settings
@@ -45,6 +45,7 @@ mat_name          = which(mfilename);
 
 n_sess            = size(epi_folders,2);
 n_cond            = size(conditions,2);
+contrasts         = [];
 
 % Load onset file
 onset_file = fullfile(base_dir, 'all_onsets.mat');
@@ -148,8 +149,7 @@ for np = 1:size(subs,2) % core loop start
         % Prepare con template              
         template                        = [];
         % only do this once
-        if ~exist(contrasts, 'var')
-            contrasts       = [];
+        if isempty(contrasts)            
             con_names       = [pmod_names, strcat('-', pmod_names)];           
             contrasts(1,:)  = repmat([repmat([0 1 0 0 0 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % heat
             contrasts(2,:)  = repmat([repmat([0 0 1 0 0 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % wm
@@ -162,14 +162,17 @@ for np = 1:size(subs,2) % core loop start
             % set not estimatable regressors to 0 (background: wm,
             % heat_X_wm, wm_X_slope and heat_X_wm_X_slope are all 0 for
             % conditions 5 and 6)
-            contrasts([2 4 6 7], [34 36 38 39    88 90 92 93]) = 0;            
+            cols_to_zero = [35 37 39 40    89 91 93 94]; % catch condition 5
+            cols_to_zero = [cols_to_zero cols_to_zero + 8]; % catch condition 6
+            contrasts([2 4 6 7], cols_to_zero) = 0;            
+            contrasts = vertcat(contrasts, -contrasts);
         end        
         
         template.spm.stats.con.spmmat   = {[a_dir filesep 'SPM.mat']};
         template.spm.stats.con.delete   = 1;        
         for k = 1:numel(con_names) % contrast loop start
                 template.spm.stats.con.consess{k}.tcon.name     = con_names{k};
-                template.spm.stats.con.consess{k}.tcon.name     = contrasts(k,:);
+                template.spm.stats.con.consess{k}.tcon.convec   = contrasts(k,:);
                 template.spm.stats.con.consess{k}.tcon.sessrep  = 'none';
         end % contrast loop end                
         
