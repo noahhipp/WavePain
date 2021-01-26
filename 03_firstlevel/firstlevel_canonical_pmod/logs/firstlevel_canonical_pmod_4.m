@@ -1,0 +1,2 @@
+function firstlevel_canonical_pmod_4
+clear matlabbatch;load('firstlevel_canonical_pmod_4.mat');addpath('/common/apps/spm12-7771');spm('defaults','FMRI');spm_jobman('initcfg');spm_jobman('run',matlabbatch);delete('firstlevel_canonical_pmod_4.mat');exit

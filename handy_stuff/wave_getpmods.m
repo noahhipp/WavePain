@@ -1,4 +1,4 @@
-function [onsets,template] = wave_getpmods(onset, condition, frequency)
+function [onsets,pmods] = wave_getpmods(onset, condition, frequency)
 % receives onsets of wavepain condition, the name of the condition and the
 % frequency for the modulated stick functions (pmods) to return
 

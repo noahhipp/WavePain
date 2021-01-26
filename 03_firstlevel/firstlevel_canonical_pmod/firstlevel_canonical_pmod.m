@@ -9,16 +9,17 @@ switch hostname
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
         n_proc            = 4;
+        cd /home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/logs
     otherwise
         error('Only hosts noahs isn laptop accepted');
 end
 
 % Subs
-%all_subs = [5:12 14:53];
-all_subs = 10;
+all_subs = [5:9 11:12 14:53];
+%all_subs = 10;
 
 % Settings
-do_model            = 0;
+do_model            = 1;
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
@@ -106,11 +107,11 @@ for np = 1:size(subs,2) % core loop start
             RES = sub_res{j};
             
             for conds = 1:numel(conditions) % condition loop start
-                onset       = (RES{conds}.onset ./ TR) - 1;
+                onset       = RES{conds}.onset; % seconds  
                 cond_name   = RES{conds}.name;
-                [onsets, pmods] = wave_getpmod(onset, cond_name, stick_resolution);
+                [onsets, pmods] = wave_getpmods(onset, cond_name, stick_resolution); % onset and onsets still in seconds
                 template.spm.stats.fmri_spec.sess(j).cond(conds).name     = cond_name;
-                template.spm.stats.fmri_spec.sess(j).cond(conds).onset    = onsets;
+                template.spm.stats.fmri_spec.sess(j).cond(conds).onset    = (onsets ./ TR) -1;
                 template.spm.stats.fmri_spec.sess(j).cond(conds).duration = 0;
                 template.spm.stats.fmri_spec.sess(j).cond(conds).orth = 1;
                 template.spm.stats.fmri_spec.sess(j).cond(conds).tmod = 0;
@@ -134,8 +135,7 @@ for np = 1:size(subs,2) % core loop start
         
         if do_model
             mbi = mbi + 1;
-            matlabbatch{mbi} = template;
-            mkdir(a_dir);
+            matlabbatch{mbi} = template;                        
             copyfile(which(mfilename),a_dir);
             matlabbatch{mbi}.spm.stats.fmri_spec.dir = {a_dir};
             
