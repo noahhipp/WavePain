@@ -12,7 +12,7 @@ task2   = idx >= bins(4) & idx < bins(6);
 slope2  = idx >= bins(6) & idx < bins(7);
 
 % Waves
-[m, w] = waveit2(110000);
+[m, w] = waveit2(110000,1);
 
 
 % Tasks
@@ -56,7 +56,7 @@ for i = 1:numel(onset)
     template = [];
     [template(:,1), x] = resample_pmod(heat, frequency);
     x = x + onset(i); % shift onset accordingly
-    onsets = vertcat(onsets, x);
+    onsets = vertcat(onsets, x');
     
     template(:,2) = resample_pmod(wm, frequency);
     template(:,3) = resample_pmod(slope, frequency);
