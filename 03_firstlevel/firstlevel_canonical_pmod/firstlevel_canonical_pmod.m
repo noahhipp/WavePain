@@ -160,11 +160,12 @@ for np = 1:size(subs,2) % core loop start
             contrasts(7,:)  = repmat([repmat([0 0 0 0 0 0 0 1],1,n_cond), zeros(1,6)],1,n_sess); % heat_X_wm_X_slope
             
             % set not estimatable regressors to 0 (background: wm,
-            % heat_X_wm, wm_X_slope and heat_X_wm_X_slope are all 0 for
+            % heat_X_wm, wm_X_slope, heat_X_slope, and heat_X_wm_X_slope are all 0 for
             % conditions 5 and 6)
-            cols_to_zero = [35 37 39 40    89 91 93 94]; % catch condition 5
-            cols_to_zero = [cols_to_zero cols_to_zero + 8]; % catch condition 6
-            contrasts([2 4 6 7], cols_to_zero) = 0;            
+            cols_to_zero = [35 37:40]; % catch sess 1 condition 5
+            cols_to_zero = [cols_to_zero cols_to_zero + 54]; % catch sess2 condition5
+            cols_to_zero = [cols_to_zero cols_to_zero + 8]; % catch both conditions6
+            contrasts([2 4 5 6 7], cols_to_zero) = 0;            
             contrasts = vertcat(contrasts, -contrasts);
         end        
         
