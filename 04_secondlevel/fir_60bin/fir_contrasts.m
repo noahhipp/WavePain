@@ -1,4 +1,4 @@
-function fir_contrasts
+convfunction fir_contrasts
 % Defines all the contrasts for 60*2s FIR analysis of wavepain mri data
 
 % Makes 3 Parametric contrasts for second_level_anova of wavepain:

@@ -9,13 +9,14 @@ switch hostname
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
         n_proc            = 4;
-        cd /home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/logs
+        code_dir          = '/home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/';
+        cd(fullfile(code_dir, logs));
     otherwise
         error('Only hosts noahs isn laptop accepted');
 end
 
 % Subs
-all_subs = [5];%:12 14:53];
+all_subs = [5:12 14:53];
 %all_subs = 10;
 
 % Settings
@@ -47,6 +48,10 @@ n_sess            = size(epi_folders,2);
 n_cond            = size(conditions,2);
 contrasts         = [];
 
+% Load temp file
+temp_file = fullfile(code_dir, 'temps.mat');
+load(temp_file, 'temps.mat');
+
 % Load onset file
 onset_file = fullfile(base_dir, 'all_onsets.mat');
 load(onset_file, 'all_RES');
@@ -70,6 +75,7 @@ for np = 1:size(subs,2) % core loop start
         sub_res         = all_RES.(name); % condition onsets
         struc_file      = spm_select('FPList', st_dir, struc_templ);
         u_rc1_file      = ins_letter(struc_file,'u_rc1');
+        sub_temps       = temps(temps.id == subs{np}(i),:);
         
         a_dir = fullfile(base_dir, name, anadirname);
         if ~exist(a_dir, 'dir')
@@ -106,24 +112,31 @@ for np = 1:size(subs,2) % core loop start
             template.spm.stats.fmri_spec.sess(j).multi_reg = {''};
             
             % Collect onsets and create conditions
-            RES = sub_res{j};
+            RES     = sub_res{j};            
             
+            % Assesmble onsets vector and pmods matrix by looping through
+            % conditions
+            all_onsets = [];
+            all_pmods  = [];
             for conds = 1:numel(conditions) % condition loop start
                 onset       = RES{conds}.onset; % seconds  
                 cond_name   = RES{conds}.name;
-                [onsets, pmods] = wave_getpmods(onset, cond_name, stick_resolution); % onset and onsets still in seconds
-                template.spm.stats.fmri_spec.sess(j).cond(conds).name     = cond_name;
-                template.spm.stats.fmri_spec.sess(j).cond(conds).onset    = (onsets ./ TR) -1;
-                template.spm.stats.fmri_spec.sess(j).cond(conds).duration = 0;
-                template.spm.stats.fmri_spec.sess(j).cond(conds).orth = 1;
-                template.spm.stats.fmri_spec.sess(j).cond(conds).tmod = 0;
-                
-                for pmod = 1:numel(pmod_names) % parametric modulator loop start
-                    template.spm.stats.fmri_spec.sess(j).cond(conds).pmod(pmod).name = pmod_names{pmod};
-                    template.spm.stats.fmri_spec.sess(j).cond(conds).pmod(pmod).param = pmods(:,pmod);
-                    template.spm.stats.fmri_spec.sess(j).cond(conds).pmod(pmod).poly = 1;
-                end % parametric modulator loop end
-            end % condition loop end
+                [onsets, pmods] = wave_getpmods(onset, cond_name, stick_resolution, sub_temps); % onset and onsets still in seconds
+                all_onsets      = vertcat(all_onsets, onsets);
+                all_pmods       = vertcat(all_pmods, pmods);
+            end % condition loop end                        
+            
+            template.spm.stats.fmri_spec.sess(j).cond.name     = 'stim';
+            template.spm.stats.fmri_spec.sess(j).cond.onset    = (all_onsets ./ TR) -1;
+            template.spm.stats.fmri_spec.sess(j).cond.duration = 0;
+            template.spm.stats.fmri_spec.sess(j).cond.orth     = 1;
+            template.spm.stats.fmri_spec.sess(j).cond.tmod     = 0;
+            
+            for pmod = 1:numel(pmod_names) % parametric modulator loop start
+                template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).name = pmod_names{pmod};
+                template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).param = all_pmods(:,pmod);
+                template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).poly = 1;
+            end % parametric modulator loop end            
             
             
             % Movement parameters black box
