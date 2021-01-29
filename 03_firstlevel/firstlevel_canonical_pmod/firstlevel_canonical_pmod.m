@@ -8,25 +8,24 @@ switch hostname
         n_proc            = 2;
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 4;
+        n_proc            = 6;
         code_dir          = '/home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/';
-        cd(fullfile(code_dir, logs));
+        cd(fullfile(code_dir, 'logs'));
     otherwise
         error('Only hosts noahs isn laptop accepted');
 end
 
 % Subs
 all_subs = [5:12 14:53];
-%all_subs = 10;
 
 % Settings
-do_model            = 0;
-do_cons             = 1;
+do_model            = 1;
+do_cons             = 0;
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
 stick_resolution    = 1; % /seconds so many sticks we want for now
-anadirname          = 'canonical_pmod';
+anadirname          = 'canonical_pmod_with_ramp';
 
 % Each subject has two sessions. Sessions are also used to distinquish
 % subjects --> conceputal distance between eg sub10 sess1 - sub10sess2 =
@@ -50,7 +49,7 @@ contrasts         = [];
 
 % Load temp file
 temp_file = fullfile(code_dir, 'temps.mat');
-load(temp_file, 'temps.mat');
+load(temp_file, 'temps');
 
 % Load onset file
 onset_file = fullfile(base_dir, 'all_onsets.mat');

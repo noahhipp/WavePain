@@ -93,7 +93,7 @@ rs_pmod = interp1(x, pmod, xq);
 % SCALE (only for heat), PREPEND/APPEND RAMPS and RESAMPLE pmods according
 % to subject specific temps
 
-function [batch,x] = scale_ramp_sample_pmods(heat,wm, slope, freq, temps)
+function [batch,xq] = scale_ramp_sample_pmods(heat,wm, slope, freq, temps)
 % This gets changed so we need to set it
 N = numel(heat);
 template = [];

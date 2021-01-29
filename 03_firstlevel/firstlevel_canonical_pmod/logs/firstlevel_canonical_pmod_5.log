@@ -22,15 +22,15 @@ no path: /home/hipp/matlab/v99_spm12
 
 
 ------------------------------------------------------------------------
-29-Jan-2021 13:48:18 - Running job #1
+29-Jan-2021 13:48:50 - Running job #1
 ------------------------------------------------------------------------
-29-Jan-2021 13:48:19 - Running 'fMRI model specification'
+29-Jan-2021 13:48:51 - Running 'fMRI model specification'
 
-SPM12: spm_fMRI_design (v7739)                     13:48:19 - 29/01/2021
+SPM12: spm_fMRI_design (v7739)                     13:48:51 - 29/01/2021
 ========================================================================
 Saving fMRI design                      :               ...SPM.mat saved
 
-SPM12: spm_fmri_spm_ui (v7738)                     13:48:22 - 29/01/2021
+SPM12: spm_fmri_spm_ui (v7738)                     13:48:54 - 29/01/2021
 ========================================================================
 Mapping files                           :                        ...done
 Calculating globals                     : 
