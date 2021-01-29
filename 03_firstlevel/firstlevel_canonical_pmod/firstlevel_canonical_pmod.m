@@ -16,11 +16,12 @@ switch hostname
 end
 
 % Subs
-all_subs = [5:12 14:53];
+all_subs = 5;
+%all_subs = [5:12 14:53];
 
 % Settings
-do_model            = 1;
-do_cons             = 0;
+do_model            = 0;
+do_cons             = 1;
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
@@ -163,22 +164,15 @@ for np = 1:size(subs,2) % core loop start
         % only do this once
         if isempty(contrasts)            
             con_names       = [pmod_names, strcat('-', pmod_names)];           
-            contrasts(1,:)  = repmat([repmat([0 1 0 0 0 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % heat
-            contrasts(2,:)  = repmat([repmat([0 0 1 0 0 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % wm
-            contrasts(3,:)  = repmat([repmat([0 0 0 1 0 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % slope
-            contrasts(4,:)  = repmat([repmat([0 0 0 0 1 0 0 0],1,n_cond), zeros(1,6)],1,n_sess); % heat_X_wm
-            contrasts(5,:)  = repmat([repmat([0 0 0 0 0 1 0 0],1,n_cond), zeros(1,6)],1,n_sess); % heat_X_slope
-            contrasts(6,:)  = repmat([repmat([0 0 0 0 0 0 1 0],1,n_cond), zeros(1,6)],1,n_sess); % wm_X_slope
-            contrasts(7,:)  = repmat([repmat([0 0 0 0 0 0 0 1],1,n_cond), zeros(1,6)],1,n_sess); % heat_X_wm_X_slope
+            contrasts(1,:)  = repmat([0 1 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat
+            contrasts(2,:)  = repmat([0 0 1 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm
+            contrasts(3,:)  = repmat([0 0 0 1 0 0 0 0 zeros(1,6)],1,n_sess); % slope
+            contrasts(4,:)  = repmat([0 0 0 0 1 0 0 0 zeros(1,6)],1,n_sess); % heat_X_wm
+            contrasts(5,:)  = repmat([0 0 0 0 0 1 0 0 zeros(1,6)],1,n_sess); % heat_X_slope
+            contrasts(6,:)  = repmat([0 0 0 0 0 0 1 0 zeros(1,6)],1,n_sess); % wm_X_slope
+            contrasts(7,:)  = repmat([0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % heat_X_wm_X_slope                        
             
-            % set not estimatable regressors to 0 (background: wm,
-            % heat_X_wm, wm_X_slope, heat_X_slope, and heat_X_wm_X_slope are all 0 for
-            % conditions 5 and 6)
-            cols_to_zero = [35 37:40]; % catch sess 1 condition 5
-            cols_to_zero = [cols_to_zero cols_to_zero + 54]; % catch sess2 condition5
-            cols_to_zero = [cols_to_zero cols_to_zero + 8]; % catch both conditions6
-            contrasts([2 4 5 6 7], cols_to_zero) = 0;            
-            contrasts = vertcat(contrasts, -contrasts);
+            contrasts = vertcat(contrasts, -contrasts); % make negative cons as well
         end        
         
         template.spm.stats.con.spmmat   = {[a_dir filesep 'SPM.mat']};
@@ -199,7 +193,7 @@ for np = 1:size(subs,2) % core loop start
     % hand over batch to core
     if ~isempty(matlabbatch)
         check = 0;
-        run_matlab(np, matlabbatch, check);
+        run_matlab(10, matlabbatch, check);
     end    
 end % core loop end
 
