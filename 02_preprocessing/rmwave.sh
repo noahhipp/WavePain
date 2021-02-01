@@ -14,16 +14,17 @@ for folder in $folders; do
     $folder"
     
     for run_folder in $run_folders; do
-	    if [[ "sub010/" == *$folder* ]];
+	    if [[ "sub010/" == *$folder* ]]; # leave this as example for old ones
             then
               continue 
     	    fi
-	    cd $run_folder
-	    echo "$run_folder"
+#	    cd $run_folder
+#	    echo "$run_folder"
 
         # Do stuff
-	    rm  spmT*  -r -f	    I
-	    cd ../ # leave run_folder
+	    rm  canonical* -r -f
+
+#	    cd ../ # leave run_folder
     done
     echo  "________________
     "

@@ -16,7 +16,7 @@ switch hostname
 end
 
 % Subs
-all_subs = 5;
+all_subs = 9;
 %all_subs = [5:12 14:53];
 
 % Settings
