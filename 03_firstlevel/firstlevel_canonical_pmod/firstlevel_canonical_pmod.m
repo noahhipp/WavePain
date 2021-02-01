@@ -16,17 +16,16 @@ switch hostname
 end
 
 % Subs
-all_subs = 9;
-%all_subs = [5:12 14:53];
+all_subs = [5:12 14:53];
 
 % Settings
-do_model            = 0;
+do_model            = 1;
 do_cons             = 1;
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
 stick_resolution    = 1; % /seconds so many sticks we want for now
-anadirname          = 'canonical_pmod_with_ramp';
+anadirname          = 'canonical_pmodV2';
 
 % Each subject has two sessions. Sessions are also used to distinquish
 % subjects --> conceputal distance between eg sub10 sess1 - sub10sess2 =
@@ -36,8 +35,10 @@ anadirname          = 'canonical_pmod_with_ramp';
 % Specify paths and files
 struc_templ         = '^sPRISMA.*\.nii';
 epi_folders         = {'run001/mrt/', 'run002/mrt/'};
+strip_str           = 's3skull_strip.nii';
 realign_str         =  '^rp_afMR.*\.txt';
-srfunc_file         = '^srafMRI.nii';
+
+rfunc_file         = '^rafMRI.nii';
 conditions          = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
 pmod_names          = {'heat', 'wm', 'slope',...
     'heat_X_wm', 'heat_X_slope','wm_X_slope',...
@@ -73,6 +74,7 @@ for np = 1:size(subs,2) % core loop start
         name            = sprintf('sub%03d',subs{np}(i));
         st_dir          = fullfile(base_dir, name,'run000/mrt/');
         sub_res         = all_RES.(name); % condition onsets
+        strip_file      = spm_select('FPList', fullfile(st_dir, 'mean_epi', strip_str)); 
         struc_file      = spm_select('FPList', st_dir, struc_templ);
         u_rc1_file      = ins_letter(struc_file,'u_rc1');
         sub_temps       = temps(temps.id == subs{np}(i),:);
@@ -94,13 +96,13 @@ for np = 1:size(subs,2) % core loop start
         template.spm.stats.fmri_spec.volt             = 1;
         template.spm.stats.fmri_spec.mthresh          = -Inf;
         template.spm.stats.fmri_spec.global           = 'None';
-        template.spm.stats.fmri_spec.mask             = cellstr([st_dir 's3skull_strip.nii']);
+        template.spm.stats.fmri_spec.mask             = cellstr(strip_file);
         template.spm.stats.fmri_spec.cvi              = 'None';
         
         for j = 1:n_sess % session loop start
             
             s_dir           = fullfile(base_dir, name, epi_folders{j});
-            epi_files       = spm_select('ExtFPList', s_dir, srfunc_file);
+            epi_files       = spm_select('ExtFPList', s_dir, rfunc_file);
             fm              = spm_select('FPList', s_dir, realign_str);
             movement        = normalize(load(fm));
             all_nuis{j}     = movement;
@@ -160,19 +162,16 @@ for np = 1:size(subs,2) % core loop start
         end
         
         % Prepare con template              
-        template                        = [];
-        % only do this once
+        template            = [];        
         if isempty(contrasts)            
-            con_names       = [pmod_names, strcat('-', pmod_names)];           
+            con_names       = pmod_names;           
             contrasts(1,:)  = repmat([0 1 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat
             contrasts(2,:)  = repmat([0 0 1 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm
             contrasts(3,:)  = repmat([0 0 0 1 0 0 0 0 zeros(1,6)],1,n_sess); % slope
             contrasts(4,:)  = repmat([0 0 0 0 1 0 0 0 zeros(1,6)],1,n_sess); % heat_X_wm
             contrasts(5,:)  = repmat([0 0 0 0 0 1 0 0 zeros(1,6)],1,n_sess); % heat_X_slope
             contrasts(6,:)  = repmat([0 0 0 0 0 0 1 0 zeros(1,6)],1,n_sess); % wm_X_slope
-            contrasts(7,:)  = repmat([0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % heat_X_wm_X_slope                        
-            
-            contrasts = vertcat(contrasts, -contrasts); % make negative cons as well
+            contrasts(7,:)  = repmat([0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % heat_X_wm_X_slope                                                
         end        
         
         template.spm.stats.con.spmmat   = {[a_dir filesep 'SPM.mat']};
@@ -190,10 +189,10 @@ for np = 1:size(subs,2) % core loop start
         end                
     end % subject loop end
     
-    % hand over batch to core
+    % PASS BATCH TO CORE
     if ~isempty(matlabbatch)
         check = 0;
-        run_matlab(10, matlabbatch, check);
+        run_matlab(np, matlabbatch, check);
     end    
 end % core loop end
 
