@@ -40,7 +40,7 @@ anadirname          = 'canonical_pmodV2';
 struc_templ         = '^sPRISMA.*\.nii';
 epi_folders         = {'run001/mrt/', 'run002/mrt/'};
 strip_str           = 's3skull_strip.nii';
-flow_str            = '^u_rcl.*\.nii';
+flow_str            = '^u_rc.*\.nii';
 realign_str         =  '^rp_afMR.*\.txt';
 
 rfunc_file         = '^rafMRI.nii';
