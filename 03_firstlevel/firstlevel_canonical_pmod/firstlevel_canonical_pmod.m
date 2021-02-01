@@ -265,11 +265,73 @@ for np = 1:size(subs,2) % core loop start
 end % core loop end
 
 %--------------------------------------------------------------------------
-% SECOND LEVEL START
+% SECOND LEVEL t-Test START (one 2nd level per contrasts --> 7 ttests)
+% --> credit: Björn Horing, ISN
 %--------------------------------------------------------------------------
+anadirname2          = strcat('second_level_ttest', anadirname);
+all_con             = 1:7;
+for i = 1:numel(con_names) % contrast loop start
+    
+    % House keeping
+    con_folder      = sprintf('%02d_%s_contrast%02d', i, con_names{i}, skern);
+    out_dir         = fullfile(base_dir, 'second_Level', anadirname2, con_folder);        
+    matlabbatch     = [];
+    all_scans       = [];
+    
+    for j = 1:numel(all_subs) % 2nd level subject loop start
+        name        = sprintf('sub%03d',subs{np}(i));
+        a_dir       = fullfile(base_dir, name, anadirname);
+        swcon_templ = sprintf('s%d%scon_%04d.nii',skern, dartel_prefix, i);
+        
+        swcon_file  = spm_select('FPList', a_dir, swcon_templ);        
+        all_scans   = char(all_scans, swcon_file);        
+    end % 2nd level subject loop end
+   
+    %----------------------- MODEL SPECIFICATION --------------------------
+    matlabbatch{1}.spm.stats.factorial_design.dir = {out_dir};
+    matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = cellstr(all_scans);
+    
+    matlabbatch{1}.spm.stats.factorial_design.des.pt.gmsca  = 0;
+    matlabbatch{1}.spm.stats.factorial_design.des.pt.ancova = 0;
 
+    
+    matlabbatch{1}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
+    matlabbatch{1}.spm.stats.factorial_design.masking.tm.tm_none = 1;
+    matlabbatch{1}.spm.stats.factorial_design.masking.im = 1;
+    %matlabbatch{1}.spm.stats.factorial_design.masking.em = {[base_dir 'mask.nii,1']};
+    matlabbatch{1}.spm.stats.factorial_design.masking.em = {[base_dir 'all_meanepis/meanepi_mean_wskull.nii']};   
+    matlabbatch{1}.spm.stats.factorial_design.globalc.g_omit = 1;
+    matlabbatch{1}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
+    matlabbatch{1}.spm.stats.factorial_design.globalm.glonorm = 1;
+    
+    %----------------------- MODEL ESTIMATION -----------------------------
+    
+    matlabbatch{2}.spm.stats.fmri_est.spmmat = {[out_dir '\SPM.mat']};
+    matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
+    
+    %---------------------- CONTRASTS -------------------------------------
+    matlabbatch{3}.spm.stats.con.spmmat = {[out_dir '\SPM.mat']};
+    matlabbatch{3}.spm.stats.con.delete = 1;
+    
+    co = 1;
+
+    matlabbatch{3}.spm.stats.con.consess{co}.tcon.name    = 'pos';
+    matlabbatch{3}.spm.stats.con.consess{co}.tcon.convec  = [1];
+    matlabbatch{3}.spm.stats.con.consess{co}.tcon.sessrep = 'none';
+    co = co + 1; %increment by 1
+    
+    matlabbatch{3}.spm.stats.con.consess{co}.tcon.name    = 'neg';
+    matlabbatch{3}.spm.stats.con.consess{co}.tcon.convec  = [-1];
+    matlabbatch{3}.spm.stats.con.consess{co}.tcon.sessrep = 'none';
+    co = co + 1; %increment by 1
+    
+    spm_jobman('initcfg');
+    spm('defaults', 'FMRI');
+    spm_jobman('run',matlabbatch);
+    copyfile(which(mfilename),out_dir);    
+end % contrast loop end
 %--------------------------------------------------------------------------
-% SECOND LEVEL END
+% SECOND LEVEL t-Test END
 %--------------------------------------------------------------------------
 
 
