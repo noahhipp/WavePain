@@ -8,7 +8,7 @@ switch hostname
         n_proc            = 2;
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 6;
+        n_proc            = 8;
         code_dir          = '/home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/';
         cd(fullfile(code_dir, 'logs'));
     otherwise
@@ -16,11 +16,15 @@ switch hostname
 end
 
 % Subs
-all_subs = [5:12 14:53];
+all_subs = 5;
+% all_subs = [5:12 14:53];
 
 % Settings
 do_model            = 1;
 do_cons             = 1;
+do_warp             = 1;
+do_smooth           = 1;
+
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
@@ -36,6 +40,7 @@ anadirname          = 'canonical_pmodV2';
 struc_templ         = '^sPRISMA.*\.nii';
 epi_folders         = {'run001/mrt/', 'run002/mrt/'};
 strip_str           = 's3skull_strip.nii';
+flow_str            = '^u_rcl.*\.nii';
 realign_str         =  '^rp_afMR.*\.txt';
 
 rfunc_file         = '^rafMRI.nii';
@@ -44,6 +49,8 @@ pmod_names          = {'heat', 'wm', 'slope',...
     'heat_X_wm', 'heat_X_slope','wm_X_slope',...
     'heat_X_wm_X_slope'}; % regressor
 mat_name          = which(mfilename);
+
+to_warp             = 'con_%04.4d.nii';
 
 n_sess            = size(epi_folders,2);
 n_cond            = size(conditions,2);
@@ -74,11 +81,11 @@ for np = 1:size(subs,2) % core loop start
         name            = sprintf('sub%03d',subs{np}(i));
         st_dir          = fullfile(base_dir, name,'run000/mrt/');
         sub_res         = all_RES.(name); % condition onsets
-        strip_file      = spm_select('FPList', fullfile(st_dir, 'mean_epi', strip_str)); 
+        mepi_dir        = fullfile(st_dir, 'mean_epi');
+        strip_file      = spm_select('FPList', mepi_dir, strip_str); 
         struc_file      = spm_select('FPList', st_dir, struc_templ);
-        u_rc1_file      = ins_letter(struc_file,'u_rc1');
-        sub_temps       = temps(temps.id == subs{np}(i),:);
-        
+        u_rc1_file      = spm_select('FPList', mepi_dir, flow_str);         
+        sub_temps       = temps(temps.id == subs{np}(i),:);        
         a_dir = fullfile(base_dir, name, anadirname);
         if ~exist(a_dir, 'dir')
             mkdir(a_dir)
@@ -161,7 +168,10 @@ for np = 1:size(subs,2) % core loop start
             matlabbatch{mbi}.spm.stats.fmri_est.method.Classical = 1;
         end
         
-        % Prepare con template              
+        %------------------------------------------------------------------
+        % CONTRAST DEFINITION START (sessions collapse here)
+        %------------------------------------------------------------------
+        % Prepare template              
         template            = [];        
         if isempty(contrasts)            
             con_names       = pmod_names;           
@@ -180,13 +190,71 @@ for np = 1:size(subs,2) % core loop start
                 template.spm.stats.con.consess{k}.tcon.name     = con_names{k};
                 template.spm.stats.con.consess{k}.tcon.convec   = contrasts(k,:);
                 template.spm.stats.con.consess{k}.tcon.sessrep  = 'none';
-        end % contrast loop end                
+        end % contrast loop end        
+        %------------------------------------------------------------------
+        % CONTRAST DEFINITION END
+        %------------------------------------------------------------------        
         
-        % Pass con template to batch
-        if do_cons
+        if do_cons % Pass con template to batch
             mbi = mbi + 1;
             matlabbatch{mbi} = template; 
-        end                
+        end                        
+        
+        %------------------------------------------------------------------
+        % WARP SPECIFICATION START (go from native to MNI space using mepi flow field)
+        %------------------------------------------------------------------
+        template            = [];
+        con_files           = '';
+        
+        for j = 1:numel(con_names) % collect con_files
+            con_files(j,:) = [a_dir filesep sprintf(to_warp,j)];
+        end
+        
+        % Prepare con file names here for later reference
+        dartel_prefix       = 'w_mepi';
+        wcon_files             = ins_letter(con_files,'w');
+        wcon_dartel_files      = ins_letter(con_files, dartel_prefix); % delete 
+        wcon_files             = chng_path(wcon_files, mepi_dir);    % delete
+        wcon_dartel_files      = chng_path(wcon_dartel_files, mepi_dir); % delete
+        wcon_dartel_files2     = chng_path(wcon_dartel_files, a_dir);  % keep those
+        
+        template.spm.tools.dartel.crt_warped.flowfields = cellstr(repmat(u_rc1_file, size(con_files,1),1)); % either use u_rcl from t1 or from epis
+        template.spm.tools.dartel.crt_warped.images = {cellstr(char(con_files))};
+        template.spm.tools.dartel.crt_warped.jactransf = 0;
+        template.spm.tools.dartel.crt_warped.K = 6;
+        template.spm.tools.dartel.crt_warped.interp = 1;        
+        %------------------------------------------------------------------
+        % WARP SPECIFICATION END
+        %------------------------------------------------------------------                    
+        
+         if do_warp % pass warp template to batch             
+            mbi = mbi + 1;
+            matlabbatch{mbi} = template; 
+            
+            mbi = mbi + 1;
+            matlabbatch{mbi}.cfg_basicio.file_dir.file_ops.file_move.files = cellstr(wcon_files);
+            matlabbatch{mbi}.cfg_basicio.file_dir.file_ops.file_move.action.moveren.moveto = cellstr(a_dir);
+            matlabbatch{mbi}.cfg_basicio.file_dir.file_ops.file_move.action.moveren.patrep.pattern = 'w';
+            matlabbatch{mbi}.cfg_basicio.file_dir.file_ops.file_move.action.moveren.patrep.repl    = dartel_prefix;
+            matlabbatch{mbi}.cfg_basicio.file_dir.file_ops.file_move.action.moveren.unique         = false;            
+         end   
+         
+         
+        %------------------------------------------------------------------
+        % SMOOTH SPECIFICATION START
+        %------------------------------------------------------------------            
+         template   = [];
+         template.spm.spatial.smooth.data = cellstr(wcon_dartel_files2);
+         template.spm.spatial.smooth.fwhm = skern;
+         template.spm.spatial.smooth.prefix = ['s' num2str(skern)];
+        %------------------------------------------------------------------
+        % SMOOTH SPECIFICATION END
+        %------------------------------------------------------------------            
+        
+        if do_smooth % pass smooth template to batch
+            mbi = mbi+1;
+            matlabbatch{mbi} = template; 
+        end                        
     end % subject loop end
     
     % PASS BATCH TO CORE
@@ -195,6 +263,15 @@ for np = 1:size(subs,2) % core loop start
         run_matlab(np, matlabbatch, check);
     end    
 end % core loop end
+
+%--------------------------------------------------------------------------
+% SECOND LEVEL START
+%--------------------------------------------------------------------------
+
+%--------------------------------------------------------------------------
+% SECOND LEVEL END
+%--------------------------------------------------------------------------
+
 
 %==========================================================================
 % FUNCTION chuckCell = splitvect(v, n)
