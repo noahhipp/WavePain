@@ -385,11 +385,11 @@ if ~exist(out_dir)
 end
 
 %-------------------------MODEL SPECIFICATION------------------------------
-matlabbatch                                     = [];
-g                                               = 1;
+matlabbatch                 = [];
+template                    = [];
+g                           = 1;
 
-if do_nosub_anova_model
-matlabbatch{g}.spm.stats.factorial_design.dir   = {out_dir};
+template.spm.stats.factorial_design.dir   = {out_dir};
 for i = 1:numel(con_names) % contrast loop start            
     all_scans       = [];    
     for j = 1:numel(all_subs) % 2nd level subject loop start
@@ -400,38 +400,64 @@ for i = 1:numel(con_names) % contrast loop start
         all_scans   = char(all_scans, swcon_file);        
     end % 2nd level subject loop end
     
-    matlabbatch{g}.spm.stats.factorial_design.des.anova.icell(i).scans = cellstr(all_scans);
-    matlabbatch{g}.spm.stats.factorial_design.des.anova.dept = 1;
-    matlabbatch{g}.spm.stats.factorial_design.des.anova.variance = 1;
-    matlabbatch{g}.spm.stats.factorial_design.des.anova.gmsca = 0;
-    matlabbatch{g}.spm.stats.factorial_design.des.anova.ancova = 0;
+    template.spm.stats.factorial_design.des.anova.icell(i).scans = cellstr(all_scans);
+    template.spm.stats.factorial_design.des.anova.dept = 1;
+    template.spm.stats.factorial_design.des.anova.variance = 1;
+    template.spm.stats.factorial_design.des.anova.gmsca = 0;
+    template.spm.stats.factorial_design.des.anova.ancova = 0;
     
-    matlabbatch{g}.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
-    matlabbatch{g}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
-    matlabbatch{g}.spm.stats.factorial_design.masking.tm.tm_none = 1;
-    matlabbatch{g}.spm.stats.factorial_design.masking.im = 1;
-    matlabbatch{g}.spm.stats.factorial_design.masking.em = {fullfile(base_dir, 'second_Level', [mask_name '.nii'])};
-    matlabbatch{g}.spm.stats.factorial_design.globalc.g_omit = 1;
-    matlabbatch{g}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
-    matlabbatch{g}.spm.stats.factorial_design.globalm.glonorm = 1;
+    template.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
+    template.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
+    template.spm.stats.factorial_design.masking.tm.tm_none = 1;
+    template.spm.stats.factorial_design.masking.im = 1;
+    template.spm.stats.factorial_design.masking.em = {fullfile(base_dir, 'second_Level', [mask_name '.nii'])};
+    template.spm.stats.factorial_design.globalc.g_omit = 1;
+    template.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
+    template.spm.stats.factorial_design.globalm.glonorm = 1;    
+end
+
+if do_nosub_anova_model
+    matlabbatch{g} = template;
     g = g+1;
 end
 
 %-------------------------MODEL ESTIMATION---------------------------------
-matlabbatch{g}.spm.stats.fmri_est.spmmat = {fullfile(out_dir, 'SPM.mat')};
-matlabbatch{g}.spm.stats.fmri_est.method.Classical = 1;
-g = g+1;
+template = [];
+template.spm.stats.fmri_est.spmmat = {fullfile(out_dir, 'SPM.mat')};
+template.spm.stats.fmri_est.method.Classical = 1;
+
+if do_nosub_anova_model
+    matlabbatch{g} = template;
+    g = g+1;
 end
+
 %-------------------------CONTRAST SPECIFICATION---------------------------
+tcons                               = eye(numel(pmod_names));
+template                            = [];
+ci                                  = 1;
+template.spm.stats.con.delete       = 1;
+template.spm.stats.con.spmmat       = {fullfile(out_dir, 'SPM.mat')};
+
+template.spm.stats.con.consess{ci}.fcon.name     = 'eoi';
+template.spm.stats.con.consess{ci}.fcon.convec   = eye(numel(pmod_names));
+ci = ci+1;
+
+for i = 1:numel(pmod_names)
+    template.spm.stats.con.consess{ci}.tcon.name    = pmod_names{i};
+    template.spm.stats.con.consess{ci}.tcon.convec  = tcons(i,:);
+    template.spm.stats.con.consess{ci}.tcon.sessrep = 'none';
+end
+
 if do_nosub_anova_cons
-    
+    matlabbatch{g} = template;
+    g = g+1;
 end
 
 
-    spm_jobman('initcfg');
-    spm('defaults', 'FMRI');
-    spm_jobman('run',matlabbatch);
-    copyfile(which(mfilename),out_dir);
+spm_jobman('initcfg');
+spm('defaults', 'FMRI');
+spm_jobman('run',matlabbatch);
+copyfile(which(mfilename),out_dir);
 %--------------------------------------------------------------------------
 % SECOND LEVEL no subject ANOVA END
 %--------------------------------------------------------------------------
