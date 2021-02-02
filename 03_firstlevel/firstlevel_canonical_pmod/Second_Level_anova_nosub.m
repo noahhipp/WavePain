@@ -40,7 +40,7 @@ con_names = {'Pain',...
     'Neg_Sound',...
     'Neg_Sound_int',...
     'Neg_Sound_modPE',...
-    'Neg_Sound_intPE'};
+    'Neg_Sound_intPE'}; % second level contrasts
 
 
 anadirname        = ['emp_model_PE'];
@@ -49,7 +49,7 @@ all_subs  = [1 2 3 4 5 6 7 8 9 10 12 15 16 17 18 20 21 22 23 24 26 27 28 29 30 3
 n_type            = 'w_dartelcon';
 
 skern             = 6;
-cond_use          = [2:9];
+cond_use          = [2:9]; % only use those cons
 
 
 do_model    = 1;
