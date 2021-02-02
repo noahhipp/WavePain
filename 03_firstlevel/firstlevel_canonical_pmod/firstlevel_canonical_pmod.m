@@ -16,20 +16,22 @@ switch hostname
 end
 
 % Subs
-all_subs = 5;
-% all_subs = [5:12 14:53];
+%all_subs = 5;
+all_subs = [5:12 14:53];
 
 % Settings
+                       
 %-firstlevel
-do_model            = 1;
-do_cons             = 1;
-do_warp             = 1;
-do_smooth           = 1;
+do_model            = 0;
+do_cons             = 0;
+do_warp             = 0;
+do_smooth           = 0;
 
 %-secondlevel
-do_mask             = 1;
-do_ttest            = 1;
-do_nosub_anova      = 1;
+do_mask             = 0;
+do_ttest            = 0;
+do_nosub_anova_model= 0;
+do_nosub_anova_cons = 1;
 
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
@@ -282,7 +284,7 @@ con_string  = sprintf('^s%d%scon', skern, dartel_prefix);
 mask_name   = 'mask_all_canonical_pmod';
 
 for i = 1:numel(all_subs)
-    name        = sprintf('sub%03d',subs{np}(i));
+    name        = sprintf('sub%03d',all_subs(i));
     a_dir       = fullfile(base_dir, name, anadirname);
     sub_cons    = spm_select('FPList', a_dir, con_string);
     all_cons    = char(all_cons, sub_cons);
@@ -314,16 +316,17 @@ for i = 1:numel(con_names) % contrast loop start
     % House keeping
     con_folder      = sprintf('%02d_%s_contrast%02d', i, con_names{i}, skern);
     out_dir         = fullfile(base_dir, 'second_Level', anadirname2, con_folder);        
-    matlabbatch     = [];
-    all_scans       = [];
+    matlabbatch     = [];    
     
     for j = 1:numel(all_subs) % 2nd level subject loop start
-        name        = sprintf('sub%03d',subs{np}(i));
+        name        = sprintf('sub%03d',all_subs(j));
         a_dir       = fullfile(base_dir, name, anadirname);
         swcon_templ = sprintf('s%d%scon_%04d.nii',skern, dartel_prefix, i);
         
-        swcon_file  = spm_select('FPList', a_dir, swcon_templ);        
-        all_scans   = char(all_scans, swcon_file);        
+        swcon_file  = spm_select('FPList', a_dir, swcon_templ);
+        if j == 1; all_scans = swcon_file; else
+            all_scans   = char(all_scans, swcon_file);        
+        end
     end % 2nd level subject loop end
    
     %----------------------- MODEL SPECIFICATION --------------------------
@@ -336,24 +339,24 @@ for i = 1:numel(con_names) % contrast loop start
     matlabbatch{1}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
     matlabbatch{1}.spm.stats.factorial_design.masking.tm.tm_none = 1;
     matlabbatch{1}.spm.stats.factorial_design.masking.im = 1;    
-    matlabbatch{1}.spm.stats.factorial_design.masking.em = {fullfile(base_dir, 'secondLevel', mask_name)};
+    matlabbatch{1}.spm.stats.factorial_design.masking.em = {fullfile(base_dir, 'second_Level', [mask_name '.nii'])};
     matlabbatch{1}.spm.stats.factorial_design.globalc.g_omit = 1;
     matlabbatch{1}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
     matlabbatch{1}.spm.stats.factorial_design.globalm.glonorm = 1;
     
     %----------------------- MODEL ESTIMATION -----------------------------    
-    matlabbatch{2}.spm.stats.fmri_est.spmmat = {[out_dir '\SPM.mat']};
+    matlabbatch{2}.spm.stats.fmri_est.spmmat = {fullfile(out_dir, 'SPM.mat')};
     matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
     
     %---------------------- CONTRASTS -------------------------------------
-    matlabbatch{3}.spm.stats.con.spmmat = {[out_dir '\SPM.mat']};
+    matlabbatch{3}.spm.stats.con.spmmat = {fullfile(out_dir, 'SPM.mat')};
     matlabbatch{3}.spm.stats.con.delete = 1;    
     co = 1;
     
     matlabbatch{3}.spm.stats.con.consess{co}.tcon.name    = 'pos';
     matlabbatch{3}.spm.stats.con.consess{co}.tcon.convec  = [1];
     matlabbatch{3}.spm.stats.con.consess{co}.tcon.sessrep = 'none';
-    co = co + 1; %increment by 1    
+    co = co + 1; %increment by 1     
     matlabbatch{3}.spm.stats.con.consess{co}.tcon.name    = 'neg';
     matlabbatch{3}.spm.stats.con.consess{co}.tcon.convec  = [-1];
     matlabbatch{3}.spm.stats.con.consess{co}.tcon.sessrep = 'none';
@@ -376,51 +379,59 @@ end % contrast loop end
 % Housekeeping
 anadirname2     = strcat('second_level_anova', anadirname);
 all_con         = 1:7;
-out_dir         = fullfile(base_dir, 'second_Level', anadirname2);        
+out_dir         = fullfile(base_dir, 'second_Level', anadirname2);
+if ~exist(out_dir)
+    mkdir(out_dir)
+end
 
 %-------------------------MODEL SPECIFICATION------------------------------
 matlabbatch                                     = [];
-matlabbatch{1}.spm.stats.factorial_design.dir   = {out_dir};
+g                                               = 1;
 
+if do_nosub_anova_model
+matlabbatch{g}.spm.stats.factorial_design.dir   = {out_dir};
 for i = 1:numel(con_names) % contrast loop start            
     all_scans       = [];    
     for j = 1:numel(all_subs) % 2nd level subject loop start
-        name        = sprintf('sub%03d',subs{np}(i));
+        name        = sprintf('sub%03d',all_subs(j));
         a_dir       = fullfile(base_dir, name, anadirname);
         swcon_templ = sprintf('s%d%scon_%04d.nii',skern, dartel_prefix, i);        
         swcon_file  = spm_select('FPList', a_dir, swcon_templ);        
         all_scans   = char(all_scans, swcon_file);        
     end % 2nd level subject loop end
     
-    matlabbatch{1}.spm.stats.factorial_design.des.anova.icell(i).scans = cellstr(all_files);
-    matlabbatch{1}.spm.stats.factorial_design.des.anova.dept = 1;
-    matlabbatch{1}.spm.stats.factorial_design.des.anova.variance = 1;
-    matlabbatch{1}.spm.stats.factorial_design.des.anova.gmsca = 0;
-    matlabbatch{1}.spm.stats.factorial_design.des.anova.ancova = 0;
+    matlabbatch{g}.spm.stats.factorial_design.des.anova.icell(i).scans = cellstr(all_scans);
+    matlabbatch{g}.spm.stats.factorial_design.des.anova.dept = 1;
+    matlabbatch{g}.spm.stats.factorial_design.des.anova.variance = 1;
+    matlabbatch{g}.spm.stats.factorial_design.des.anova.gmsca = 0;
+    matlabbatch{g}.spm.stats.factorial_design.des.anova.ancova = 0;
     
-    matlabbatch{1}.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
-    matlabbatch{1}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
-    matlabbatch{1}.spm.stats.factorial_design.masking.tm.tm_none = 1;
-    matlabbatch{1}.spm.stats.factorial_design.masking.im = 1;
-    matlabbatch{1}.spm.stats.factorial_design.masking.em = {fullfile(base_dir, 'secondLevel', mask_name)};
-    matlabbatch{1}.spm.stats.factorial_design.globalc.g_omit = 1;
-    matlabbatch{1}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
-    matlabbatch{1}.spm.stats.factorial_design.globalm.glonorm = 1;
+    matlabbatch{g}.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
+    matlabbatch{g}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
+    matlabbatch{g}.spm.stats.factorial_design.masking.tm.tm_none = 1;
+    matlabbatch{g}.spm.stats.factorial_design.masking.im = 1;
+    matlabbatch{g}.spm.stats.factorial_design.masking.em = {fullfile(base_dir, 'second_Level', [mask_name '.nii'])};
+    matlabbatch{g}.spm.stats.factorial_design.globalc.g_omit = 1;
+    matlabbatch{g}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
+    matlabbatch{g}.spm.stats.factorial_design.globalm.glonorm = 1;
+    g = g+1;
 end
 
 %-------------------------MODEL ESTIMATION---------------------------------
-matlabbatch{2}.spm.stats.fmri_est.spmmat = {[out_dir '\SPM.mat']};
-matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
-
+matlabbatch{g}.spm.stats.fmri_est.spmmat = {fullfile(out_dir, 'SPM.mat')};
+matlabbatch{g}.spm.stats.fmri_est.method.Classical = 1;
+g = g+1;
+end
 %-------------------------CONTRAST SPECIFICATION---------------------------
-% insert contrats here
+if do_nosub_anova_cons
+    
+end
 
-if do_nosub_anova
+
     spm_jobman('initcfg');
     spm('defaults', 'FMRI');
     spm_jobman('run',matlabbatch);
     copyfile(which(mfilename),out_dir);
-end
 %--------------------------------------------------------------------------
 % SECOND LEVEL no subject ANOVA END
 %--------------------------------------------------------------------------
