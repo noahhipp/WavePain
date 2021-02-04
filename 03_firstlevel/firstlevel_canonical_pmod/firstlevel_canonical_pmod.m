@@ -446,6 +446,7 @@ for i = 1:numel(pmod_names)
     template.spm.stats.con.consess{ci}.tcon.name    = pmod_names{i};
     template.spm.stats.con.consess{ci}.tcon.convec  = tcons(i,:);
     template.spm.stats.con.consess{ci}.tcon.sessrep = 'none';
+    ci = ci+1;
 end
 
 if do_nosub_anova_cons
