@@ -16,8 +16,8 @@ switch hostname
 end
 
 % Subs
-%all_subs = 5;
-all_subs = [5:12 14:53];
+all_subs = 10;
+%all_subs = [5:12 14:53];
 
 % Settings
                        
@@ -36,7 +36,7 @@ do_nosub_anova_cons = 1;
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
-stick_resolution    = 1; % /seconds so many sticks we want for now
+stick_resolution    = 10; % /seconds so many sticks we want for now
 anadirname          = 'canonical_pmodV2';
 
 % Each subject has two sessions. Sessions are also used to distinquish
@@ -51,11 +51,11 @@ strip_str           = 's3skull_strip.nii';
 flow_str            = '^u_rc.*\.nii';
 realign_str         =  '^rp_afMR.*\.txt';
 
-rfunc_file         = '^rafMRI.nii';
+rfunc_file         = '^srafMRI.nii';
 conditions          = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
 pmod_names          = {'heat', 'wm', 'slope',...
     'heat_X_wm', 'heat_X_slope','wm_X_slope',...
-    'heat_X_wm_X_slope'}; % regressor
+    'heat_X_wm_X_slope', 'ramp_up', 'ramp_down'}; % regressor
 mat_name          = which(mfilename);
 
 to_warp             = 'con_%04.4d.nii';

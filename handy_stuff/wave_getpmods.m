@@ -98,16 +98,17 @@ function [batch,xq] = scale_ramp_sample_pmods(heat,wm, slope, freq, temps)
 N = numel(heat);
 template = [];
 
-% heat
+% heat (the scaling becomes redundant now that we have seperate ramp
+% regressor)
 heat = heat.*(temps.peak-temps.lead); % amplitude
 heat = heat+temps.lead; % lead in
-template(:,1) = zscore([32 heat 32]);
+template(:,1) = zscore([temps.lead heat temps.lead]);
 
 % wm
 template(:,2) = zscore([0 wm 0]);
 
 % slope
-template(:,3) = zscore([1 slope -1]);
+template(:,3) = zscore([0 slope 0]);
 
 % heat x wm
 template(:,4) = template(:,1).*template(:,2);
@@ -121,12 +122,28 @@ template(:,6) = template(:,2).*template(:,3);
 % heat x wm x slope
 template(:,7) = template(:,1).*template(:,2).*template(:,3);
 
-% Construct corresponding time vectors
+% Construct time vectors
 x  = [-temps.to_lead linspace(0,110,N), 110+ temps.to_lead];
-xq = -temps.to_lead:freq:110+temps.to_lead;
+xq = -temps.to_lead:1/freq:110+temps.to_lead;
 
-% Prepare template
+% Resample template
 batch = [];
-for i = 1:size(template,2)
+n = size(template,2);
+for i = 1:n
     batch(:,i) = interp1(x,template(:,i),xq);
 end
+
+% Add ramp up ramp down
+ramp_up_index               = xq < 0;
+ramp_down_index             = xq > 110;
+ramp_up                     = zeros(size(batch,1),1);
+ramp_up(ramp_up_index)      = 1;
+ramp_down                   = zeros(size(batch,1),1);
+ramp_down(ramp_down_index)  = 1;
+
+batch(:,n+1) = ramp_up;
+batch(:,n+2) = ramp_down;
+
+
+
+
