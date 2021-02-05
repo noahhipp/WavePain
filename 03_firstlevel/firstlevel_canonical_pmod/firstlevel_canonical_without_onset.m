@@ -1,4 +1,4 @@
-function firstlevel_canonical_pmod
+function firstlevel_canonical_without_onset
 % specify firstlevel pmod with parametrically modulated stick functions
 
 hostname =  char(getHostName(java.net.InetAddress.getLocalHost));
@@ -8,7 +8,7 @@ switch hostname
         n_proc            = 2;
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 6;
+        n_proc            = 4;
         code_dir          = '/home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/';
         cd(fullfile(code_dir, 'logs'));
     otherwise
@@ -16,16 +16,16 @@ switch hostname
 end
 
 % Subs
-%all_subs = 5;
-all_subs = [6:12 14:53]; 
+all_subs = 10;
+%all_subs = [5:12 14:53];
 
 % Settings
                        
 %-firstlevel
 do_model            = 1;
 do_cons             = 1;
-do_warp             = 1;
-do_smooth           = 1;
+do_warp             = 0;
+do_smooth           = 0;
 
 %-secondlevel
 do_mask             = 0;
@@ -37,7 +37,7 @@ TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = 6; % smoothing kernel
 stick_resolution    = 10; % /seconds so many sticks we want for now
-anadirname          = 'canonical_pmodV3';
+anadirname          = 'canonical_pmodV4';
 
 % Each subject has two sessions. Sessions are also used to distinquish
 % subjects --> conceputal distance between eg sub10 sess1 - sub10sess2 =
@@ -51,7 +51,7 @@ strip_str           = 's3skull_strip.nii';
 flow_str            = '^u_rc.*\.nii';
 realign_str         =  '^rp_afMR.*\.txt';
 
-rfunc_file         = '^rafMRI.nii';
+rfunc_file         = '^srafMRI.nii';
 conditions          = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
 pmod_names          = {'heat', 'wm', 'slope',...
     'heat_X_wm', 'heat_X_slope','wm_X_slope',...
@@ -90,11 +90,17 @@ for np = 1:size(subs,2) % core loop start
         st_dir          = fullfile(base_dir, name,'run000/mrt/');
         sub_res         = all_RES.(name); % condition onsets
         mepi_dir        = fullfile(st_dir, 'mean_epi');
+        spm_mat         = fullfile(base_dir, name, 'canonical_pmodV3', 'SPM.mat');
         strip_file      = spm_select('FPList', mepi_dir, strip_str); 
         struc_file      = spm_select('FPList', st_dir, struc_templ);
         u_rc1_file      = spm_select('FPList', mepi_dir, flow_str);         
-        sub_temps       = temps(temps.id == subs{np}(i),:);        
+        sub_temps       = temps(temps.id == subs{np}(i),:);                        
         a_dir = fullfile(base_dir, name, anadirname);
+        
+        load(spm_mat, 'SPM');
+        M = SPM.xX.X;
+        
+        
         if ~exist(a_dir, 'dir')
             mkdir(a_dir)
         end
@@ -131,37 +137,49 @@ for np = 1:size(subs,2) % core loop start
             % Collect onsets and create conditions
             RES     = sub_res{j};            
             
-            % Assesmble onsets vector and pmods matrix by looping through
-            % conditions
-            all_onsets = [];
-            all_pmods  = [];
-            for conds = 1:numel(conditions) % condition loop start
-                onset       = RES{conds}.onset; % seconds  
-                cond_name   = RES{conds}.name;
-                [onsets, pmods] = wave_getpmods(onset, cond_name, stick_resolution, sub_temps); % onset and onsets still in seconds
-                all_onsets      = vertcat(all_onsets, onsets);
-                all_pmods       = vertcat(all_pmods, pmods);
-            end % condition loop end                        
+%             % Assesmble onsets vector and pmods matrix by looping through
+%             % conditions
+%             all_onsets = [];
+%             all_pmods  = [];
+%             for conds = 1:numel(conditions) % condition loop start
+%                 onset       = RES{conds}.onset; % seconds  
+%                 cond_name   = RES{conds}.name;
+%                 [onsets, pmods] = wave_getpmods(onset, cond_name, stick_resolution, sub_temps); % onset and onsets still in seconds
+%                 all_onsets      = vertcat(all_onsets, onsets);
+%                 all_pmods       = vertcat(all_pmods, pmods);
+%             end % condition loop end                        
+%             
+%             template.spm.stats.fmri_spec.sess(j).cond.name     = 'stim';
+%             template.spm.stats.fmri_spec.sess(j).cond.onset    = (all_onsets ./ TR) -1;
+%             template.spm.stats.fmri_spec.sess(j).cond.duration = 0;
+%             template.spm.stats.fmri_spec.sess(j).cond.orth     = 1;
+%             template.spm.stats.fmri_spec.sess(j).cond.tmod     = 0;
+%             
+%             for pmod = 1:numel(pmod_names) % parametric modulator loop start
+%                 template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).name = pmod_names{pmod};
+%                 template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).param = all_pmods(:,pmod);
+%                 template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).poly = 1;
+%             end % parametric modulator loop end              
+            if j == 1
+                sM = M(1:SPM.nscan(1),2:10);
+            else
+                sM = M(SPM.nscan(1)+1:end,18:26);
+            end
             
-            template.spm.stats.fmri_spec.sess(j).cond.name     = 'stim';
-            template.spm.stats.fmri_spec.sess(j).cond.onset    = (all_onsets ./ TR) -1;
-            template.spm.stats.fmri_spec.sess(j).cond.duration = 0;
-            template.spm.stats.fmri_spec.sess(j).cond.orth     = 1;
-            template.spm.stats.fmri_spec.sess(j).cond.tmod     = 0;
+            % Now loop through old design matrix
+            n = size(sM,2);
+            for k = 1:n
+                template.spm.stats.fmri_spec.sess(j).regress(k) = struct('name', cellstr(pmod_names{k}), 'val', sM(:,k));
+            end
             
-            for pmod = 1:numel(pmod_names) % parametric modulator loop start
-                template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).name = pmod_names{pmod};
-                template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).param = all_pmods(:,pmod);
-                template.spm.stats.fmri_spec.sess(j).cond.pmod(pmod).poly = 1;
-            end % parametric modulator loop end            
-            
-            
+
+
             % Movement parameters black box
             movement        = normalize(load(fm));
             all_nuis{j}     = movement;
             n_nuis          = size(all_nuis{j},2);
             for nuis = 1:n_nuis % movement parameters loop start
-                template.spm.stats.fmri_spec.sess(j).regress(nuis) = struct('name', cellstr(num2str(nuis)), 'val', all_nuis{j}(:,nuis));
+                template.spm.stats.fmri_spec.sess(j).regress(nuis+n) = struct('name', cellstr(num2str(nuis)), 'val', all_nuis{j}(:,nuis));
             end % movement parameter loop end            
         end % session loop end        
         
@@ -183,20 +201,19 @@ for np = 1:size(subs,2) % core loop start
         template            = [];        
         if isempty(contrasts)            
             con_names       = pmod_names;           
-            contrasts(1,:)  = repmat([0 1 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat
-            contrasts(2,:)  = repmat([0 0 1 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm
-            contrasts(3,:)  = repmat([0 0 0 1 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % slope
-            contrasts(4,:)  = repmat([0 0 0 0 1 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat_X_wm
-            contrasts(5,:)  = repmat([0 0 0 0 0 1 0 0 0 0 zeros(1,6)],1,n_sess); % heat_X_slope
-            contrasts(6,:)  = repmat([0 0 0 0 0 0 1 0 0 0 zeros(1,6)],1,n_sess); % wm_X_slope
-            contrasts(7,:)  = repmat([0 0 0 0 0 0 0 1 0 0 zeros(1,6)],1,n_sess); % heat_X_wm_X_slope                                               
-            contrasts(8,:)  = repmat([0 0 0 0 0 0 0 0 1 0 zeros(1,6)],1,n_sess); % ramp_up
-            contrasts(9,:)  = repmat([0 0 0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % ramp_down
-        end        
+            contrasts(1,:)  = repmat([1 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat
+            contrasts(2,:)  = repmat([0 1 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm
+            contrasts(3,:)  = repmat([0 0 1 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % slope
+            contrasts(4,:)  = repmat([0 0 0 1 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat_X_wm
+            contrasts(5,:)  = repmat([0 0 0 0 1 0 0 0 0 zeros(1,6)],1,n_sess); % heat_X_slope
+            contrasts(6,:)  = repmat([0 0 0 0 0 1 0 0 0 zeros(1,6)],1,n_sess); % wm_X_slope
+            contrasts(7,:)  = repmat([0 0 0 0 0 0 1 0 0 zeros(1,6)],1,n_sess); % heat_X_wm_X_slope                                               
+            contrasts(8,:)  = repmat([0 0 0 0 0 0 0 1 0 zeros(1,6)],1,n_sess); % heat_X_wm_X_slope                                                
+            contrasts(9,:)  = repmat([0 0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % heat_X_wm_X_slope                                                
+        end
         
-%         % Make negative contrasts
-%         contrasts = vertcat(contrasts, -contrasts);
-%         con_names = [con_names, strcat('-',con_names)];
+        contrasts = vertcat(contrasts, -contrasts);
+        con_names = [con_names, strcat('-',con_names)];
         
         template.spm.stats.con.spmmat   = {[a_dir filesep 'SPM.mat']};
         template.spm.stats.con.delete   = 1;        
