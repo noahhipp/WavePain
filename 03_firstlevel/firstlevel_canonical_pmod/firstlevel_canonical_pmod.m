@@ -8,7 +8,7 @@ switch hostname
         n_proc            = 2;
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 6;
+        n_proc            = 12;
         code_dir          = '/home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/';
         cd(fullfile(code_dir, 'logs'));
     otherwise
@@ -17,25 +17,25 @@ end
 
 % Subs
 %all_subs = 5;
-all_subs = [6:12 14:53]; 
+all_subs = [5:12 14:53]; 
 
 % Settings
                        
 %-firstlevel
-do_model            = 1;
-do_cons             = 1;
-do_warp             = 1;
-do_smooth           = 1;
+do_model            = 0;
+do_cons             = 0;
+do_warp             = 0;
+do_smooth           = 0;
 
 %-secondlevel
 do_mask             = 0;
 do_ttest            = 0;
 do_nosub_anova_model= 0;
-do_nosub_anova_cons = 0;
+do_nosub_anova_cons = 1;
 
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
-skern               = 6; % smoothing kernel
+skern               = [6 6 6]; % smoothing kernel
 stick_resolution    = 10; % /seconds so many sticks we want for now
 anadirname          = 'canonical_pmodV3';
 
@@ -260,7 +260,7 @@ for np = 1:size(subs,2) % core loop start
          template   = [];
          template.spm.spatial.smooth.data = cellstr(wcon_dartel_files2);
          template.spm.spatial.smooth.fwhm = skern;
-         template.spm.spatial.smooth.prefix = ['s' num2str(skern)];
+         template.spm.spatial.smooth.prefix = ['s' num2str(skern(1))];
         %------------------------------------------------------------------
         % SMOOTH SPECIFICATION END
         %------------------------------------------------------------------            
@@ -271,7 +271,7 @@ for np = 1:size(subs,2) % core loop start
         end                        
     end % subject loop end
     
-    % PASS BATCH TO CORE
+    % PASS BATCH TO CORE    
     if ~isempty(matlabbatch)
         check = 0;
         run_matlab(np, matlabbatch, check);
@@ -286,7 +286,7 @@ end % core loop end
 
 matlabbatch = [];
 all_cons    = [];
-con_string  = sprintf('^s%d%scon', skern, dartel_prefix);
+con_string  = sprintf('^s%d%scon', skern(1), dartel_prefix);
 mask_name   = 'mask_all_canonical_pmod';
 
 for i = 1:numel(all_subs)
@@ -316,18 +316,17 @@ end
 % SECOND LEVEL t-Test START (one 2nd level per contrasts --> 7 ttests)% 
 %--------------------------------------------------------------------------
 anadirname2          = strcat('second_level_ttest', anadirname);
-all_con             = 1:7;
 for i = 1:numel(con_names) % contrast loop start
     
     % House keeping
-    con_folder      = sprintf('%02d_%s_contrast%02d', i, con_names{i}, skern);
+    con_folder      = sprintf('%02d_%s_contrast%02d', i, con_names{i}, skern(1));
     out_dir         = fullfile(base_dir, 'second_Level', anadirname2, con_folder);        
     matlabbatch     = [];    
     
     for j = 1:numel(all_subs) % 2nd level subject loop start
         name        = sprintf('sub%03d',all_subs(j));
         a_dir       = fullfile(base_dir, name, anadirname);
-        swcon_templ = sprintf('s%d%scon_%04d.nii',skern, dartel_prefix, i);
+        swcon_templ = sprintf('s%d%scon_%04d.nii',skern(1), dartel_prefix, i);
         
         swcon_file  = spm_select('FPList', a_dir, swcon_templ);
         if j == 1; all_scans = swcon_file; else
@@ -384,7 +383,7 @@ end % contrast loop end
 %--------------------------------------------------------------------------
 % Housekeeping
 anadirname2     = strcat('second_level_anova', anadirname);
-all_con         = 1:7;
+all_con         = 1:9;
 out_dir         = fullfile(base_dir, 'second_Level', anadirname2);
 if ~exist(out_dir)
     mkdir(out_dir)
@@ -401,12 +400,13 @@ for i = 1:numel(con_names) % contrast loop start
     for j = 1:numel(all_subs) % 2nd level subject loop start
         name        = sprintf('sub%03d',all_subs(j));
         a_dir       = fullfile(base_dir, name, anadirname);
-        swcon_templ = sprintf('s%d%scon_%04d.nii',skern, dartel_prefix, i);        
+        swcon_templ = sprintf('s%d%scon_%04d.nii',skern(1), dartel_prefix, i);        
         swcon_file  = spm_select('FPList', a_dir, swcon_templ);        
-        all_scans   = char(all_scans, swcon_file);        
+        all_scans   = strvcat(all_scans, swcon_file);        
     end % 2nd level subject loop end
     
     template.spm.stats.factorial_design.des.anova.icell(i).scans = cellstr(all_scans);
+end
     template.spm.stats.factorial_design.des.anova.dept = 1;
     template.spm.stats.factorial_design.des.anova.variance = 1;
     template.spm.stats.factorial_design.des.anova.gmsca = 0;
@@ -420,7 +420,6 @@ for i = 1:numel(con_names) % contrast loop start
     template.spm.stats.factorial_design.globalc.g_omit = 1;
     template.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
     template.spm.stats.factorial_design.globalm.glonorm = 1;    
-end
 
 if do_nosub_anova_model
     matlabbatch{g} = template;
@@ -448,6 +447,14 @@ template.spm.stats.con.consess{ci}.fcon.name     = 'eoi';
 template.spm.stats.con.consess{ci}.fcon.convec   = eye(numel(pmod_names));
 ci = ci+1;
 
+template.spm.stats.con.consess{ci}.fcon.name     = 'eoi_without_ramps';
+template.spm.stats.con.consess{ci}.fcon.convec   = [eye(numel(pmod_names)-2) zeros(7,2)];
+ci = ci+1;
+
+% Prepare flipped tcons
+pmod_names = [pmod_names, strcat('-',pmod_names)];
+tcons = vertcat(tcons, -tcons);
+
 for i = 1:numel(pmod_names)
     template.spm.stats.con.consess{ci}.tcon.name    = pmod_names{i};
     template.spm.stats.con.consess{ci}.tcon.convec  = tcons(i,:);
@@ -460,11 +467,12 @@ if do_nosub_anova_cons
     g = g+1;
 end
 
-
-spm_jobman('initcfg');
-spm('defaults', 'FMRI');
-spm_jobman('run',matlabbatch);
-copyfile(which(mfilename),out_dir);
+if ~isempty(matlabbatch)
+    spm_jobman('initcfg');
+    spm('defaults', 'FMRI');
+    spm_jobman('run',matlabbatch);
+    copyfile(which(mfilename),out_dir);
+end
 %--------------------------------------------------------------------------
 % SECOND LEVEL no subject ANOVA END
 %--------------------------------------------------------------------------

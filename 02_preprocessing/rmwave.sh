@@ -14,7 +14,7 @@ for folder in $folders; do
     $folder"
     
     for run_folder in $run_folders; do
-	    if [[ "sub010/" == *$folder* ]]; # leave this as example for old ones
+	    if [[ "sub013/" == *$folder* ]]; # leave this as example for old ones
             then
               continue 
     	    fi
@@ -22,7 +22,9 @@ for folder in $folders; do
 #	    echo "$run_folder"
 
         # Do stuff
-	    rm  canonical* -r -f
+	    cd canonical_pmodV3
+	    rm s6* -f
+	    cd ../
 
 #	    cd ../ # leave run_folder
     done
