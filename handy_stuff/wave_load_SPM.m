@@ -27,11 +27,11 @@ ana_ws = sprintf('%s_SPM', ananame);
 % check whether desired SPM.mat is already in memory and act accordingly
 try
     SPM = evalin('base',ana_ws);
-    fprintf('Found %s in base workspace... proceeding\n', ana_ws);
+    fprintf('Found %40s in base workspace.\n', ana_ws);
 catch
     load(ana_crunchie, 'SPM');
     assignin('base', ana_ws, SPM);
-    fprintf('Successfully assigned %s to base workspace... proceeding\n', ana_ws);
+    fprintf('Successfully assigned %40s to base workspace.\n', ana_ws);
 end
 
 % extract desired values want from spm mat
