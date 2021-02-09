@@ -31,7 +31,7 @@ try
 catch
     load(ana_crunchie, 'SPM');
     assignin('base', ana_ws, SPM);
-    fprintf('Successfully assigned %s to base workspae... proceeding\n', ana_ws);
+    fprintf('Successfully assigned %s to base workspace... proceeding\n', ana_ws);
 end
 
 % extract desired values want from spm mat
