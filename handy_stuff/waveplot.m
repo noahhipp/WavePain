@@ -23,11 +23,15 @@ if nargin > 2
 end
 
 % No task, 1back, 2back
+c = wave_load_colors;
+
 colors = [0 0 0;... % no task
-          0 0 1;... % 1back         
-          1 0 0;... % 2back
+          c(2,:);... % 1back         
+          c(1,:);... % 2back
           0 1 1;... % 2back-1back   
-          1 1 0];   % 1back-2back
+          1 1 0;...   % 1back-2back
+          c(5,:)];
+      
     
 [~,ticks] = getBinBarPos(n_wave);
 
@@ -71,10 +75,10 @@ switch condition
         cs = [1, 4, 5, 1];
         legend_labels = {'FIR (no task)', 'FIR (2back)-FIR (1back)', 'FIR (1back)-FIR (2back)'};
     case 'Monline'
-        cs = ones(1,4);
+        cs = ones(1,4).*6;
         legend_labels = {'FIR (no task)'};
     case 'Wonline'
-        cs = ones(1,4);
+        cs = ones(1,4).*6;
         legend_labels = {'FIR (no task)'};
 end
 

@@ -15,9 +15,11 @@ function [vox] = mm2voxel(mm, xSPM)
     mm = [mm; ones(1, size(mm, 2))];
     iM = xSPM.iM;
     vox = iM * mm;
-    vox = vox(1:3, :);
+    vox = vox(1:3, :);        
     if transpose
         vox = vox';
     end
+    
+    
 
 end

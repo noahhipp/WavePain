@@ -38,7 +38,7 @@ end
 %------------------------------PREPARING STUFF-END-------------------------
 
 %------------------------------PLOTTING ACTION ----------------------------
-y_label = 'Activation';
+y_label = 'fMRI signal [au]';
 hold on;
 pmod_names          = {'Heat', 'WM', 'Slope',...
         'Heat X WM', 'Heat X Slope','WM X Slope',...
