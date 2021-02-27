@@ -73,6 +73,19 @@ parametric_contrasts.m12 = m12;
 parametric_contrasts.w21 = w21;
 parametric_contrasts.w12 = w12;
 
+heat  = [m_unit m_unit w_unit w_unit m_unit w_unit];
+wm    = [tbob obtb tbob obtb zeros(1,120)];
+slope = [dsus dsus usds usds dsus usds];
+
+parametric_contrasts.heat               = heat;
+parametric_contrasts.wm                 = wm;
+parametric_contrasts.slope              = slope;
+parametric_contrasts.heat_X_wm          = heat.*wm;
+parametric_contrasts.heat_X_slope       = heat.*slope;
+parametric_contrasts.wm_X_slope         = wm.*slope;
+parametric_contrasts.heat_X_wm_X_slope  = heat.*wm.*slope;
+
+
 % Plot
 if show
     [~,ticks] = getBinBarPos(110);

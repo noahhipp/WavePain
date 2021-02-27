@@ -1,4 +1,4 @@
-convfunction fir_contrasts
+function fir_contrasts
 % Defines all the contrasts for 60*2s FIR analysis of wavepain mri data
 
 % Makes 3 Parametric contrasts for second_level_anova of wavepain:
@@ -9,17 +9,7 @@ convfunction fir_contrasts
 
 
 % House keeping
-hostname =  char(getHostName(java.net.InetAddress.getLocalHost));
-switch hostname
-    case 'DESKTOP-3UBJ04S'
-        base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
-        n_proc            = 2;
-    case 'revelations'
-        base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 4;
-    otherwise
-        error('Only hosts noahs isn laptop accepted');
-end
+[base_dir, n_proc] = wave_ghost; 
 
 % Settings
 do_plot = 0;

@@ -2,18 +2,8 @@ function data = wave_load_SPM(ananame, cons_to_extract)
 % loads second level wavepain analysis to base workspace and extracts some
 % data 
 
-hostname =  char(getHostName(java.net.InetAddress.getLocalHost));
-switch hostname
-    case 'DESKTOP-3UBJ04S'
-        base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
-        n_proc            = 2;
-    case 'revelations'
-        base_dir          = '/projects/crunchie/hipp/wavepain/';        
-        code_dir          = '/home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/';
-        cd(fullfile(code_dir, 'plotting'));
-    otherwise
-        error('Only hosts noahs isn laptop accepted');
-end
+% Collect path
+[base_dir] = wave_ghost;
 
 % load coordinates
 xyz = wave_load_coordinates;

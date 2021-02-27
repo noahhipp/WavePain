@@ -67,11 +67,16 @@ if new
     ax.XAxis.TickLabelInterpreter = 'none';
     xtickangle(90);
     xlabel('Contrasts', 'FontWeight', 'bold');
-    ylabel(y_label, 'FontWeight', 'bold');
+    ylabel(y_label, 'FontWeight', 'bold');    
 end
 
 % title
 fig_title = sprintf('CANONICAL PMOD ANOVA for x=%1.1f y=%1.1f z=%1.1f', xyz_mm);
 sgtitle(fig_title, 'FontWeight', 'bold', 'FontSize', 16);
+
+% safe stuff to binary files
+wave_save_ylims(ylim);
+wave_save(data{1}.contrast, 'betas');
+wave_save(data{1}.contrast, 'custom_betas');
 
 fprintf('done!\n');

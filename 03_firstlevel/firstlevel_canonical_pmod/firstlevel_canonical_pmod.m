@@ -1,23 +1,11 @@
 function firstlevel_canonical_pmod
 % specify firstlevel pmod with parametrically modulated stick functions
 
-hostname =  char(getHostName(java.net.InetAddress.getLocalHost));
-switch hostname
-    case 'DESKTOP-3UBJ04S'
-        base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
-        n_proc            = 2;
-    case 'revelations'
-        base_dir          = '/projects/crunchie/hipp/wavepain/';
-        n_proc            = 12;
-        code_dir          = '/home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/';
-        cd(fullfile(code_dir, 'logs'));
-    otherwise
-        error('Only hosts noahs isn laptop accepted');
-end
+[base_dir, n_proc, code_dir] = wave_ghost;
 
 % Subs
 %all_subs = 5;
-all_subs = [5:12 14:53]; 
+all_subs = [6:12 14:53]; 
 
 % Settings
                        
@@ -31,7 +19,7 @@ do_smooth           = 0;
 do_mask             = 0;
 do_ttest            = 0;
 do_nosub_anova_model= 0;
-do_nosub_anova_cons = 1;
+do_nosub_anova_cons = 0;
 
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat

@@ -10,8 +10,3 @@ xyz = fread(fid, 'double');
 xyz_mm = xyz(4:6);
 xyz = xyz(1:3);
 fclose(fid);
-
-% fprintf('Before rounding: %f %f %f\n', xyz);
-% fprintf('After rounding: %f %f %f\n', spm_XYZreg('roundCOords',xyz));
-% 
-

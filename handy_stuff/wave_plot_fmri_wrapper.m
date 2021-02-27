@@ -3,17 +3,8 @@ function wave_plot_fmri_wrapper
 % If figures are open update title
 wave_updating;
 
-hostname =  char(getHostName(java.net.InetAddress.getLocalHost));
-switch hostname
-    case 'DESKTOP-3UBJ04S'
-        error('this does not work, sorry');
-    case 'revelations'
-        base_dir          = '/projects/crunchie/hipp/wavepain/';        
-        code_dir          = '/home/hipp/projects/WavePain/code/matlab/fmri/03_firstlevel/firstlevel_canonical_pmod/';
-        cd(fullfile(code_dir, 'plotting'));
-    otherwise
-        error('Only hosts noahs isn laptop accepted');
-end
+[~, ~, code_dir] = wave_ghost;
+cd(fullfile(code_dir, 'plotting'));
 
 % Save coordinates
 global st;
@@ -22,7 +13,7 @@ fprintf('\n\n STARTING NEW PLOTTING CYCLE FOR: X: %.2f, Y: %.2f Z: %.2f\n', st.c
 wave_save_coordinates(st.centre, xSPM);
 
 
-% Load data from FIR SPM
+% Load data from FIR SPM, then save to binary file for rapid access
 fir_data = wave_load_SPM('fir_anova_6', 1:6);
 
 % Load data from Canonical pmod ANOVA
