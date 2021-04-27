@@ -17,14 +17,19 @@ index_test = 0;
 n_wave      = numel(y);
 n           = n_wave;
 error       = zeros(n, 1);
+
 if nargin > 2
-    error  =varargin{1};
+    error  = varargin{1};
+end
+
+if nargin > 3    
     n_wave  =varargin{2}; 
 end
 
 % No task, 1back, 2back
 c = wave_load_colors;
 
+% Hard to see: We create c using some colors from c = wave_load_colors
 colors = [0 0 0;... % no task
           c(2,:);... % 1back         
           c(1,:);... % 2back
