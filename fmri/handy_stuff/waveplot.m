@@ -40,7 +40,7 @@ colors = [0 0 0;... % no task
     
 [~,ticks] = getBinBarPos(n_wave);
 
-x               = linspace(1,119,n); % each bin is 
+x               = linspace(1,110,n); % each bin is 
 xx              = 1:n; % indices of x, used for constructing index table
 ind             = table;
 ind.pre_task    = xx <= ticks(2) + 1;

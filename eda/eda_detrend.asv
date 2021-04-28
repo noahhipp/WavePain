@@ -1,12 +1,11 @@
 function eda_detrend
 % Removes linear trend within session and/or within trial
 
-within_session = 1;
-within_trial_zscore    = 0;
+within_session = 0;
+within_trial_zscore    = 1;
 within_trial_detrend   = 1;
 
 start_from             = 'native_scl';
-goto                   = 'zdtdt_scl';
 
 % Housekeeping
 eda_name_in        = 'all_eda_clean_downsampled.csv';
@@ -15,7 +14,7 @@ eda_name_out       = 'all_eda_clean_downsampled.csv';
 eda_file_in       = fullfile(eda_dir, eda_name_in);
 eda_file_out      = fullfile(eda_dir, eda_name_out);
 
-check_name        = 'all_eda_clean_downsampled_has_zdtdt_scl.bin';
+check_name        = 'all_eda_clean_downsampled_has_zdt_scl.bin';
 check_file        = fullfile(eda_dir, check_name);
 
 % Avoid double work or work without task
@@ -29,7 +28,7 @@ end
 data            = readtable(eda_file_in);
 
 % Preallocate empty column
-data{:,goto}  = nan(height(data),1);
+data.zdt_scl  = nan(height(data),1);
 
 % Loop over data
 for i = unique(data.ID)'
@@ -43,10 +42,10 @@ for i = unique(data.ID)'
         
         % Manipulate it
         if within_session
-            session{:,goto} = detrend(session{:,start_from});
+            session.zdtm_scl = detrend(session{:,start_from});
             fprintf('- detrended -\n');
         else
-            session{:,goto} = session{:,start_from};
+            session.zdtm_scl = session{:,start_from};
         end
         
         for k = unique(session.trial)'
@@ -57,13 +56,11 @@ for i = unique(data.ID)'
                 k, height(trial));
             
             % Manipulate it
-            if within_trial_zscore
-                trial{:,goto} = zscore(trial{:,goto});
-            end
+            if within_trial_
             
             if within_trial_detrend
-                trial{:,goto} = detrend(trial{:,goto});
-                fprintf(' - detrended - ');
+                trial.zdtm_scl = trial.zdtm_scl - mean(trial.zdtm_scl);
+                fprintf(' - demeaned - ');
             end
             
             % Put trial back
