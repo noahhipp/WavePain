@@ -7,7 +7,6 @@ else
     xlims = [0,110];
 end
 
-
 [~,ticks] = getBinBarPos(110);
 xlim(xlims);
 xticks([0 ticks(2:2:6) 110]);
