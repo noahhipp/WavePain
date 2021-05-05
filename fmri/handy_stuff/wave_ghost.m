@@ -10,7 +10,12 @@ switch hostname
     case 'DESKTOP-3UBJ04S'
         base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
         n_proc            = 2;
-        eda_dir           = 'C:\Users\hipp\projects\WavePain\data\fmri_sample\eda';
+        if ~nargin
+            eda_dir           = 'C:\Users\hipp\projects\WavePain\data\fmri_sample\eda';
+        elseif strcmp(varargin{1}, 'behav')
+            eda_dir           = 'C:\Users\hipp\projects\WavePain\data\behav_sample\eda\';
+        end             
+        
         cloud_dir         = 'C:\Users\hipp\OneDrive - Universität Hamburg\projects\wavepain\results';
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';        
