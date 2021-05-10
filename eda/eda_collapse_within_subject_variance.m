@@ -3,8 +3,8 @@ function eda_collapse_within_subject_variance
 % per subject (one for each condition)
 
 % Housekeeping
-eda_name_in        = 'all_eda_clean_downsampled.csv';
-eda_name_out       = 'all_eda_clean_downsampled_collapsed.csv';
+eda_name_in        = 'all_eda_clean_downsampled10.csv';
+eda_name_out       = 'all_eda_clean_downsampled10_collapsed.csv';
 [~,~,~,eda_dir] = wave_ghost;
 eda_file_in       = fullfile(eda_dir, eda_name_in);
 eda_file_out      = fullfile(eda_dir, eda_name_out);

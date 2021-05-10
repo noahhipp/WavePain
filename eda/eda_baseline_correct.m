@@ -1,12 +1,12 @@
 function eda_baseline_correct
 
-eda_name_in       = 'all_eda_clean_downsampled_collapsed.csv';
-eda_name_out      = 'all_eda_clean_downsampled_collapsed.csv';
-[~,~,~,eda_dir] = wave_ghost;
+eda_name_in       = 'all_eda_clean_downsampled10_collapsed.csv';
+eda_name_out      = 'all_eda_clean_downsampled10_collapsed.csv';
+[~,~,~,eda_dir] = wave_ghost();
 eda_file_in       = fullfile(eda_dir, eda_name_in);
 eda_file_out      = fullfile(eda_dir, eda_name_out);
 
-check_name        = 'all_eda_clean_downsampled_collapsed_has_baseline_corrected_zdt_scl.bin';
+check_name        = 'all_eda_clean_downsampled10_collapsed_has_baseline_corrected_zdt_scl.bin';
 check_file        = fullfile(eda_dir, check_name);
 
 % Avoid double work or work without task
@@ -19,13 +19,18 @@ end
 data = readtable(eda_file_in);
 
 
-cols_to_base = 'zdt_scl';
+cols_to_base = 'scl';
 new_col         = strcat(cols_to_base, '_bl');
 data{:,new_col} = nan(height(data),1);
+
 
 for i = unique(data.ID)'
     % Pick subject
     sub = data(data.ID == i,:);
+    
+    if i < 15 % then we have no online scl to use for basing
+        continue
+    end
     
     % Pick baseline
     m = sub{sub.condition == 5, cols_to_base};

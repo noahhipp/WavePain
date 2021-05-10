@@ -3,11 +3,13 @@ function ds_data = eda_downsample
 % in. according to björn there is no benefit of using that much information
 
 % Housekeeping
-eda_name_in        = 'all_eda_clean.csv';
-eda_name_out       = 'all_eda_clean_downsampled.csv';
-[~,~,~,eda_dir] = wave_ghost;
+eda_name_in        = 'all_eda_behav.csv';
+eda_name_out       = 'all_eda_behav_downsampled10.csv';
+[~,~,~,eda_dir] = wave_ghost('behav');
 eda_file_in       = fullfile(eda_dir, eda_name_in);
 eda_file_out      = fullfile(eda_dir, eda_name_out);
+
+F = 10; % sample frequency of output
 
 % Avoid double work
 if exist(eda_file_out, 'file')
@@ -33,7 +35,7 @@ for i = unique(data.ID)'
         fprintf('%d samples --> ', height(trial));
         
         % Interpolate
-        xq          = min(trial.time_within_trial):1:max(trial.time_within_trial);
+        xq          = min(trial.time_within_trial):1/F:max(trial.time_within_trial);
         ds_trial    = interp1(trial.time_within_trial, trial{:,:}, xq);
         ds_trial    = array2table(ds_trial, 'VariableNames', names);
         ds_trial.index_within_trial = [1:1:height(ds_trial)]'; % we still want our index to be integers

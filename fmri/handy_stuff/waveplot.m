@@ -90,5 +90,5 @@ end
 % Plot lines and shades
 for i = 1:4    
     [line(i), shade(i)] = boundedline(x(ind{:,i}), y(ind{:,i}), error(ind{:,i}),'k-*', 'cmap', colors(cs(i),:), 'alpha');
-    line(i).LineWidth = 4;            
+    line(i).LineWidth = 2;            
 end    

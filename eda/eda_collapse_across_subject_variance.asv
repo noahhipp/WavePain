@@ -2,15 +2,15 @@ function eda_collapse_across_subject_variance
 % Removes ID
 
 % Housekeeping
-eda_name_in       = 'all_eda_clean_downsampled10_collapsed.csv';
-eda_name_out      = 'all_eda_clean_downsampled10_collapsed_collapsed.csv';
-[~,~,~,eda_dir] = wave_ghost;
+eda_name_in       = 'all_eda_behav_downsampled10_collapsed.csv';
+eda_name_out      = 'all_eda_behav_downsampled10_collapsed_collapsed.csv';
+[~,~,~,eda_dir] = wave_ghost('behav');
 eda_file_in       = fullfile(eda_dir, eda_name_in);
 eda_file_out      = fullfile(eda_dir, eda_name_out);
 
 if exist(eda_file_out, 'file')    
     fprintf('To run this %s needs to be deleted.\n', eda_file_out);
-    order = input('delete file? [y]es, [n]o \n', 's');
+    order = input('delete file? [y]es or [n]o \n', 's');
     if ~strcmp(order, 'y')
         return
     else

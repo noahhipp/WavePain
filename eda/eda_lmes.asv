@@ -2,8 +2,8 @@ function lmes=eda_lmes
 % fit lmes to aggregated second level
 
 % Housekeeping
-[~,~,~,EDA_DIR] = wave_ghost();
-EDA_NAME_IN     = 'all_eda_clean_downsampled10.csv';
+[~,~,~,EDA_DIR] = wave_ghost('behav');
+EDA_NAME_IN     = 'all_eda_behav_downsampled10_collapsed.csv';
 EDA_FILE_IN     = fullfile(EDA_DIR, EDA_NAME_IN);
 SHIFT_NAME      = 'eda_bestshifts.csv';
 SHIFT_FILE      = fullfile(EDA_DIR, SHIFT_NAME);
@@ -14,13 +14,13 @@ data = readtable(EDA_FILE_IN);
 SHIFTS = readtable(SHIFT_FILE);
 
 % Get rid of conditions we dont want
-data(data.condition > 4,:) = [];
+data(data.condition  4,:) = [];
 
 % Cast to categorical
 % data.wm = categorical(data.wm);
 
-dvs = {'scl'};
-shift = SHIFTS.fmri_wms;
+dvs = {'zdt_scl'};
+shift = SHIFTS.behav_wm;
 lmes = {};
 
 for i = 1:numel(dvs)
@@ -46,9 +46,6 @@ y_label = 'LME Estimate +- SE';
 pmod_names          = {'Heat', 'WM', 'Slope',...
     'Heat X WM', 'Heat X Slope','WM X Slope',...
     'Heat X WM X Slope'};
-
-% pmod_names          = {'Heat', 'Slope',...
-%     'Heat X Slope'};
 
 
 x = 1:numel(pmod_names);

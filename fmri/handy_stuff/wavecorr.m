@@ -1,4 +1,4 @@
-function [opti_lag, line] = wavecorr(x,y,varargin)
+function [opti_lag, line, max_c] = wavecorr(x,y,varargin)
 % Wrapper around xcorr. Do cross correlation of x and y and plot it to current axes.
 % Optional arguments:
 %               - f: sampling frequency in hz of x and y to correctly display max
@@ -21,9 +21,10 @@ end
 
 % plot it
 % figure('Name','wavecorr', 'Color', [1 1 1]);
-line = plot(lag_s,c); 
+line = plot(lag_s,c, 'k-', 'LineWidth',4); 
 ylabel('Correlation','FontWeight','bold'); xlabel('Lag (seconds)','FontWeight','bold');
 ax = gca;
 ax.FontSize = 14;
 vline(lag_s(find(c==max(c))),'k-', sprintf('Max corr at: %.1fs',lag_s(c == max(c))));
 opti_lag = lag_s(c == max(c));
+max_c = max(c);

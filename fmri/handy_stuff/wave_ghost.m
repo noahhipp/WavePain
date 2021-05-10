@@ -21,9 +21,9 @@ switch hostname
         n_proc            = 8;
         plot_dir          = 'C:\projects\wavepain\code\fmri\03_firstlevel\firstlevel_canonical_pmod\';        
         if ~nargin
-            eda_dir           = 'E:wavepain\data\fmri_sample\eda\';
+            eda_dir           = 'E:\wavepain\data\fmri_sample\eda\';
         elseif strcmp(varargin{1}, 'behav')
-            eda_dir           = 'E:wavepain\data\behav_sample\eda\';
+            eda_dir           = 'E:\wavepain\data\behav_sample\eda\';
         end            
     otherwise        
         error('Only hosts noahs isn laptop, revelations or aranyani accepted');

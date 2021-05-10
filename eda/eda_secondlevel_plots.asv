@@ -3,21 +3,25 @@ function eda_secondlevel_plots
 % wavepain eda
 
 % Housekeeping
-EDA_NAME_IN      = 'all_eda_clean_downsampled10_collapsed_collapsed.csv';
+eda_name_in      = 'all_eda_behav_downsampled10_collapsed_collapsed.csv';
 SHIFT_NAME       = 'eda_bestshifts.csv';
-[~,~,~,EDA_DIR]  = wave_ghost();
-EDA_FILE_IN      = fullfile(EDA_DIR, EDA_NAME_IN);
-SHIFT_FILE       = fullfile(EDA_DIR, SHIFT_NAME);
-F                = 10; % Sampling freq of our data
+[~,~,~,eda_dir] = wave_ghost('behav');
+eda_file_in       = fullfile(eda_dir, eda_name_in);
+SHIFT_FILE      = fullfile(eda_dir, SHIFT_NAME);
+F               = 10; % Sampling freq of our data
 
 % Read in data
-data   = readtable(EDA_FILE_IN);
+data = readtable(eda_file_in);
 SHIFTS = readtable(SHIFT_FILE);
-shift  = SHIFTS.fmri_all;
+shift = '
+
+
+
+
 
 % Plotting
 % columns_to_plot = {'raw_eda', 'native_scl','z_scl','z_eda','zdtdt_scl','zdtm_scl','scl', 'zdt_scl', 'zdtm_scl_bl', 'zdt_scl_bl'};
-columns_to_plot = {'scl'};
+columns_to_plot = {'zdt_scl'};
 titles = {'trial zscore --> trial detrend',...
     'session zscore --> session detrend --> trial demean'};
 condition_names = {'M21','M12', 'W21','W12','Monline','Wonline'};
@@ -36,12 +40,10 @@ for i = 1:numel(columns_to_plot)
         
         % Grab data
         trial   = data(data.condition==j,:);
-        signal = trial{:,col_to_plot};        
+        signal = trial{:,col_to_plot};
+%         signal = circshift(signal, -6);
         sem    = trial{:,error_column};
-        
-        % Shift data
-        signal = nanshift(signal, shift*F);
-        sem = nanshift(sem, shift*F);
+%         sem = circshift(sem, -6);
 
         % Plot it
         subplot(3,5,porder(j,:));
