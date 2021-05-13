@@ -17,7 +17,7 @@ function data = eda_behav_create_online_long
 % - heat_X_slope
 
 % Housekeeping
-eda_name_in     = 'online_native_scl_behav.mat';
+eda_name_in     = 'online_native_scl.mat';
 eda_name_out    = 'all_online_scl_behav.csv';
 [~,~,~, eda_dir] = wave_ghost('behav');
 eda_file_in     = fullfile(eda_dir, eda_name_in);
@@ -35,13 +35,9 @@ overall_rating_file    = "E:\wavepain\data\behav_sample\overall_ratings\all_over
 
 % Grab data. onlineScl is a 3D mat: row-->time, column->condition [M W
 % M W], page->ID.
-load(eda_file_in, 'native_scl_online', 'subjects');
+load(eda_file_in, 'onlineScl', 'subjects');
 online_ratings = readtable(online_rating_file);
 overall_ratings = readtable(overall_rating_file);
-
-% To make it run on aranyani
-onlineScl = native_scl_online;
-subject.minSclLength = 2767;
 
 % Chop overlap off (5 samples = ~0.2s)
 onlineScl = onlineScl(1:subject.minSclLength, :,:);
@@ -114,4 +110,4 @@ data = sortrows(data, {'ID', 'trial', 'index_within_trial',}, 'ascend');
 
 % Write output
 writetable(data, eda_file_out);
-fprintf('Wrote %s \nwith %d lines\n', eda_file_out, height(data));
+fprintf('Wrote %s \nith %d lines\n

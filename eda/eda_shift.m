@@ -1,0 +1,60 @@
+function eda_shift
+% Shift eda according to best shifts from shift file
+
+% Housekeeping
+[~,~,~,EDA_DIR] = wave_ghost();
+EDA_NAME_IN     = 'all_eda_clean_downsampled_collapsed.csv';
+EDA_FILE_IN     = fullfile(EDA_DIR, EDA_NAME_IN);
+EDA_NAME_OUT    = 'all_eda_clean_downsampled_collapsed_shifted.csv';
+EDA_FILE_OUT    = fullfile(EDA_DIR, EDA_NAME_OUT);
+SHIFT_NAME      = 'eda_bestshifts.csv';
+SHIFT_FILE      = fullfile(EDA_DIR, SHIFT_NAME);
+F               = 1; % sampling freq of our data
+
+if exist(EDA_FILE_OUT,'file')
+    fprintf('To run again\n delete %s\n',EDA_FILE_OUT);
+    return
+end
+
+% Import data
+DATA = readtable(EDA_FILE_IN);
+SHIFTS = readtable(SHIFT_FILE);
+
+cols_to_shift = find(contains(DATA.Properties.VariableNames, {'scl','eda'}));
+
+% Loop through data
+
+for i = unique(DATA.ID)'    
+    sub_data = DATA(DATA.ID == i,:);    
+    fprintf('\nsub%03d',i);
+    
+    for j = unique(sub_data.condition)'
+        trial_data = sub_data(sub_data.condition == j,:);
+        fprintf('\n    condition %02d',j);        
+        
+        if unique(trial_data.condition) < 5
+            shift = SHIFTS.fmri_wm;
+        else
+            shift = SHIFTS.fmri_online;
+        end
+        
+        
+        shift = round(shift);
+        
+        
+        % Shift columns
+        for k = 1:numel(cols_to_shift)
+           col = cols_to_shift(k);
+           trial_data{:,col} = nanshift(trial_data{:,col}, shift*F);
+        end        
+        fprintf(' shifted by %fs.',shift);        
+        
+        sub_data(sub_data.condition == j,:) = trial_data;
+    end    
+    
+    DATA(DATA.ID == i,:) = sub_data;   % DATA is a constant but we dont care
+end
+
+% Write output
+writetable(DATA,EDA_FILE_OUT);
+fprintf('\n\nWrote %s\n', EDA_FILE_OUT);

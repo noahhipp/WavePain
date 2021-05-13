@@ -13,8 +13,8 @@ shift.fmri_wm = -7.4250;
 shift.fmri_online = -8.6;
 
 shift.behav_all = -4.72;
-shift.behav_wm = -5.12;
-shift.behav_online = -3.88;
+shift.behav_wm = -5.0;
+shift.behav_online = -3.9;
 
 writetable(shift,FILE_OUT);
 fprintf('best shifts written to %s\n', FILE_OUT);

@@ -3,37 +3,92 @@ function lmes=eda_lmes
 
 % Housekeeping
 [~,~,~,EDA_DIR] = wave_ghost();
-EDA_NAME_IN     = 'all_eda_clean_downsampled10.csv';
+EDA_NAME_IN     = 'all_eda_clean_downsampled01_collapsed.csv';
 EDA_FILE_IN     = fullfile(EDA_DIR, EDA_NAME_IN);
-SHIFT_NAME      = 'eda_bestshifts.csv';
-SHIFT_FILE      = fullfile(EDA_DIR, SHIFT_NAME);
-F               = 10; % sampling freq of our data
 
 % Read in data
 data = readtable(EDA_FILE_IN);
-SHIFTS = readtable(SHIFT_FILE);
 
 % Get rid of conditions we dont want
 data(data.condition > 4,:) = [];
+data(data.wm == 0,:) = [];
+data.time = data.time_within_trial -22.015;
+
 
 % Cast to categorical
-% data.wm = categorical(data.wm);
+data.cwm_sort1 = categorical(data.wm, [-1 0 1], {'1back', 'nothing', '2back'});
+data.cwm_sort2 = categorical(data.wm, [0 -1 1], { 'nothing', '1back', '2back'});
+data.cwm_sort3 = categorical(data.wm, [-1 1], {'1back', '2back'});
 
-dvs = {'scl'};
-shift = SHIFTS.fmri_wms;
-lmes = {};
+lme= fitlme(data, sprintf('%s ~ time+ diffheat*cwm_sort3 + (1|ID)+ (time-1|ID)', dv), 'FitMethod', 'REML')
 
-for i = 1:numel(dvs)
-    dv = dvs{i};
-    data{:,dv} = nanshift(data{:,dv}, shift*F);
-    lme_form = sprintf('%s ~ heat*wm*slope + (1|ID)', dv);
-    
-    lme= fitlme(data, lme_form, 'FitMethod', 'REML')
-    lmes{i} = lme;
-    [~,~,stats] = fixedEffects(lme);
-    
-    eda_plot_betas(stats, lme_form); % 2:end as we exclude intercept        
-end
+
+lme=fitlme(data, 's_zt_dtt_scl ~ time+ diffheat*cwm_sort3 + (1|ID)+ (time-1|ID)', 'FitMethod', 'REML')
+
+% With detrend
+lme=fitlme(data, 's_zt_dtt_scl ~ time+ diffheat*cwm_sort3 + (1|ID)', 'FitMethod', 'REML')
+
+% Without detrend
+lme=fitlme(data, 's_zt_scl ~ time+ diffheat*cwm_sort3 + (1|ID)', 'FitMethod', 'REML') % shifted
+lme=fitlme(data, 'zt_scl ~ time+ diffheat*cwm_sort3 + (1|ID)', 'FitMethod', 'REML') % not shifted
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% dvs = {'native_scl'};
+% lmes = {};
+% 
+% for i = 1:numel(dvs)
+%     dv = dvs{i};
+% %     data{:,dv} = nanshift(data{:,dv}, shift*F);
+%     lme_form = sprintf('%s ~ time*diffheat*cwm_sort3 + (1|ID)+ (time-1|ID)', dv);
+%     
+%     lme= fitlme(data, lme_form, 'FitMethod', 'REML');
+%     lmes{i} = lme;
+%     [~,~,stats] = fixedEffects(lme);
+%     
+%     lme= fitlme(data, sprintf('%s ~ time+ diffheat*cwm_sort3 + (1|ID)+ (time-1|ID)', dv), 'FitMethod', 'REML')
+%     lme= fitlme(data, sprintf('%s ~ time*diffheat*cwm_sort3 + (1|ID)', dv), 'FitMethod', 'REML')
+%     lme= fitlme(data, sprintf('%s ~ time+diffheat*cwm_sort3 + (1|ID)', dv), 'FitMethod', 'REML')
+%     lme= fitlme(data, sprintf('%s ~ time*diffheat*cwm_sort3 + (1|ID)+ (time-1|ID)', dv), 'FitMethod', 'REML')
+%     lme= fitlme(data, sprintf('%s ~ time*diffheat*cwm_sort3 + (1|ID)+ (time-1|ID)', dv), 'FitMethod', 'REML')
+%     
+%     
+%     
+%     
+%     
+%     
+%     
+%     
+%     eda_plot_betas(stats, lme_form); % 2:end as we exclude intercept        
+% end
 
 function eda_plot_betas(stats, tit)
 

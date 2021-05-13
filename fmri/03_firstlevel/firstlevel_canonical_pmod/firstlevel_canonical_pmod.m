@@ -5,7 +5,7 @@ function firstlevel_canonical_pmod
 
 % Subs
 %all_subs = 5;
-all_subs = [6:12 14:53]; 
+all_subs = [5:12 14:53]; 
 
 % Settings
                        
@@ -25,7 +25,7 @@ TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = [6 6 6]; % smoothing kernel
 stick_resolution    = 10; % /seconds so many sticks we want for now
-anadirname          = 'canonical_pmodV3';
+anadirname          = 'canonical_pmodV4'; 
 
 % Each subject has two sessions. Sessions are also used to distinquish
 % subjects --> conceputal distance between eg sub10 sess1 - sub10sess2 =

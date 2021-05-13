@@ -22,12 +22,16 @@ end
 data = readtable(eda_file_in);
 
 % Drop firstlevel errors and groupcount
-sem_cols = find(contains(data.Properties.VariableNames,'sem'));
-data(:,sem_cols) = [];
-data.GroupCount = [];
+sem_cols            = contains(data.Properties.VariableNames,'sem');
+data(:,sem_cols)    = [];
+data.GroupCount     = [];
 
 % Collapse everything but ID, condition and index within trial
-grouping_variables = {'condition', 'index_within_trial'};
+if contains(eda_name_in, 'segmented')
+    grouping_variables = {'condition', 'segment'};
+else
+    grouping_variables = {'condition', 'index_within_trial'};
+end
 mean_data = varfun(@nanmean, data, 'GroupingVariables', grouping_variables);
 sem_data = varfun(@sem, data, 'GroupingVariables', grouping_variables);
 
@@ -35,7 +39,6 @@ sem_data = varfun(@sem, data, 'GroupingVariables', grouping_variables);
 for i = 1:width(mean_data)
     mean_data.Properties.VariableNames{i} = strrep(mean_data.Properties.VariableNames{i}, 'nanmean_','');
 end
-
 
 % Transfer interesting sem columns to mean data aka columns that contain
 % scl or eda
@@ -48,7 +51,7 @@ end
 
 % Writeoutput
 writetable(mean_data, eda_file_out);
-
+fprintf('Wrote %s\n', eda_file_out);
 
 % Sem function
 function out = sem(in)
