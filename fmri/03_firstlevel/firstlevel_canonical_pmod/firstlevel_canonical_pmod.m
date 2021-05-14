@@ -18,7 +18,7 @@ do_smooth           = 0;
 %-secondlevel
 do_mask             = 0;
 do_ttest            = 0;
-do_nosub_anova_model= 0;
+do_nosub_anova_model= 1;
 do_nosub_anova_cons = 1;
 
 TR                  = 1.599;
@@ -392,8 +392,10 @@ end % contrast loop end
 % SECOND LEVEL no subject ANOVA START
 %--------------------------------------------------------------------------
 % Housekeeping
-anadirname2     = strcat('second_level_anova', anadirname);
+anadirname2     = strcat('second_level_anova_WM', anadirname);
 out_dir         = fullfile(base_dir, 'second_Level', anadirname2);
+con_names = strcat('wm', pmod_names);
+
 if ~exist(out_dir)
     mkdir(out_dir)
 end
@@ -446,26 +448,26 @@ if do_nosub_anova_model
 end
 
 %-------------------------CONTRAST SPECIFICATION---------------------------
-tcons                               = eye(numel(con_names));
+tcons                               = eye(numel(pmod_names));
 template                            = [];
 ci                                  = 1;
 template.spm.stats.con.delete       = 1;
 template.spm.stats.con.spmmat       = {fullfile(out_dir, 'SPM.mat')};
 
 template.spm.stats.con.consess{ci}.fcon.name     = 'eoi';
-template.spm.stats.con.consess{ci}.fcon.convec   = eye(numel(con_names));
+template.spm.stats.con.consess{ci}.fcon.convec   = eye(numel(pmod_names));
 ci = ci+1;
 
 template.spm.stats.con.consess{ci}.fcon.name     = 'eoi_without_ramps';
-template.spm.stats.con.consess{ci}.fcon.convec   = [eye(numel(con_names)-2) zeros(numel(con_names)-2,2)];
+template.spm.stats.con.consess{ci}.fcon.convec   = [eye(numel(pmod_names)-2) zeros(7,2)];
 ci = ci+1;
 
 % Prepare flipped tcons
-con_names = [con_names, strcat('-',con_names)];
+pmod_names = [pmod_names, strcat('-',pmod_names)];
 tcons = vertcat(tcons, -tcons);
 
-for i = 1:numel(con_names)
-    template.spm.stats.con.consess{ci}.tcon.name    = con_names{i};
+for i = 1:numel(pmod_names)
+    template.spm.stats.con.consess{ci}.tcon.name    = pmod_names{i};
     template.spm.stats.con.consess{ci}.tcon.convec  = tcons(i,:);
     template.spm.stats.con.consess{ci}.tcon.sessrep = 'none';
     ci = ci+1;
