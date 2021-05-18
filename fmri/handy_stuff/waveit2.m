@@ -1,4 +1,4 @@
-function [m, w] = waveit2(varargin)
+function [m, w, dm, dw] = waveit2(varargin)
 % returns m and w wave with lead in and out with specified number of
 % samples
 
@@ -20,6 +20,9 @@ lead_out            = zeros(1,lead_out_samples);
 
 m                   = [lead_in, wave, lead_out];
 w                   = [lead_in, wave .* -1, lead_out];
+
+dm = [0 diff(m)]; dm = dm./max(dm);
+dw = [0 diff(w)]; dw = dw./max(dw);
 
 if ~suppress_output
     fprintf('=======\n waveit2: created waves with\n%d samples(%d lead in, %d wave, %d lead_out)\n=======\n',...
