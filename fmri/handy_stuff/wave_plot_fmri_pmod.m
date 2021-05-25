@@ -51,6 +51,7 @@ cla;
 grid on;
 
 b   = bar(x, data{1}.contrast);
+
 b.FaceColor = [1 1 1];
 b.LineWidth = 2;
 er  = errorbar(x, data{1}.contrast, data{1}.standarderror);

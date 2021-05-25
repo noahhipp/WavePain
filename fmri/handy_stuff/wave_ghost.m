@@ -1,4 +1,4 @@
-function [base_dir, n_proc, plot_dir, eda_dir, cloud_dir] = wave_ghost(varargin)
+function [base_dir, n_proc, plot_dir, eda_dir, cloud_dir, data_dir] = wave_ghost(varargin)
 % Collects hostname and returns wavepain data base dir and number of
 % MATLBAB instances to use for heavy computing
  
@@ -22,8 +22,10 @@ switch hostname
         plot_dir          = 'C:\projects\wavepain\code\fmri\03_firstlevel\firstlevel_canonical_pmod\';        
         if ~nargin
             eda_dir           = 'E:\wavepain\data\fmri_sample\eda\';
+            data_dir        = 'E:\wavepain\data\fmri_sample\';
         elseif strcmp(varargin{1}, 'behav')
             eda_dir           = 'E:\wavepain\data\behav_sample\eda\';
+            data_dir        = 'E:\wavepain\data\behav_sample\';
         end            
     otherwise        
         error('Only hosts noahs isn laptop, revelations or aranyani accepted');
