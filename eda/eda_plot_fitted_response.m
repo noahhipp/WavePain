@@ -21,7 +21,7 @@ figure('Color', 'white', 'Name','fitted scl_response');
 condition_names = {'M21','M12', 'W21','W12','Monline','Wonline'};
 
 responses = [wm_response, online_response];
-porder = [1 3 2 4 5 6];
+porder = [1 1 2 4 5 6];
 for i = 1:6
     subplot(3,2,porder(i)); hold on;
     waveplot(responses(:,i), condition_names{i});    

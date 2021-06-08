@@ -3,8 +3,8 @@ function eda_cb_lme
 % betas to table. Run ANOVA on them. Plot fitted response.
 
 % Housekeeping
-EDA_NAME_IN     = 'all_eda_clean_downsampled01.csv';
-[~,~,~,EDA_DIR] = wave_ghost();
+EDA_NAME_IN     = 'all_eda_behav_downsampled01.csv';
+[~,~,~,EDA_DIR] = wave_ghost('behav');
 EDA_FILE_IN     = fullfile(EDA_DIR, EDA_NAME_IN);
 
 EDA_NAME_OUT    = 'fmri_betas.csv';
@@ -71,21 +71,24 @@ x                   = 1:numel(pmod_names);
 figure;
 grid on;
 
-b   = bar(x, betas); hold on;
+b   = bar(x(1:7), betas(1:7)); hold on;
 b.FaceColor = [1 1 1];
 b.LineWidth = 2;
-er  = errorbar(x, betas, sem_betas);
+er  = errorbar(x(1:7), betas(1:7), sem_betas(1:7));
 er.Color = [0 0 0];
 er.LineStyle = 'none';
 er.LineWidth = 2;    
 
-xticklabels(pmod_names);
+xticklabels(pmod_names(1:7));
 xticks(x);
+xlim([.5 7.5])
 ax = gca;
 ax.FontSize = 14;
 ax.XAxis.TickLabelInterpreter = 'none';
-xtickangle(90);
+xtickangle(45);
 xlabel('Betas', 'FontWeight', 'bold');
+ylabel('Parameter estimates', 'FontWeight','bold');
+ylim([-.1 .4]);
 
 % Wave plot fitted response
 

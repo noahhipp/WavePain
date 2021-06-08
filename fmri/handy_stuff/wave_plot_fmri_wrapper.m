@@ -27,6 +27,11 @@ wave_plot_fmri_fir(fir_data);
 cd(fullfile(code_dir, 'plotting'));
 wave_plot_fmri_pmod(pmod_data);
 
+% Plot fitted response
+wave_plot_fmri_fitted_response;
+wave_sliders;
+
+
 
 
 

@@ -4,8 +4,8 @@ function firstlevel_canonical_pmod
 [base_dir, n_proc, code_dir] = wave_ghost;
 
 % Subs
-% all_subs = 10;
-all_subs = [5:12 14:53]; 
+all_subs = 20;
+% all_subs = [5:12 14:53]; 
 
 % Settings
                        
