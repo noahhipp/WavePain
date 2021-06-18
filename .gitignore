@@ -2,3 +2,4 @@
 *.mat
 *.log
 /fmri/handy_stuff/raincloudplots/
+fmri_experiment/

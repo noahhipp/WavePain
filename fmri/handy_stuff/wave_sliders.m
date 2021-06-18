@@ -7,26 +7,40 @@ function wave_sliders
 % --> and call wave_plot_fitted_response
 
 ylims = wave_load_ylims;
-betas           = wave_load('betas', [7 1]); % Initialize at original_betas
+betas           = wave_load('betas', [10 1]); % Initialize at original_betas
 
-slider_names    = {'heat', 'wm', 'slope',...
-    'heat_X_wm', 'heat_X_slope','wm_X_slope',...
-    'heat_X_wm_X_slope'};
+slider_names         = {'wm_Heat', 'wm_WM', 'wm_Slope',...
+    'wm_Heat X WM', 'wm_Heat X Slope','wm_WM X Slope',...
+    'wm_Heat X WM X Slope',...
+    'online_Heat', 'online_Slope', 'online_Heat X Slope'};
 
-fig             = uifigure('Position',[100 100 1000  500], 'Name', 'Wave_Sliders');
+%------------------------------PREPARING STUFF-----------------------------
+
+% Get access to figure;
+% global slide_fig
+% if ishandle(slide_fig)
+%     uifigure(slide_fig);
+%     slide_fig.Children = {};
+%     fprintf('Found %25s plot', 'existing figure for sliders');                
+% else
+%     slide_fig = uifigure('Position',[100 100 1000  500], 'Name', 'Wave_Sliders');
+%     fprintf('Created %25s plot', 'existing figure for sliders');    
+% end
+
+slide_fig = uifigure('Position',[100 100 1000  500], 'Name', 'Wave_Sliders');
 pos             = [50 200 120 3];
 
 % Initialize appropriate number of betas
 for i = 1:numel(slider_names)
-    [sliders(i), edts(i)] = create_slider(fig, slider_names{i}, pos, betas(i));
+    [sliders(i), edts(i)] = create_slider(slide_fig, slider_names{i}, pos, betas(i));
     pos = pos+[85 0 0 0];
 end
 
 % Initialize reset button
-btn = uibutton(fig, 'push',...
+btn = uibutton(slide_fig, 'push',...
     'Text', 'reset',...
     'Position', [300 100 120 20],...
-    'ButtonPushedFcn', @(btn,event) reset_custom_betas(fig));
+    'ButtonPushedFcn', @(btn,event) reset_custom_betas(slide_fig));
 
 %==============================SUBFUNCTIONS================================
 
@@ -35,7 +49,7 @@ function [slider, edt] = create_slider(parent, label, pos, beta)
 % Instantiate objects
 slider = uislider(parent,...
     'Limits',[-1,1],...
-    'Value', beta,...
+    'Value', beta,...    
     'Position', pos,...
     'Orientation', 'vertical');
 
@@ -93,7 +107,7 @@ fprintf('%2.2f ', betas);
 function reset_custom_betas(parent)
 
 % Rewrite binary file
-betas = wave_load('betas', [1,7]);
+betas = wave_load('betas', [1,10]);
 wave_save(betas, 'custom_betas');
 
 % Just initialize again (could do this more elegantly but don't want to)

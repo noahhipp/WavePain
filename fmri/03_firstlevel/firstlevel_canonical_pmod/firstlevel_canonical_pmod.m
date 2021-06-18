@@ -2,12 +2,16 @@ function firstlevel_canonical_pmod
 % specify firstlevel pmod with parametrically modulated stick functions
 
 [base_dir, n_proc, code_dir] = wave_ghost;
+go_back = pwd; % go back to the directory we started in
 
 % Subs
-all_subs = 20;
-% all_subs = [5:12 14:53]; 
+all_subs = [5:12 14:53]; 
+% all_subs = [5:12];
+% all_subs = [14:53];
+
 
 % Settings
+DEBUG_PLOT = 0;
                        
 %-firstlevel
 do_model            = 0;
@@ -18,13 +22,13 @@ do_smooth           = 0;
 %-secondlevel
 do_mask             = 0;
 do_ttest            = 0;
-do_nosub_anova_model= 1;
+do_nosub_anova_model= 0;
 do_nosub_anova_cons = 1;
 
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = [6 6 6]; % smoothing kernel
-stick_resolution    = 10; % /seconds so many sticks we want for now
+stick_resolution    = 10; % /seconds so many sticks we want per second
 anadirname          = 'canonical_pmodV4'; 
 
 % Each subject has two sessions. Sessions are also used to distinquish
@@ -102,7 +106,21 @@ for np = 1:size(subs,2) % core loop start
         template.spm.stats.fmri_spec.mask             = cellstr(strip_file);
         template.spm.stats.fmri_spec.cvi              = 'None';
         
+        
+        if DEBUG_PLOT
+            porder = [1:2:27 2:2:28];
+            pidx = 1;
+            figure('Name', name);
+            sgtitle(name);
+        end
+        
+        
         for j = 1:n_sess % session loop start
+            
+%             if DEBUG_PLOT
+%                 subplot(2,1,j);
+%                 title(sprintf('session %d',j));                
+%             end
             
             s_dir           = fullfile(base_dir, name, epi_folders{j});
             epi_files       = spm_select('ExtFPList', s_dir, rfunc_file);
@@ -120,9 +138,9 @@ for np = 1:size(subs,2) % core loop start
             RES     = sub_res{j};            
             
             % Assesmble onsets vector and pmods matrix for wm and online conditions respectively
-            model_conds = {'wm','online'};            
+            model_conds = {'wm','online'}; % model conditions           
             all_onsets = {[],[]}; % first entry for wm conditions, second for online
-            all_pmods  = {[],[]}; % first entry for wm conditions, second for online                                                
+            all_pmods  = {[],[]}; % first entry for wm conditions, second for online                                                                        
             
             for conds = 1:numel(conditions) % condition loop start
                 onset       = RES{conds}.onset; % seconds  
@@ -137,26 +155,38 @@ for np = 1:size(subs,2) % core loop start
                 all_pmods{idx} = vertcat(all_pmods{idx}, pmods);
             end % condition loop end                        
             
-            for model_cond = 1:numel(model_conds) % model condition start
+            for model_cond = 1:numel(model_conds) % model condition start: handle wm conditions first, then online conditions
                 template.spm.stats.fmri_spec.sess(j).cond(model_cond).name     = model_conds{model_cond};
-                template.spm.stats.fmri_spec.sess(j).cond(model_cond).onset    = (all_onsets{model_cond} ./ TR) -1;
+                template.spm.stats.fmri_spec.sess(j).cond(model_cond).onset    = (all_onsets{model_cond} ./ TR) -1;                                                
                 template.spm.stats.fmri_spec.sess(j).cond(model_cond).duration = 0;
-                template.spm.stats.fmri_spec.sess(j).cond(model_cond).orth     = 1;
-                template.spm.stats.fmri_spec.sess(j).cond(model_cond).tmod     = 0;
+                template.spm.stats.fmri_spec.sess(j).cond(model_cond).orth     = 0;
+                template.spm.stats.fmri_spec.sess(j).cond(model_cond).tmod     = 0;                                
                 
                 idx = 1; % we need this to index as some iterators are going to be skipped for online conditions so we cannot use the iterator as an index anymore
                 for pmod = 1:numel(pmod_names) % parametric modulator loop start
                     pmod_params = all_pmods{model_cond}(:,pmod);
-                    if isempty(find(pmod_params, 1)) % then we have only zeros in pmod aka wm related pmod for online
+                    if isempty(find(pmod_params, 1)) % only zeros in pmod --> wm related pmod for online --> skip
 %                         fprintf('\n skipped %s for %s-condition', pmod_names{pmod}, model_conds{model_cond});
                         continue % dont do anything                        
                     end                        
                     template.spm.stats.fmri_spec.sess(j).cond(model_cond).pmod(idx).name = pmod_names{pmod};
-                    template.spm.stats.fmri_spec.sess(j).cond(model_cond).pmod(idx).param = pmod_params;
+                    template.spm.stats.fmri_spec.sess(j).cond(model_cond).pmod(idx).param = pmod_params;                                                            
                     template.spm.stats.fmri_spec.sess(j).cond(model_cond).pmod(idx).poly = 1;
                     idx = idx+1; 
+                    
+                    if DEBUG_PLOT
+                        subplot(14,2,porder(pidx));                        
+                        x = (all_onsets{model_cond} ./ TR) -1;
+                        plot(x,pmod_params,'.');                                                
+                        title(sprintf('%02d %s session %02d',...
+                            pidx ,pmod_names{pmod}, j),...
+                            'Interpreter', 'none');
+                        xlim([0 1100]);
+                        pidx = pidx + 1;                        
+                    end                    
+                    
                 end % parametric modulator loop end                
-            end % model condition loop end                                    
+            end % model condition loop end                                      
             
             % Movement parameters black box
             movement        = normalize(load(fm));
@@ -183,7 +213,7 @@ for np = 1:size(subs,2) % core loop start
         %------------------------------------------------------------------
         % Prepare template              
         template            = [];        
-        if isempty(contrasts)                  
+        if isempty(contrasts)                              
             con_names       = strcat('wm_',pmod_names); % wm cons           
             con_names       = [con_names,...
                 'online_heat','online_slope','online_heat_X_slope',...
@@ -392,9 +422,8 @@ end % contrast loop end
 % SECOND LEVEL no subject ANOVA START
 %--------------------------------------------------------------------------
 % Housekeeping
-anadirname2     = strcat('second_level_anova_WM', anadirname);
+anadirname2     = strcat('second_level_anova', anadirname);
 out_dir         = fullfile(base_dir, 'second_Level', anadirname2);
-con_names = strcat('wm', pmod_names);
 
 if ~exist(out_dir)
     mkdir(out_dir)
@@ -411,13 +440,15 @@ for i = 1:numel(con_names) % contrast loop start
     for j = 1:numel(all_subs) % 2nd level subject loop start
         name        = sprintf('sub%03d',all_subs(j));
         a_dir       = fullfile(base_dir, name, anadirname);
-        swcon_templ = sprintf('s%d%scon_%04d.nii',skern(1), dartel_prefix, i);        
-        swcon_file  = spm_select('FPList', a_dir, swcon_templ);        
+        swcon_templ = sprintf('s%d%scon_%04d.nii',skern(1), dartel_prefix, i); % already exists because 2nd level ttests designed above        
+        swcon_file  = spm_select('FPList', a_dir, swcon_templ);                                
         all_scans   = strvcat(all_scans, swcon_file);        
     end % 2nd level subject loop end
     
-    template.spm.stats.factorial_design.des.anova.icell(i).scans = cellstr(all_scans);
-end
+    % Pass images to cell
+    template.spm.stats.factorial_design.des.anova.icell(i).scans = cellstr(all_scans);    
+    
+end % contrast loop end
     template.spm.stats.factorial_design.des.anova.dept = 1;
     template.spm.stats.factorial_design.des.anova.variance = 1;
     template.spm.stats.factorial_design.des.anova.gmsca = 0;
@@ -448,26 +479,27 @@ if do_nosub_anova_model
 end
 
 %-------------------------CONTRAST SPECIFICATION---------------------------
-tcons                               = eye(numel(pmod_names));
+contrast_names                      = con_names; % condition names
+tcons                               = eye(numel(contrast_names));
 template                            = [];
 ci                                  = 1;
 template.spm.stats.con.delete       = 1;
 template.spm.stats.con.spmmat       = {fullfile(out_dir, 'SPM.mat')};
 
 template.spm.stats.con.consess{ci}.fcon.name     = 'eoi';
-template.spm.stats.con.consess{ci}.fcon.convec   = eye(numel(pmod_names));
+template.spm.stats.con.consess{ci}.fcon.convec   = eye(numel(con_names));
 ci = ci+1;
 
 template.spm.stats.con.consess{ci}.fcon.name     = 'eoi_without_ramps';
-template.spm.stats.con.consess{ci}.fcon.convec   = [eye(numel(pmod_names)-2) zeros(7,2)];
+template.spm.stats.con.consess{ci}.fcon.convec   = [vertcat(eye(7), zeros(3,7)) zeros(10,2) vertcat(zeros(7,3),eye(3))];
 ci = ci+1;
 
 % Prepare flipped tcons
-pmod_names = [pmod_names, strcat('-',pmod_names)];
-tcons = vertcat(tcons, -tcons);
+contrast_names = [contrast_names, strcat('-',contrast_names)];
+tcons = vertcat(tcons, -tcons); 
 
-for i = 1:numel(pmod_names)
-    template.spm.stats.con.consess{ci}.tcon.name    = pmod_names{i};
+for i = 1:numel(contrast_names)
+    template.spm.stats.con.consess{ci}.tcon.name    = contrast_names{i};
     template.spm.stats.con.consess{ci}.tcon.convec  = tcons(i,:);
     template.spm.stats.con.consess{ci}.tcon.sessrep = 'none';
     ci = ci+1;
@@ -487,6 +519,8 @@ end
 %--------------------------------------------------------------------------
 % SECOND LEVEL no subject ANOVA END
 %--------------------------------------------------------------------------
+
+cd(go_back); % so we don't end up in results folder
 
 %==========================================================================
 % FUNCTION chuckCell = splitvect(v, n)

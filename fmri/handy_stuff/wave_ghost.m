@@ -11,7 +11,7 @@ switch hostname
         base_dir          = 'C:\Users\hipp\projects\WavePain\data\fmri\fmri_temp\';
         n_proc            = 2;
         eda_dir           = 'C:\Users\hipp\projects\WavePain\data\fmri_sample\eda';
-        cloud_dir         = 'C:\Users\hipp\OneDrive - Universität Hamburg\projects\wavepain\results';
+        cloud_dir         = 'C:\Users\hipp\OneDrive - Universität Hamburg\projects\wavepain\paper';
     case 'revelations'
         base_dir          = '/projects/crunchie/hipp/wavepain/';        
         n_proc            = 8;
@@ -20,6 +20,7 @@ switch hostname
         base_dir          = 'E:\wavepain\data\fmri_sample\fmri';
         n_proc            = 8;
         plot_dir          = 'C:\projects\wavepain\code\fmri\03_firstlevel\firstlevel_canonical_pmod\';        
+        cloud_dir         = 'D:\OneDrive - Universität Hamburg\projects\wavepain';
         if ~nargin
             eda_dir           = 'E:\wavepain\data\fmri_sample\eda\';
             data_dir        = 'E:\wavepain\data\fmri_sample\';

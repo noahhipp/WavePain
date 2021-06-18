@@ -10,8 +10,9 @@ end
 
 [~,ticks] = getBinBarPos(110);
 xlim(xlims);
-xticks([0 ticks(2:2:6) 110]);
-xticklabels({'0','22','55','88', '110'});
-xlabel('Time (s)', 'FontWeight','bold');
+xticks([0 ticks([1 2:2:6]) 110]);
+xticklabels({'0','5','22','55','88','110'});
+xlabel('Time [s]', 'FontWeight','bold');
 grid on;
-waveax.FontSize = 14;
+ax = gca;
+ax.FontSize = 14;

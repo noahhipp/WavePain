@@ -5,9 +5,12 @@ function wave_plot_fmri_pmod(data)
 %------------------------------CHECK INPUT---------------------------------
 check0 = 0;
 check1 = 0;
-if numel(data{1}.contrast) == 7
+if numel(data{1}.contrast) == 10
     check0 = 1;
+elseif numel(data{1}.contrast) == 7
+    check0 = 2; % old data with 7 regressors   
 end
+
 if numel(fieldnames(data{1})) == 3
     check1 = 1;
 end
@@ -29,7 +32,7 @@ if ishandle(pmod_fig)
 else
     pmod_fig = figure('Color', [1 1 1]);
     new     = 1;
-    fprintf('Created %23s plot', 'new figure for pmod');    
+    fprintf('Created %23s plot', 'new figure for pmod');
 end
 
 % Collect coordinates
@@ -40,11 +43,18 @@ end
 %------------------------------PLOTTING ACTION ----------------------------
 y_label = 'fMRI signal [au]';
 hold on;
-pmod_names          = {'Heat', 'WM', 'Slope',...
+if check0 == 1
+    pmod_names          = {'wm_Heat', 'wm_WM', 'wm_Slope',...
+        'wm_Heat X WM', 'wm_Heat X Slope','wm_WM X Slope',...
+        'wm_Heat X WM X Slope',...
+        'online_Heat', 'online_Slope', 'online_Heat X Slope'};
+elseif check0 == 2
+    pmod_names          = {'Heat', 'WM', 'Slope',...
         'Heat X WM', 'Heat X Slope','WM X Slope',...
         'Heat X WM X Slope'};
-    
-    x = 1:numel(pmod_names);
+end
+
+x = 1:numel(pmod_names);
 
 % Update plot
 cla;
@@ -58,9 +68,9 @@ er  = errorbar(x, data{1}.contrast, data{1}.standarderror);
 er.Color = [0 0 0];
 er.LineStyle = 'none';
 er.LineWidth = 2;
-    
+
 if new
-    fprintf('...instantiating...');        
+    fprintf('...instantiating...');
     xticklabels(pmod_names);
     xticks(x);
     ax = gca;
@@ -68,7 +78,7 @@ if new
     ax.XAxis.TickLabelInterpreter = 'none';
     xtickangle(90);
     xlabel('Contrasts', 'FontWeight', 'bold');
-    ylabel(y_label, 'FontWeight', 'bold');    
+    ylabel(y_label, 'FontWeight', 'bold');
 end
 
 % title

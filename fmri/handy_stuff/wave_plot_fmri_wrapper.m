@@ -17,7 +17,7 @@ wave_save_coordinates(st.centre, xSPM);
 fir_data = wave_load_SPM('fir_anova_6', 1:6);
 
 % Load data from Canonical pmod ANOVA
-pmod_data = wave_load_SPM('second_level_anovacanonical_pmodV3', 2);
+pmod_data = wave_load_SPM('second_level_anovacanonical_pmodV4', 2);
 
 % Plot timecourses
 cd(fullfile(code_dir, 'plotting'));
