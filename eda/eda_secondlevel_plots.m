@@ -3,18 +3,22 @@ function eda_secondlevel_plots
 % wavepain eda
 
 % Housekeeping
-eda_name_in      = 'all_eda_clean_downsampled_collapsed_collapsed.csv';
-[~,~,~,eda_dir] = wave_ghost;
-eda_file_in       = fullfile(eda_dir, eda_name_in);
+EDA_NAME_IN      = 'all_eda_behav_downsampled10_collapsed_collapsed.csv';
+SHIFT_NAME       = 'eda_bestshifts.csv';
+[~,~,~,EDA_DIR]  = wave_ghost('behav');
+EDA_FILE_IN      = fullfile(EDA_DIR, EDA_NAME_IN);
+SHIFT_FILE       = fullfile(EDA_DIR, SHIFT_NAME);
+F                = 10; % Sampling freq of our data
 
 % Read in data
-data = readtable(eda_file_in);
+data   = readtable(EDA_FILE_IN);
+SHIFTS = readtable(SHIFT_FILE);
+shift  = SHIFTS.fmri_all;
 
 % Plotting
 % columns_to_plot = {'raw_eda', 'native_scl','z_scl','z_eda','zdtdt_scl','zdtm_scl','scl', 'zdt_scl', 'zdtm_scl_bl', 'zdt_scl_bl'};
-columns_to_plot = {'zdtm_scl','zdt_scl'};
-titles = {'session zscore --> session detrend --> trial demean',...
-    'trial zscore --> trial detrend'};
+columns_to_plot = {'s_zt_scl', 's_zt_dtt_scl', 'special_scl'};
+titles = columns_to_plot;
 condition_names = {'M21','M12', 'W21','W12','Monline','Wonline'};
 
 for i = 1:numel(columns_to_plot)
@@ -31,23 +35,25 @@ for i = 1:numel(columns_to_plot)
         
         % Grab data
         trial   = data(data.condition==j,:);
-        signal = trial{:,col_to_plot};
-        signal = circshift(signal, -6);
+        signal = trial{:,col_to_plot};        
         sem    = trial{:,error_column};
-        sem = circshift(sem, -6);
+        
+%        % Shift data
+%         signal = nanshift(signal, shift*F);
+%         sem = nanshift(sem, shift*F);
 
         % Plot it
         subplot(3,5,porder(j,:));
         line = waveplot(signal, condition_names{j}, sem);            
         hold on; 
-        wave = plot(trial.heat .* 0.4, 'k--', 'LineWidth',3);
+        wave = plot(trial.time_within_trial,trial.heat .* 0.4, 'k--', 'LineWidth',3);
         
         % Settings
         wavexaxis2;
         if ismember(j, [1 2 5])
-            waveyaxis(ylab, [-0.7,0.7]);              
+            waveyaxis(ylab, [-0.8,0.8]);              
         else
-            waveyaxis('',[-0.7,0.7]);
+            waveyaxis('',[-0.8,0.8]);
         end
         
         % Legend

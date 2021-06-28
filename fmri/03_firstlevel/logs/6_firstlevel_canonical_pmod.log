@@ -1,0 +1,375 @@
+[Warning: Function narginchk has the same name as a MATLAB builtin. We suggest you rename the function to avoid a potential name conflict.] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\branches] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\hooks] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\info] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\logs] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\logs\refs] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\logs\refs\heads] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\logs\refs\remotes] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\logs\refs\remotes\origin] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\objects] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\objects\info] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\objects\pack] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\refs] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\refs\heads] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\refs\remotes] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\refs\remotes\origin] 
+[Warning: Name is nonexistent or not a directory: C:\projects\wavepain\code\fmri\.git\refs\tags] 
+[Warning: Name is nonexistent or not a directory: C:\Users\Hipp\AppData\Local\Temp\Editor_oxjwk] 
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+Defaults settings have been modified by file(s):
+  C:\projects\wavepain\code\fmri\spm_my_defaults.m
+Modified fields: stats 
+
+
+------------------------------------------------------------------------
+14-May-2021 17:13:16 - Running job #1
+------------------------------------------------------------------------
+14-May-2021 17:13:17 - Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             17:13:17 - 14/05/2021
+========================================================================
+Contrasts folder                        : .\fmri\sub036\canonical_pmodV4
+Deleting contrasts                      :                        ...done
+	contrast image  1               :                   ...computing       ...written con_0001.nii
+	spm{T} image  1                 :                   ...computing      ...written spmT_0001.nii
+	contrast image  2               :                   ...computing       ...written con_0002.nii
+	spm{T} image  2                 :                   ...computing      ...written spmT_0002.nii
+	contrast image  3               :                   ...computing       ...written con_0003.nii
+	spm{T} image  3                 :                   ...computing      ...written spmT_0003.nii
+	contrast image  4               :                   ...computing       ...written con_0004.nii
+	spm{T} image  4                 :                   ...computing      ...written spmT_0004.nii
+	contrast image  5               :                   ...computing       ...written con_0005.nii
+	spm{T} image  5                 :                   ...computing      ...written spmT_0005.nii
+	contrast image  6               :                   ...computing       ...written con_0006.nii
+	spm{T} image  6                 :                   ...computing      ...written spmT_0006.nii
+	contrast image  7               :                   ...computing       ...written con_0007.nii
+	spm{T} image  7                 :                   ...computing      ...written spmT_0007.nii
+	contrast image  8               :                   ...computing       ...written con_0008.nii
+	spm{T} image  8                 :                   ...computing      ...written spmT_0008.nii
+	contrast image  9               :                   ...computing       ...written con_0009.nii
+	spm{T} image  9                 :                   ...computing      ...written spmT_0009.nii
+	contrast image 10               :                   ...computing       ...written con_0010.nii
+	spm{T} image 10                 :                   ...computing      ...written spmT_0010.nii
+	contrast image 11               :                   ...computing       ...written con_0011.nii
+	spm{T} image 11                 :                   ...computing      ...written spmT_0011.nii
+	contrast image 12               :                   ...computing       ...written con_0012.nii
+	spm{T} image 12                 :                   ...computing      ...written spmT_0012.nii
+	contrast image 13               :                   ...computing       ...written con_0013.nii
+	spm{T} image 13                 :                   ...computing      ...written spmT_0013.nii
+	contrast image 14               :                   ...computing       ...written con_0014.nii
+	spm{T} image 14                 :                   ...computing      ...written spmT_0014.nii
+	Saving SPM.mat                  :                     ...writing              ...SPM.mat saved
+Completed                               :          17:13:23 - 14/05/2021
+14-May-2021 17:13:23 - Done    'Contrast Manager'
+14-May-2021 17:13:23 - Running 'Create Warped'
+u_rc1meanafMRI: con_0001	1,1,1
+u_rc1meanafMRI: con_0002	1,1,1
+u_rc1meanafMRI: con_0003	1,1,1
+u_rc1meanafMRI: con_0004	1,1,1
+u_rc1meanafMRI: con_0005	1,1,1
+u_rc1meanafMRI: con_0006	1,1,1
+u_rc1meanafMRI: con_0007	1,1,1
+u_rc1meanafMRI: con_0008	1,1,1
+u_rc1meanafMRI: con_0009	1,1,1
+u_rc1meanafMRI: con_0010	1,1,1
+u_rc1meanafMRI: con_0011	1,1,1
+u_rc1meanafMRI: con_0012	1,1,1
+u_rc1meanafMRI: con_0013	1,1,1
+u_rc1meanafMRI: con_0014	1,1,1
+14-May-2021 17:13:43 - Done    'Create Warped'
+14-May-2021 17:13:43 - Running 'Move/Delete Files'
+14-May-2021 17:13:43 - Done    'Move/Delete Files'
+14-May-2021 17:13:43 - Running 'Smooth'
+14-May-2021 17:13:50 - Done    'Smooth'
+14-May-2021 17:13:50 - Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             17:13:50 - 14/05/2021
+========================================================================
+Contrasts folder                        : .\fmri\sub037\canonical_pmodV4
+Deleting contrasts                      :                        ...done
+	contrast image  1               :                   ...computing       ...written con_0001.nii
+	spm{T} image  1                 :                   ...computing      ...written spmT_0001.nii
+	contrast image  2               :                   ...computing       ...written con_0002.nii
+	spm{T} image  2                 :                   ...computing      ...written spmT_0002.nii
+	contrast image  3               :                   ...computing       ...written con_0003.nii
+	spm{T} image  3                 :                   ...computing      ...written spmT_0003.nii
+	contrast image  4               :                   ...computing       ...written con_0004.nii
+	spm{T} image  4                 :                   ...computing      ...written spmT_0004.nii
+	contrast image  5               :                   ...computing       ...written con_0005.nii
+	spm{T} image  5                 :                   ...computing      ...written spmT_0005.nii
+	contrast image  6               :                   ...computing       ...written con_0006.nii
+	spm{T} image  6                 :                   ...computing      ...written spmT_0006.nii
+	contrast image  7               :                   ...computing       ...written con_0007.nii
+	spm{T} image  7                 :                   ...computing      ...written spmT_0007.nii
+	contrast image  8               :                   ...computing       ...written con_0008.nii
+	spm{T} image  8                 :                   ...computing      ...written spmT_0008.nii
+	contrast image  9               :                   ...computing       ...written con_0009.nii
+	spm{T} image  9                 :                   ...computing      ...written spmT_0009.nii
+	contrast image 10               :                   ...computing       ...written con_0010.nii
+	spm{T} image 10                 :                   ...computing      ...written spmT_0010.nii
+	contrast image 11               :                   ...computing       ...written con_0011.nii
+	spm{T} image 11                 :                   ...computing      ...written spmT_0011.nii
+	contrast image 12               :                   ...computing       ...written con_0012.nii
+	spm{T} image 12                 :                   ...computing      ...written spmT_0012.nii
+	contrast image 13               :                   ...computing       ...written con_0013.nii
+	spm{T} image 13                 :                   ...computing      ...written spmT_0013.nii
+	contrast image 14               :                   ...computing       ...written con_0014.nii
+	spm{T} image 14                 :                   ...computing      ...written spmT_0014.nii
+	Saving SPM.mat                  :                     ...writing              ...SPM.mat saved
+Completed                               :          17:13:54 - 14/05/2021
+14-May-2021 17:13:54 - Done    'Contrast Manager'
+14-May-2021 17:13:54 - Running 'Create Warped'
+u_rc1meanafMRI: con_0001	1,1,1
+u_rc1meanafMRI: con_0002	1,1,1
+u_rc1meanafMRI: con_0003	1,1,1
+u_rc1meanafMRI: con_0004	1,1,1
+u_rc1meanafMRI: con_0005	1,1,1
+u_rc1meanafMRI: con_0006	1,1,1
+u_rc1meanafMRI: con_0007	1,1,1
+u_rc1meanafMRI: con_0008	1,1,1
+u_rc1meanafMRI: con_0009	1,1,1
+u_rc1meanafMRI: con_0010	1,1,1
+u_rc1meanafMRI: con_0011	1,1,1
+u_rc1meanafMRI: con_0012	1,1,1
+u_rc1meanafMRI: con_0013	1,1,1
+u_rc1meanafMRI: con_0014	1,1,1
+14-May-2021 17:14:14 - Done    'Create Warped'
+14-May-2021 17:14:14 - Running 'Move/Delete Files'
+14-May-2021 17:14:14 - Done    'Move/Delete Files'
+14-May-2021 17:14:14 - Running 'Smooth'
+14-May-2021 17:14:21 - Done    'Smooth'
+14-May-2021 17:14:21 - Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             17:14:21 - 14/05/2021
+========================================================================
+Contrasts folder                        : .\fmri\sub038\canonical_pmodV4
+Deleting contrasts                      :                        ...done
+	contrast image  1               :                   ...computing       ...written con_0001.nii
+	spm{T} image  1                 :                   ...computing      ...written spmT_0001.nii
+	contrast image  2               :                   ...computing       ...written con_0002.nii
+	spm{T} image  2                 :                   ...computing      ...written spmT_0002.nii
+	contrast image  3               :                   ...computing       ...written con_0003.nii
+	spm{T} image  3                 :                   ...computing      ...written spmT_0003.nii
+	contrast image  4               :                   ...computing       ...written con_0004.nii
+	spm{T} image  4                 :                   ...computing      ...written spmT_0004.nii
+	contrast image  5               :                   ...computing       ...written con_0005.nii
+	spm{T} image  5                 :                   ...computing      ...written spmT_0005.nii
+	contrast image  6               :                   ...computing       ...written con_0006.nii
+	spm{T} image  6                 :                   ...computing      ...written spmT_0006.nii
+	contrast image  7               :                   ...computing       ...written con_0007.nii
+	spm{T} image  7                 :                   ...computing      ...written spmT_0007.nii
+	contrast image  8               :                   ...computing       ...written con_0008.nii
+	spm{T} image  8                 :                   ...computing      ...written spmT_0008.nii
+	contrast image  9               :                   ...computing       ...written con_0009.nii
+	spm{T} image  9                 :                   ...computing      ...written spmT_0009.nii
+	contrast image 10               :                   ...computing       ...written con_0010.nii
+	spm{T} image 10                 :                   ...computing      ...written spmT_0010.nii
+	contrast image 11               :                   ...computing       ...written con_0011.nii
+	spm{T} image 11                 :                   ...computing      ...written spmT_0011.nii
+	contrast image 12               :                   ...computing       ...written con_0012.nii
+	spm{T} image 12                 :                   ...computing      ...written spmT_0012.nii
+	contrast image 13               :                   ...computing       ...written con_0013.nii
+	spm{T} image 13                 :                   ...computing      ...written spmT_0013.nii
+	contrast image 14               :                   ...computing       ...written con_0014.nii
+	spm{T} image 14                 :                   ...computing      ...written spmT_0014.nii
+	Saving SPM.mat                  :                     ...writing              ...SPM.mat saved
+Completed                               :          17:14:26 - 14/05/2021
+14-May-2021 17:14:26 - Done    'Contrast Manager'
+14-May-2021 17:14:26 - Running 'Create Warped'
+u_rc1meanafMRI: con_0001	1,1,1
+u_rc1meanafMRI: con_0002	1,1,1
+u_rc1meanafMRI: con_0003	1,1,1
+u_rc1meanafMRI: con_0004	1,1,1
+u_rc1meanafMRI: con_0005	1,1,1
+u_rc1meanafMRI: con_0006	1,1,1
+u_rc1meanafMRI: con_0007	1,1,1
+u_rc1meanafMRI: con_0008	1,1,1
+u_rc1meanafMRI: con_0009	1,1,1
+u_rc1meanafMRI: con_0010	1,1,1
+u_rc1meanafMRI: con_0011	1,1,1
+u_rc1meanafMRI: con_0012	1,1,1
+u_rc1meanafMRI: con_0013	1,1,1
+u_rc1meanafMRI: con_0014	1,1,1
+14-May-2021 17:14:46 - Done    'Create Warped'
+14-May-2021 17:14:46 - Running 'Move/Delete Files'
+14-May-2021 17:14:46 - Done    'Move/Delete Files'
+14-May-2021 17:14:46 - Running 'Smooth'
+14-May-2021 17:14:53 - Done    'Smooth'
+14-May-2021 17:14:53 - Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             17:14:53 - 14/05/2021
+========================================================================
+Contrasts folder                        : .\fmri\sub039\canonical_pmodV4
+Deleting contrasts                      :                        ...done
+	contrast image  1               :                   ...computing       ...written con_0001.nii
+	spm{T} image  1                 :                   ...computing      ...written spmT_0001.nii
+	contrast image  2               :                   ...computing       ...written con_0002.nii
+	spm{T} image  2                 :                   ...computing      ...written spmT_0002.nii
+	contrast image  3               :                   ...computing       ...written con_0003.nii
+	spm{T} image  3                 :                   ...computing      ...written spmT_0003.nii
+	contrast image  4               :                   ...computing       ...written con_0004.nii
+	spm{T} image  4                 :                   ...computing      ...written spmT_0004.nii
+	contrast image  5               :                   ...computing       ...written con_0005.nii
+	spm{T} image  5                 :                   ...computing      ...written spmT_0005.nii
+	contrast image  6               :                   ...computing       ...written con_0006.nii
+	spm{T} image  6                 :                   ...computing      ...written spmT_0006.nii
+	contrast image  7               :                   ...computing       ...written con_0007.nii
+	spm{T} image  7                 :                   ...computing      ...written spmT_0007.nii
+	contrast image  8               :                   ...computing       ...written con_0008.nii
+	spm{T} image  8                 :                   ...computing      ...written spmT_0008.nii
+	contrast image  9               :                   ...computing       ...written con_0009.nii
+	spm{T} image  9                 :                   ...computing      ...written spmT_0009.nii
+	contrast image 10               :                   ...computing       ...written con_0010.nii
+	spm{T} image 10                 :                   ...computing      ...written spmT_0010.nii
+	contrast image 11               :                   ...computing       ...written con_0011.nii
+	spm{T} image 11                 :                   ...computing      ...written spmT_0011.nii
+	contrast image 12               :                   ...computing       ...written con_0012.nii
+	spm{T} image 12                 :                   ...computing      ...written spmT_0012.nii
+	contrast image 13               :                   ...computing       ...written con_0013.nii
+	spm{T} image 13                 :                   ...computing      ...written spmT_0013.nii
+	contrast image 14               :                   ...computing       ...written con_0014.nii
+	spm{T} image 14                 :                   ...computing      ...written spmT_0014.nii
+	Saving SPM.mat                  :                     ...writing              ...SPM.mat saved
+Completed                               :          17:14:58 - 14/05/2021
+14-May-2021 17:14:58 - Done    'Contrast Manager'
+14-May-2021 17:14:58 - Running 'Create Warped'
+u_rc1meanafMRI: con_0001	1,1,1
+u_rc1meanafMRI: con_0002	1,1,1
+u_rc1meanafMRI: con_0003	1,1,1
+u_rc1meanafMRI: con_0004	1,1,1
+u_rc1meanafMRI: con_0005	1,1,1
+u_rc1meanafMRI: con_0006	1,1,1
+u_rc1meanafMRI: con_0007	1,1,1
+u_rc1meanafMRI: con_0008	1,1,1
+u_rc1meanafMRI: con_0009	1,1,1
+u_rc1meanafMRI: con_0010	1,1,1
+u_rc1meanafMRI: con_0011	1,1,1
+u_rc1meanafMRI: con_0012	1,1,1
+u_rc1meanafMRI: con_0013	1,1,1
+u_rc1meanafMRI: con_0014	1,1,1
+14-May-2021 17:15:19 - Done    'Create Warped'
+14-May-2021 17:15:19 - Running 'Move/Delete Files'
+14-May-2021 17:15:19 - Done    'Move/Delete Files'
+14-May-2021 17:15:19 - Running 'Smooth'
+14-May-2021 17:15:26 - Done    'Smooth'
+14-May-2021 17:15:26 - Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             17:15:26 - 14/05/2021
+========================================================================
+Contrasts folder                        : .\fmri\sub040\canonical_pmodV4
+Deleting contrasts                      :                        ...done
+	contrast image  1               :                   ...computing       ...written con_0001.nii
+	spm{T} image  1                 :                   ...computing      ...written spmT_0001.nii
+	contrast image  2               :                   ...computing       ...written con_0002.nii
+	spm{T} image  2                 :                   ...computing      ...written spmT_0002.nii
+	contrast image  3               :                   ...computing       ...written con_0003.nii
+	spm{T} image  3                 :                   ...computing      ...written spmT_0003.nii
+	contrast image  4               :                   ...computing       ...written con_0004.nii
+	spm{T} image  4                 :                   ...computing      ...written spmT_0004.nii
+	contrast image  5               :                   ...computing       ...written con_0005.nii
+	spm{T} image  5                 :                   ...computing      ...written spmT_0005.nii
+	contrast image  6               :                   ...computing       ...written con_0006.nii
+	spm{T} image  6                 :                   ...computing      ...written spmT_0006.nii
+	contrast image  7               :                   ...computing       ...written con_0007.nii
+	spm{T} image  7                 :                   ...computing      ...written spmT_0007.nii
+	contrast image  8               :                   ...computing       ...written con_0008.nii
+	spm{T} image  8                 :                   ...computing      ...written spmT_0008.nii
+	contrast image  9               :                   ...computing       ...written con_0009.nii
+	spm{T} image  9                 :                   ...computing      ...written spmT_0009.nii
+	contrast image 10               :                   ...computing       ...written con_0010.nii
+	spm{T} image 10                 :                   ...computing      ...written spmT_0010.nii
+	contrast image 11               :                   ...computing       ...written con_0011.nii
+	spm{T} image 11                 :                   ...computing      ...written spmT_0011.nii
+	contrast image 12               :                   ...computing       ...written con_0012.nii
+	spm{T} image 12                 :                   ...computing      ...written spmT_0012.nii
+	contrast image 13               :                   ...computing       ...written con_0013.nii
+	spm{T} image 13                 :                   ...computing      ...written spmT_0013.nii
+	contrast image 14               :                   ...computing       ...written con_0014.nii
+	spm{T} image 14                 :                   ...computing      ...written spmT_0014.nii
+	Saving SPM.mat                  :                     ...writing              ...SPM.mat saved
+Completed                               :          17:15:31 - 14/05/2021
+14-May-2021 17:15:31 - Done    'Contrast Manager'
+14-May-2021 17:15:31 - Running 'Create Warped'
+u_rc1meanafMRI: con_0001	1,1,1
+u_rc1meanafMRI: con_0002	1,1,1
+u_rc1meanafMRI: con_0003	1,1,1
+u_rc1meanafMRI: con_0004	1,1,1
+u_rc1meanafMRI: con_0005	1,1,1
+u_rc1meanafMRI: con_0006	1,1,1
+u_rc1meanafMRI: con_0007	1,1,1
+u_rc1meanafMRI: con_0008	1,1,1
+u_rc1meanafMRI: con_0009	1,1,1
+u_rc1meanafMRI: con_0010	1,1,1
+u_rc1meanafMRI: con_0011	1,1,1
+u_rc1meanafMRI: con_0012	1,1,1
+u_rc1meanafMRI: con_0013	1,1,1
+u_rc1meanafMRI: con_0014	1,1,1
+14-May-2021 17:15:52 - Done    'Create Warped'
+14-May-2021 17:15:52 - Running 'Move/Delete Files'
+14-May-2021 17:15:52 - Done    'Move/Delete Files'
+14-May-2021 17:15:52 - Running 'Smooth'
+14-May-2021 17:15:58 - Done    'Smooth'
+14-May-2021 17:15:58 - Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             17:15:58 - 14/05/2021
+========================================================================
+Contrasts folder                        : .\fmri\sub041\canonical_pmodV4
+Deleting contrasts                      :                        ...done
+	contrast image  1               :                   ...computing       ...written con_0001.nii
+	spm{T} image  1                 :                   ...computing      ...written spmT_0001.nii
+	contrast image  2               :                   ...computing       ...written con_0002.nii
+	spm{T} image  2                 :                   ...computing      ...written spmT_0002.nii
+	contrast image  3               :                   ...computing       ...written con_0003.nii
+	spm{T} image  3                 :                   ...computing      ...written spmT_0003.nii
+	contrast image  4               :                   ...computing       ...written con_0004.nii
+	spm{T} image  4                 :                   ...computing      ...written spmT_0004.nii
+	contrast image  5               :                   ...computing       ...written con_0005.nii
+	spm{T} image  5                 :                   ...computing      ...written spmT_0005.nii
+	contrast image  6               :                   ...computing       ...written con_0006.nii
+	spm{T} image  6                 :                   ...computing      ...written spmT_0006.nii
+	contrast image  7               :                   ...computing       ...written con_0007.nii
+	spm{T} image  7                 :                   ...computing      ...written spmT_0007.nii
+	contrast image  8               :                   ...computing       ...written con_0008.nii
+	spm{T} image  8                 :                   ...computing      ...written spmT_0008.nii
+	contrast image  9               :                   ...computing       ...written con_0009.nii
+	spm{T} image  9                 :                   ...computing      ...written spmT_0009.nii
+	contrast image 10               :                   ...computing       ...written con_0010.nii
+	spm{T} image 10                 :                   ...computing      ...written spmT_0010.nii
+	contrast image 11               :                   ...computing       ...written con_0011.nii
+	spm{T} image 11                 :                   ...computing      ...written spmT_0011.nii
+	contrast image 12               :                   ...computing       ...written con_0012.nii
+	spm{T} image 12                 :                   ...computing      ...written spmT_0012.nii
+	contrast image 13               :                   ...computing       ...written con_0013.nii
+	spm{T} image 13                 :                   ...computing      ...written spmT_0013.nii
+	contrast image 14               :                   ...computing       ...written con_0014.nii
+	spm{T} image 14                 :                   ...computing      ...written spmT_0014.nii
+	Saving SPM.mat                  :                     ...writing              ...SPM.mat saved
+Completed                               :          17:16:03 - 14/05/2021
+14-May-2021 17:16:03 - Done    'Contrast Manager'
+14-May-2021 17:16:03 - Running 'Create Warped'
+u_rc1meanafMRI: con_0001	1,1,1
+u_rc1meanafMRI: con_0002	1,1,1
+u_rc1meanafMRI: con_0003	1,1,1
+u_rc1meanafMRI: con_0004	1,1,1
+u_rc1meanafMRI: con_0005	1,1,1
+u_rc1meanafMRI: con_0006	1,1,1
+u_rc1meanafMRI: con_0007	1,1,1
+u_rc1meanafMRI: con_0008	1,1,1
+u_rc1meanafMRI: con_0009	1,1,1
+u_rc1meanafMRI: con_0010	1,1,1
+u_rc1meanafMRI: con_0011	1,1,1
+u_rc1meanafMRI: con_0012	1,1,1
+u_rc1meanafMRI: con_0013	1,1,1
+u_rc1meanafMRI: con_0014	1,1,1
+14-May-2021 17:16:23 - Done    'Create Warped'
+14-May-2021 17:16:23 - Running 'Move/Delete Files'
+14-May-2021 17:16:23 - Done    'Move/Delete Files'
+14-May-2021 17:16:23 - Running 'Smooth'
+14-May-2021 17:16:31 - Done    'Smooth'
+14-May-2021 17:16:31 - Done
+

@@ -51,7 +51,7 @@ xticklabels(pmod_names);
 yticklabels(pmod_names);
 xtickangle(90);
 ax = gca; ax.FontSize = 14;
-sfig(fullfile(save_dir, t));
+% sfig(fullfile(save_dir, t));
 
 % Split it
 split   = 110;
