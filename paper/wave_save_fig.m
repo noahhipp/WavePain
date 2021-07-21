@@ -11,4 +11,4 @@ end
 save_dir            = fullfile(cloud_dir, 'paper','figures');
 save_file = fullfile(save_dir, fname);
 
-print(save_file,'-r300', '-dpng');
+print(save_file,'-r300', '-dpdf');

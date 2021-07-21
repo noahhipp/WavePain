@@ -13,12 +13,19 @@ DATA = readtable(FILE_IN);
 
 
 % Convert data to desired format
-up_conds = [1,4];
-down_conds = [2,3];
+up_conds = [4];
+down_conds = [3];
+% up_conds = 1;
+% down_conds = 2;
 d{1} = DATA.rating(ismember(DATA.condition, up_conds));
 d{2} = DATA.rating(ismember(DATA.condition, down_conds));
 
 cb = wave_load_colors;
+
+[~,p,ci,~] = ttest(d{1}, d{2});
+fprintf('p-value: %f\nCI: %f %f\n', p, ci);
+fprintf('Up mean: %f\nDown mean: %f\nMean diff: %f\n', mean(d{1}), mean(d{2}), mean(d{1}) - mean(d{2}));
+fprintf('Mean difference (p=%.4f):\n%d VAS (90%% CI: [%d,%d])\n', p, round(mean(d{1}) - mean(d{2})), round(ci));
 
 
 % driver code
