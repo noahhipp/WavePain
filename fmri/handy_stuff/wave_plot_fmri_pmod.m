@@ -41,7 +41,7 @@ end
 %------------------------------PREPARING STUFF-END-------------------------
 
 %------------------------------PLOTTING ACTION ----------------------------
-y_label = 'fMRI signal [au]';
+y_label = 'Parameter estimate';
 hold on;
 if check0 == 1
     pmod_names          = {'wm_Heat', 'wm_WM', 'wm_Slope',...
@@ -63,7 +63,7 @@ grid on;
 b   = bar(x, data{1}.contrast);
 
 b.FaceColor = [1 1 1];
-b.LineWidth = 2;
+b.LineWidth = 1;
 er  = errorbar(x, data{1}.contrast, data{1}.standarderror);
 er.Color = [0 0 0];
 er.LineStyle = 'none';
@@ -74,16 +74,16 @@ if new
     xticklabels(pmod_names);
     xticks(x);
     ax = gca;
-    ax.FontSize = 14;
+    ax.FontSize = 10;
     ax.XAxis.TickLabelInterpreter = 'none';
-    xtickangle(90);
-    xlabel('Contrasts', 'FontWeight', 'bold');
-    ylabel(y_label, 'FontWeight', 'bold');
+    xtickangle(45);
+    xlabel('Regressor', 'FontWeight', 'normal');
+    ylabel(y_label, 'FontWeight', 'normal');
 end
 
 % title
-fig_title = sprintf('CANONICAL PMOD ANOVA for x=%1.1f y=%1.1f z=%1.1f', xyz_mm);
-sgtitle(fig_title, 'FontWeight', 'bold', 'FontSize', 16);
+fig_title = sprintf('Parameter estimates for x=%1.1f y=%1.1f z=%1.1f', xyz_mm);
+title(fig_title, 'FontWeight', 'bold', 'FontSize', 10);
 
 % safe stuff to binary files
 wave_save_ylims(ylim);

@@ -2,19 +2,17 @@ function overall_plot
 % use fancy raincloudroutine to plot overall ratings
 
 % Housekeeping
-NAME_IN     = 'all_overall_behav_collapsed.csv';
-[~,~,~,~,~,BASE_DIR]    = wave_ghost('behav');
+NAME_IN     = 'all_overall_fmri_collapsed.csv';
+[~,~,~,~,~,BASE_DIR]    = wave_ghost();
 
 DIR         = fullfile(BASE_DIR, 'overall_ratings');
 FILE_IN     = fullfile(DIR, NAME_IN);
-
-
 DATA = readtable(FILE_IN);
 
 
 % Convert data to desired format
-up_conds = [4];
-down_conds = [3];
+up_conds = [4 1];
+down_conds = [2 3 ];
 % up_conds = 1;
 % down_conds = 2;
 d{1} = DATA.rating(ismember(DATA.condition, up_conds));
@@ -39,7 +37,7 @@ h2 = raincloud_plot(d{2}, 'box_on', 1, 'color', [119, 221, 119]./255, 'alpha', 0
 l =legend([h1{1} h2{1}], {'up slope', 'down slope'}, 'Location','northwest');
 l.Title.String = 'Attention on:';
 l.FontSize = 12;
-title(['N=25'], 'FontSize', 16,'FontWeight','bold');
+title(['N=47'], 'FontSize', 16,'FontWeight','bold');
 box off
 
 % customize it

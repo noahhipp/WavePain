@@ -1,16 +1,19 @@
 function nback_analysis
-% nback analysis
+% Settings
+SAMPLE   = '';
 
 % Housekeeping
 [~,~,~,~,~,DATA_DIR]        = wave_ghost();
 NBACK_DIR                   = fullfile(DATA_DIR, 'nback');
 RAW_TEMPLATE                = 'all_nback.csv';
 SLOPE_COLLAPSED_TEMPLATE    = 'all_nback_slope_collapsed.csv';
-SLOPE_COLLAPSED_COLLAPSED_TEMPLATE = 'all_nback_slope_collapsed_collapsed.csv'; % two values/trial
+SLOPE_COLLAPSED_COLLAPSED_TEMPLATE = 'all_nback_slope_collapsed_collapsed.csv'; % 4 values/sub: ob | tb X up | down
+SLOPE_COLLAPSED_COLLAPSED_C_TEMPLATE = 'all_nback_slope_collapsed_collapsed_c.csv'; % 2 values/sub: ob tb
 
 RAW_FILE                    = fullfile(NBACK_DIR, RAW_TEMPLATE);
 SLOPE_COLLAPSED_FILE        = fullfile(NBACK_DIR, SLOPE_COLLAPSED_TEMPLATE);
 SLOPE_COLLAPSED_COLLAPSED_FILE = fullfile(NBACK_DIR, SLOPE_COLLAPSED_COLLAPSED_TEMPLATE);
+SLOPE_COLLAPSED_COLLAPSED_C_FILE = fullfile(NBACK_DIR, SLOPE_COLLAPSED_COLLAPSED_C_TEMPLATE);
 
 % Check if files are available
 if ~exist(RAW_FILE, 'file') % then we cannot do anything
@@ -61,7 +64,7 @@ if ~exist(SLOPE_COLLAPSED_FILE, 'file')
                 new_row.shape       = task_data.wave(1);
                 new_row.slope       = task_data.slope(1);
                 new_row.task        = task_data.taskType(1);
-                new_row.seen_before = task_data.seen_before(1);
+%                 new_row.seen_before = task_data.seen_before(1);
                 
                 % Performance of sequence
                 new_row.signals    = sum(task_data.target);
@@ -77,6 +80,9 @@ if ~exist(SLOPE_COLLAPSED_FILE, 'file')
                 new_row.hr_ll       = (new_row.hits + 0.5) / (new_row.signals +1);
                 new_row.far_ll      = (new_row.false_alarms + 0.5) / (new_row.noises +1);
                 new_row.d           = dprime(new_row.hr_ll, new_row.far_ll);                             
+                
+                % Reaction times
+                new_row.rt          = nanmean(task_data.rt);
                 
                 % Append row to output
                 slope_collapsed_data = vertcat(slope_collapsed_data,...
@@ -103,6 +109,7 @@ end
 % Collapse trials --> 4 values for each sub
 % =========================================================================
 if ~exist(SLOPE_COLLAPSED_COLLAPSED_FILE, 'file')   
+    fprintf('Collapsed file (%s) is missing. Initalizing collapse.\n', SLOPE_COLLAPSED_COLLAPSED_FILE)
     
     data_in = readtable(SLOPE_COLLAPSED_FILE);
     
@@ -144,6 +151,49 @@ if ~exist(SLOPE_COLLAPSED_COLLAPSED_FILE, 'file')
     writetable(data_out, SLOPE_COLLAPSED_COLLAPSED_FILE);    
 end
 
+% =========================================================================
+% Collapse up/down slopes --> 2 values for each sub
+% =========================================================================
+if ~exist(SLOPE_COLLAPSED_COLLAPSED_C_FILE, 'file')   
+    fprintf('Collapsed file (%s) is missing. Initalizing collapse.\n', SLOPE_COLLAPSED_COLLAPSED_C_FILE)
+    
+    data_in = readtable(SLOPE_COLLAPSED_FILE);
+    
+    % Convert variables to correct types
+    nancol          = nan(height(data_in),1);
+    shape2   = nancol;    
+    
+    shape2(strcmp(data_in.shape, 'M')) = 1;
+    shape2(strcmp(data_in.shape, 'W')) = 2;
+    data_in.shape = shape2;       
+    
+    % Get rid of slope
+    data_in.slope = [];
+    
+    % Collapse everything but ID, and slope and task
+    grouping_variables = {'ID', 'task'};
+    mean_data = varfun(@mean, data_in, 'GroupingVariables', grouping_variables);
+    sem_data = varfun(@sem, data_in, 'GroupingVariables', grouping_variables);
+    fprintf('Height of original DATA: %10d\n', height(data_in));
+    fprintf('Height of mean DATA: %10d\n', height(mean_data));
+    fprintf('Reduction factor: %f\n', height(data_in) / height(mean_data));
+    
+    % Get rid of mean_ prefix
+    for i = 1:width(mean_data)
+        mean_data.Properties.VariableNames{i} = strrep(mean_data.Properties.VariableNames{i}, 'mean_','');
+    end
+    
+    % Transfer interesting sem columns to mean DATA
+    idx = strcmp(sem_data.Properties.VariableNames, 'd');
+    cols_to_transfer = sem_data.Properties.VariableNames(idx);
+    for i = 1:numel(cols_to_transfer)
+        mean_data(:,cols_to_transfer{i}) = sem_data(:,cols_to_transfer{i});
+    end            
+    
+    % Write output
+    data_out = mean_data;
+    writetable(data_out, SLOPE_COLLAPSED_COLLAPSED_C_FILE);    
+end
 
 
 % =========================================================================
@@ -258,23 +308,23 @@ end
 % =========================================================================
 % check if seen_before has an effect on d'
 % =========================================================================
-data = readtable(SLOPE_COLLAPSED_FILE);
+% data = readtable(SLOPE_COLLAPSED_FILE);
 
-data.seen_before_c1 = categorical(data.seen_before);
+%data.seen_before_c1 = categorical(data.seen_before);
 data.task_c1 = categorical(data.task, [1 2], {'1back', '2back'});
 
-lme_form = 'd ~ task_c1 * seen_before_c1 + (1|ID)';
-fitlme(data, lme_form)
+% lme_form = 'd ~ task_c1 * seen_before_c1 + (1|ID)';
+% fitlme(data, lme_form)
 
 % =========================================================================
 % check if seen_before has an effect on rt
 % =========================================================================
-data = readtable(RAW_FILE);
+% data = readtable(RAW_FILE);
 
-data.seen_before_c1 = categorical(data.seen_before);
-data.task_c1 = categorical(data.taskType, [1 2], {'1back', '2back'});
-lme_form = 'rt ~ task_c1 * seen_before_c1 + (1|ID)';
-fitlme(data, lme_form)
+% data.seen_before_c1 = categorical(data.seen_before);
+% data.task_c1 = categorical(data.taskType, [1 2], {'1back', '2back'});
+% lme_form = 'rt ~ task_c1 * seen_before_c1 + (1|ID)';
+% fitlme(data, lme_form)
 
 
 % =========================
