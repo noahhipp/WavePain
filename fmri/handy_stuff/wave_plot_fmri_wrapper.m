@@ -17,19 +17,19 @@ wave_save_coordinates(st.centre, xSPM);
 fir_data = wave_load_SPM('fir_anova_6', 1:6);
 
 % Load data from Canonical pmod ANOVA
-pmod_data = wave_load_SPM('second_level_anovacanonical_pmodV4', 2);
+pmod_data = wave_load_SPM('second_level_anovacanonical_pmodV3', 2);
 
 % Plot timecourses
 cd(fullfile(code_dir, 'plotting'));
-wave_plot_fmri_fir(fir_data);
+wave_plot_fmri_fir_paper(fir_data);
 
 % Plot anovabars
 cd(fullfile(code_dir, 'plotting'));
 wave_plot_fmri_pmod(pmod_data);
 
 % Plot fitted response
-wave_plot_fmri_fitted_response;
-wave_sliders;
+wave_plot_fmri_fitted_response_paper;
+% wave_sliders;
 
 
 

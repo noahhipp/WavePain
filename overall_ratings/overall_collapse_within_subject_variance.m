@@ -1,8 +1,8 @@
 function overall_collapse_within_subject_variance
 
 % Housekeeping
-NAME_IN     = 'all_overall_behav.csv';
-[~,~,~,~,~,BASE_DIR]    = wave_ghost('behav');
+NAME_IN     = 'all_overall_fmri.csv';
+[~,~,~,~,~,BASE_DIR]    = wave_ghost();
 
 DIR         = fullfile(BASE_DIR, 'overall_ratings');
 FILE_IN     = fullfile(DIR, NAME_IN);
@@ -19,7 +19,7 @@ end
 
 % Read data
 DATA = readtable(FILE_IN);
-% DATA.attention = []; % this is categorical so we throw it out here
+DATA.attention = []; % this is categorical so we throw it out here
 
 % Collapse everything but ID and  condition 
 grouping_variables = {'ID', 'condition'};
@@ -47,4 +47,4 @@ fprintf('\nWrote %s\n', FILE_OUT);
 
 % Sem function
 function out = sem(in)
-out = nanstd(in)./sum(~isnan(in));
+out = nanstd(in)./sqrt(sum(~isnan(in)));

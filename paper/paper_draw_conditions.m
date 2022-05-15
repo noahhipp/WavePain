@@ -4,6 +4,21 @@ function paper_draw_conditions
 N = 1100;
 
 % Settings
+LABELS_OFF = 1;
+LEGEND_OFF = 1;
+MODIFY_TBLS = 1;
+
+TBLS_ALPHA = 0.25;
+TBLS_STYLE = '--';
+
+% for fname
+TBLS_STYLE_NAME = TBLS_STYLE;
+if strcmp(TBLS_STYLE,':')
+    TBLS_STYLE_NAME = 'dotted';
+elseif strcmp(TBLS_STYLE,'--')
+    TBLS_STYLE_NAME = 'dashed';
+end
+
 XLIMS = [0 110];
 YLIMS = [0 100];
 YLABEL = 'Temperature [VAS]';
@@ -12,23 +27,35 @@ TITLES = {'M21', 'M12', 'W21','W12','M-online', 'W-online'};
 TITLESIZE = 16;
 TICKSIZE = 12;
 
+FNAME = sprintf('condtions_tbls_alpha%.2f_%s.png', TBLS_ALPHA, TBLS_STYLE_NAME);
+DIR   = 'D:\OneDrive - Universität Hamburg\projects\wavepain\results\22_05_12_draw_conditions';
+PATH  = fullfile(DIR, FNAME);
+
 [m, w] = waveit2(N);
 m = m*30+30;
 w = w*30+30;
 x      = linspace(0,110,N);
 
-figure('Color', 'white');
+figure('Color', 'white', 'Units', 'centimeters', 'Position', [0 0 18 8]);
+
+
+% sgtitle(FNAME, 'FontSize', 20, 'Interpreter', 'none');
 
 porder              = [1 2; 6 7; 3 4; 8 9; 11 12; 13 14];
 for i = 1:6
     subplot(3,5,porder(i,:));
     
-    % Add patches
+    % Determine task order
     if ismember(i, [1 3])
-        p = wave_batches(21, YLIMS);
+        task_order = 21;        
     elseif ismember(i, [2 4])        
-        p = wave_batches(12, YLIMS);
+        task_order = 12;
+    else
+        task_order = 0;
     end
+    
+    % Draw patches
+    p = wave_batches(task_order, YLIMS);    
     
     % Plot
     hold on;
@@ -41,11 +68,15 @@ for i = 1:6
     end        
     
     % Legend
-    if i ==4
-        lg = legend([heat p(1) p(2)], {'Heat stimulus', '1-back task', '2-back task'});
-        lg.Position = [.83 .45 .1 .1];
-        lg.FontSize = 12;
+    if ~LEGEND_OFF
+        if i ==4
+            lg = legend([heat p(1) p(2)], {'Heat stimulus', '1-back task', '2-back task'});
+            lg.Position = [.83 .45 .1 .1];
+            lg.FontSize = 12;
+        end
     end
+    
+    
     wavexaxis;    
     title(TITLES{i}, 'FontSize', TITLESIZE, 'FontWeight', 'bold');
     
@@ -66,20 +97,31 @@ for i = 1:6
     xlabel('Time [s]', 'FontWeight', 'bold');
     grid on;
     ax = gca;
-    ax.FontSize = TICKSIZE;
+    ax.FontSize = TICKSIZE;    
+    
+    % Final touch
+    if LABELS_OFF
+        lose_labels   
+    end
+    
+    if MODIFY_TBLS
+        modify_tbls(TBLS_ALPHA, TBLS_STYLE, LINEWIDTH, task_order, heat)
+    end
 end
 
-
-
-
-
-
+% Save
+saveas(gcf, PATH);
 
 
 
 % wave_batches
 % add wave batches to axis
 function p = wave_batches(task_order, yspan)
+
+if task_order == 0
+    p = nan;
+    return
+end
 
 % OPTIONS
 COLORS = wave_load_colors;
@@ -109,3 +151,54 @@ if task_order == 12
     p(2).FaceColor = TB_C;
     p(2).EdgeColor = TB_C;
 end
+
+% lose_labels
+% delete all titles, axis labels, tick labels from current figrue
+function lose_labels
+title('');
+xlabel('');
+ylabel('');
+xticklabels({});
+yticklabels({});
+
+fprintf('\nlost labels O_O\n');
+
+% modify_tbls (modify_twobacklinesegment)
+% modify the heat line segments under 2back. following ideas:
+% - reduce alpha
+% - reduce linewidth
+% - change style
+%       - tb dashed everything else constant
+%       - tb dotted everything else dashed (probably better as heat is dashed
+%       throughout all plots
+
+function modify_tbls(alpha, style, line_width, task_order, line)
+
+% Find tb segment
+[~,ticks] = getBinBarPos(110);
+
+if task_order == 21
+    tb = [ticks(2) ticks(4)];
+elseif task_order == 12
+    tb = [ticks(4) ticks(6)];
+else
+    % then we have CRT and nothing to do
+    return
+end
+
+% Find index of tb
+tbidx = find(line.XData >= tb(1) & line.XData < tb(2));
+
+% Copy to new arrays for new tb line
+tbx = line.XData(tbidx);
+tby = line.YData(tbidx);
+
+% Make old tb segment invisible
+line.XData(tbidx) = nan;
+
+% Draw new line
+hold on;
+plot(tbx, tby,...
+    'Color', [0, 0, 0, alpha],...
+    'LineWidth', line_width,...
+    'LineStyle', style);
