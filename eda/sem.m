@@ -3,4 +3,4 @@ function s = sem(v)
 % sem = std(v)/sqrt(numel(v))
 
 
-s = std(v)/sqrt(numel(v));
+s = nanstd(v)/sqrt(numel(v));

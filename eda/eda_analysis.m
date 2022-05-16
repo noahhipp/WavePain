@@ -29,7 +29,7 @@ if ~exist(EDA_C_FILE, 'file')
     
     % Collapse everything but ID, shape and rating_counter    
     grouping_variables = {'id', 'condition', 'index_within_trial'};
-    mean_data = varfun(@mean, data_in, 'GroupingVariables', grouping_variables);
+    mean_data = varfun(@nanmean, data_in, 'GroupingVariables', grouping_variables);
     sem_data = varfun(@sem, data_in, 'GroupingVariables', grouping_variables);
     fprintf('Height of original DATA: %10d\n', height(data_in));
     fprintf('Height of mean DATA: %10d\n', height(mean_data));
@@ -37,7 +37,7 @@ if ~exist(EDA_C_FILE, 'file')
     
     % Get rid of mean_ prefix
     for i = 1:width(mean_data)
-        mean_data.Properties.VariableNames{i} = strrep(mean_data.Properties.VariableNames{i}, 'mean_','');
+        mean_data.Properties.VariableNames{i} = strrep(mean_data.Properties.VariableNames{i}, 'nanmean_','');
     end
     
     % Transfer interesting sem columns to mean DATA
@@ -51,6 +51,14 @@ if ~exist(EDA_C_FILE, 'file')
     data_out = mean_data;
     writetable(data_out, EDA_C_FILE);        
     fprintf('\nWrote %s.\n', EDA_C_FILE);
+    
+else
+    fprintf('Wanna delete %s and run again?\n', EDA_C_FILE)
+    prompt = input('(y/N)?\n', 's');
+    if strcmp(prompt, 'y')
+        delete(EDA_C_FILE);
+        return
+    end
 end
 
 % Collapse second level variance
@@ -63,7 +71,7 @@ if ~exist(EDA_CC_FILE, 'file')
     
     % Collapse everything but ID, shape and rating_counter    
     grouping_variables = {'condition', 'index_within_trial'};
-    mean_data = varfun(@mean, data_in, 'GroupingVariables', grouping_variables);
+    mean_data = varfun(@nanmean, data_in, 'GroupingVariables', grouping_variables);
     sem_data = varfun(@sem, data_in, 'GroupingVariables', grouping_variables);
     fprintf('Height of original DATA: %10d\n', height(data_in));
     fprintf('Height of mean DATA: %10d\n', height(mean_data));
@@ -71,7 +79,7 @@ if ~exist(EDA_CC_FILE, 'file')
     
     % Get rid of mean_ prefix
     for i = 1:width(mean_data)
-        mean_data.Properties.VariableNames{i} = strrep(mean_data.Properties.VariableNames{i}, 'mean_','');
+        mean_data.Properties.VariableNames{i} = strrep(mean_data.Properties.VariableNames{i}, 'nanmean_','');
     end
     
     % Transfer interesting sem columns to mean DATA
@@ -85,4 +93,11 @@ if ~exist(EDA_CC_FILE, 'file')
     data_out = mean_data;
     writetable(data_out, EDA_CC_FILE);        
     fprintf('\nWrote %s.\n', EDA_CC_FILE);
+else
+    fprintf('Wanna delete %s and run again?\n', EDA_CC_FILE)
+    prompt = input('y/N)?\n', 's');
+    if strcmp(prompt, 'y')
+        delete(EDA_CC_FILE);                
+        return
+    end
 end
