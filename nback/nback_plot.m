@@ -4,18 +4,19 @@ function nback_plot
 % Settings
 SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
 XVAR            = 'rt';
+LEGEND_OFF      = 'legend_on'; % 'legend_off' turns it off else on
 
 HUE             = 'task';
 HUE_NAMES       = {'1-back', '2-back'};
 HUE1            = 1;
 HUE2            = 2;
 
-
-
 HOST            = wave_ghost2(SAMPLE); %wave_gethost
-NAME            = sprintf('%s_nback_%s_by_%s',SAMPLE, XVAR, HUE);
-DIR             = fullfile(HOST.results, '22_05_13_nback_performance');
-FNAME           = fullfile(DIR,NAME);
+NAME            = sprintf('%s_nback_%s_by_%s_%s',...
+                SAMPLE, XVAR, HUE, LEGEND_OFF);
+FIG_DIR         = fullfile(HOST.results,...
+                '2022_05_13_nback_performance');
+FNAME           = fullfile(FIG_DIR, NAME);
 
 % Figure
 FIG_DIMS        = [8.8 5];
@@ -45,8 +46,6 @@ XL_FONTSIZE     = 8;
 XL_FONTWEIGHT   = 'bold';
 XA_FONTSIZE     = 8;
 
-
-
 % HOUSEKEEPING
 NAMES = {   'all_nback.csv',...
             'all_nback_slope_collapsed.csv',...
@@ -62,9 +61,7 @@ FILES   = fullfile(DIR, NAMES);
  for file = FILES
      i = i + 1;
      data{i} = readtable(FILES{i});
- end
- 
- 
+ end  
  
  % Plot reaction times 
  % 1b vs 2b
@@ -87,7 +84,8 @@ d1(isnan(d1)) = [];
 d2(isnan(d2)) = [];
 
 % driver code
-figure('Color','white', 'Units', 'centimeters', 'Position', [10 10 FIG_DIMS]);
+figure('Color','white',...
+    'Units', 'centimeters', 'Position', [10 10 FIG_DIMS]);
 
 h1 = raincloud_plot(d1, 'box_on', 1, 'color', CB(2,:), 'alpha', ALPHA,...
      'box_dodge', 1, 'box_dodge_amount', .15, 'dot_dodge_amount', .3,...
@@ -98,9 +96,11 @@ h2 = raincloud_plot(d2, 'box_on', 1, 'color', CB(1,:), 'alpha', ALPHA,...
      'box_col_match', 1);
  
 % Legend 
-l =legend([h1{1} h2{1}], HUE_NAMES, 'Location','best');
-l.Title.String = '';
-l.FontSize = L_FONTSIZE;
+if ~strcmp(LEGEND_OFF, 'legend_off')
+        l =legend([h1{1} h2{1}], HUE_NAMES, 'Location','best');
+        l.Title.String = '';
+        l.FontSize = L_FONTSIZE;
+end
 
 % Title
 if strcmp(SAMPLE, 'behav')
@@ -119,7 +119,8 @@ ax = gca;
 ax.XAxis.FontSize = XA_FONTSIZE;
 ax.YAxis.TickValues = [];
 
-ylim([-1 1.5])
+% ylim([-1 1.5])
 
 % Save
 print(FNAME, '-dpng','-r300');
+fprintf('Printed %s.png\n\n', FNAME);

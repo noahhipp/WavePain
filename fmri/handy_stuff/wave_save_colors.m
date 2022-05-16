@@ -7,7 +7,8 @@ function wave_save_colors
      253,174,97;
      255,255,191;
      171,217,233;
-     44,123,182];
+     44,123,182;
+     119,221,119];
  
  fid = fopen('colors.bin', 'w');
  fwrite(fid, c, 'double');

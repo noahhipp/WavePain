@@ -2,23 +2,25 @@ function online_plot
 % Plots online ratings for wavepain paper
 
 % Settings
-SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
-
+SAMPLE          = 'fmri'; % can be 'behav' or 'fMRI'
 XVAR            = 't';
+LEGEND_OFF      = 'legend_on'; % 'legend_off' turns it off else on
 
 YVAR            = 'rating';
 YVAR_ERROR      = 'sem_rating';
 
 ZVAR            = 'shape';
+ZVAR_NAMES      = {'M-shape', 'W-shape'};
 ZVAR_VALS       = [1, 2];
 
 HOST            = wave_ghost2(SAMPLE); %wave_gethost
-NAME            = sprintf('%s_online_ratings_%s_vs_%s',SAMPLE, YVAR, XVAR);
-DIR             = fullfile(HOST.results, '2022_05_14_online_ratings');
-if ~exist(DIR, 'dir')
-    mkdir(DIR)
+NAME            = sprintf('%s_online_ratings_%s_vs_%s_%s',...
+                SAMPLE, YVAR, XVAR, LEGEND_OFF);
+FIG_DIR             = fullfile(HOST.results, '2022_05_14_online_ratings');
+if ~exist(FIG_DIR, 'dir')
+    mkdir(FIG_DIR)
 end
-FNAME           = fullfile(DIR,NAME);
+FNAME           = fullfile(FIG_DIR,NAME);
 
 % Figure
 FIG_DIMS        = [8.8 5];
@@ -34,7 +36,6 @@ end
 L_FONTSIZE      = 8;
 
 % Title
-T_ADDONS        = {': M-shape', ': W-shape'};
 T_FONTSIZE      = 10;
 T_FONTWEIGHT    = 'bold';
 
@@ -53,8 +54,6 @@ XA_TICKS        = [0 5 55 110];
 % YAxis
 YL = 'pain [VAS]';
 YA_TICKS = [0 30 60 100];
-
-
 
 % HOUSEKEEPING
 NAMES = {   'all_online_ratings.csv',...
@@ -98,11 +97,9 @@ FILES   = fullfile(DATA_DIR, NAMES);
 % create wave
 for i = 1:numel(ZVAR_VALS)
     if ZVAR_VALS(i) == 1 % then we have an M
-        wave = waveit2(numel(d{i}));
-        name_addon = 'm_';
+        wave = waveit2(numel(d{i}));        
     elseif ZVAR_VALS(i) == 2 % then we have a W
-        [~,wave] = waveit2(numel(d{i}));
-        name_addon = 'w_';
+        [~,wave] = waveit2(numel(d{i}));        
     end
     wave = wave .* 30 + 30;       
     
@@ -117,7 +114,7 @@ for i = 1:numel(ZVAR_VALS)
     h{3} = plot(x{i}, wave, 'k--');        
  
     % Legend
-    if i == 10
+    if ~strcmp(LEGEND_OFF, 'legend_off')
         l =legend([h{1}, h{2}, h{3}], {'CPRs','CPRs SEM', 'Heat stimulus'},...
             'Location','best');        
         l.Title.String = '';
@@ -132,7 +129,7 @@ for i = 1:numel(ZVAR_VALS)
     else
         error("Sample not recognized, must be 'behav' or 'fmri'");
     end
-    T = strcat(T, T_ADDONS{i});
+    T = sprintf('%s: %s', T, ZVAR_NAMES{i});
     title(T, 'FontSize', T_FONTSIZE,'FontWeight',T_FONTWEIGHT);
     box off
     
@@ -149,8 +146,10 @@ for i = 1:numel(ZVAR_VALS)
     ylim([0 100])
     
     % Save
-    grid on;
-    [~,f] = fileparts(FNAME);
-    FNAME = fullfile(DIR, strcat(name_addon, f));
-    print(FNAME, '-dpng','-r300');
+    grid on;    
+    fname = sprintf('%s_%s_online_ratings_%s_vs_%s_%s',...
+                SAMPLE,ZVAR_NAMES{i}, YVAR, XVAR, LEGEND_OFF);
+    fname = fullfile(FIG_DIR, fname);
+    print(fname, '-dpng','-r300');
+    fprintf('Printed %s\n\n',fname);
 end

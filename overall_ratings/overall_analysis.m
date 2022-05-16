@@ -1,34 +1,34 @@
-function online_analyis
+function overall_analysis
 
 % Settings
 SAMPLE   = 'fmri'; % can be behav or fmri
 
 % Housekeeping
 HOST                = wave_ghost2(SAMPLE);
-CPR_DIR             = fullfile(HOST.dir, 'online_ratings');
-CPR_TEMPLATE        = 'all_online_ratings.csv';
-CPR_C_TEMPLATE      = 'all_online_ratings_c.csv'; % first level variance removed
-CPR_CC_TEMPLATE    = 'all_online_ratings_cc.csv'; % second level variance removed
+OPR_DIR             = fullfile(HOST.dir, 'overall_ratings');
+OPR_TEMPLATE        = 'all_overall_ratings.csv';
+OPR_C_TEMPLATE      = 'all_overall_ratings_c.csv'; % first level variance removed
+OPR_CC_TEMPLATE    = 'all_overall_ratings_cc.csv'; % second level variance removed
 
-CPR_FILE            = fullfile(CPR_DIR, CPR_TEMPLATE);
-CPR_C_FILE          = fullfile(CPR_DIR, CPR_C_TEMPLATE);
-CPR_CC_FILE        = fullfile(CPR_DIR, CPR_CC_TEMPLATE);
+OPR_FILE            = fullfile(OPR_DIR, OPR_TEMPLATE);
+OPR_C_FILE          = fullfile(OPR_DIR, OPR_C_TEMPLATE);
+OPR_CC_FILE        = fullfile(OPR_DIR, OPR_CC_TEMPLATE);
 
 % Check if source is available
-if ~exist(CPR_FILE, 'file') % then we cannot do anything
+if ~exist(OPR_FILE, 'file') % then we cannot do anything
     fprintf('Source file (%s) is missing. Aborting.\n', RAW_FILE)
     return
 end
 
 % Collapse firstlevel variance
-if ~exist(CPR_C_FILE, 'file')
-    fprintf('%s is missing. Collapsing firstlevel variance.\n', CPR_C_FILE)
+if ~exist(OPR_C_FILE, 'file')
+    fprintf('%s is missing. Collapsing firstlevel variance.\n', OPR_C_FILE)
     
     % Grab raw data
-    data_in = readtable(CPR_FILE);
+    data_in = readtable(OPR_FILE);
     
-    % Collapse everything but ID, shape and rating_counter    
-    grouping_variables = {'id', 'shape', 'rating_counter'};
+    % Collapse everything but ID and condition
+    grouping_variables = {'id', 'condition'};
     mean_data = varfun(@mean, data_in, 'GroupingVariables', grouping_variables);
     sem_data = varfun(@sem, data_in, 'GroupingVariables', grouping_variables);
     fprintf('Height of original DATA: %10d\n', height(data_in));
@@ -49,20 +49,20 @@ if ~exist(CPR_C_FILE, 'file')
     
     % Write output
     data_out = mean_data;
-    writetable(data_out, CPR_C_FILE);        
-    fprintf('\nWrote %s.\n', CPR_C_FILE);
+    writetable(data_out, OPR_C_FILE);        
+    fprintf('\nWrote %s.\n', OPR_C_FILE);
 end
 
 % Collapse second level variance
-if ~exist(CPR_CC_FILE, 'file')
-    fprintf('%s is missing. Collapsing firstlevel variance.\n', CPR_CC_FILE)
+if ~exist(OPR_CC_FILE, 'file')
+    fprintf('%s is missing. Collapsing firstlevel variance.\n', OPR_CC_FILE)
     
     % Grab first level collapsed data
-    data_in = readtable(CPR_C_FILE);
+    data_in = readtable(OPR_C_FILE);
     data_in.GroupCount = [];
     
     % Collapse everything but ID, shape and rating_counter    
-    grouping_variables = {'shape', 'rating_counter'};
+    grouping_variables = {'condition'};
     mean_data = varfun(@mean, data_in, 'GroupingVariables', grouping_variables);
     sem_data = varfun(@sem, data_in, 'GroupingVariables', grouping_variables);
     fprintf('Height of original DATA: %10d\n', height(data_in));
@@ -83,6 +83,6 @@ if ~exist(CPR_CC_FILE, 'file')
     
     % Write output
     data_out = mean_data;
-    writetable(data_out, CPR_CC_FILE);        
-    fprintf('\nWrote %s.\n', CPR_CC_FILE);
+    writetable(data_out, OPR_CC_FILE);        
+    fprintf('\nWrote %s.\n', OPR_CC_FILE);
 end

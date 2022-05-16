@@ -1,11 +1,10 @@
 function c = wave_load_colors
-% reads 5 colors from binary file 
+% returns array with colors for wavepain paper
+% used to reads 5 colors from binary file but this is not C but MATLAB
 
-[fid, errmsg] = fopen('colors.bin', 'r');
-if ~isempty(errmsg)
-    warning('something wrong with colors');
-    return;
-end
-
-c = reshape(fread(fid,'double'),5,[]) ./ 255;
-fclose(fid);
+c = [215,25,28;
+     253,174,97;
+     255,255,191;
+     171,217,233;
+     44,123,182;
+     119,221,119]./255;
