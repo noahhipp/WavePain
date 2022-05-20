@@ -5,10 +5,10 @@ function eda_online_plot
 SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
 XVAR            = 't';
 DETREND_SCL     = 'yes'; % can be 'yes' or 'no'
-LEGEND_OFF      = 'legend_on'; % 'legend_off' turns it off else on
+LEGEND_OFF      = 'legend_off'; % 'legend_off' turns it off else on
 
 YVAR            = 's_zt_scl';
-YVAR_ERROR      = 'sem_s_zt_scl';
+YVAR_ERROR      = 'sembj_id_dv';
 
 ZVAR            = 'condition';
 ZVAR_NAMES      = {'M-shape', 'W-shape'};

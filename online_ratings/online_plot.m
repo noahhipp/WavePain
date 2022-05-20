@@ -2,21 +2,21 @@ function online_plot
 % Plots online ratings for wavepain paper
 
 % Settings
-SAMPLE          = 'fmri'; % can be 'behav' or 'fMRI'
+SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
 XVAR            = 't';
 LEGEND_OFF      = 'legend_on'; % 'legend_off' turns it off else on
 
 YVAR            = 'rating';
-YVAR_ERROR      = 'sem_rating';
+YVAR_ERROR      = 'sembj_id_rating';
 
 ZVAR            = 'shape';
 ZVAR_NAMES      = {'M-shape', 'W-shape'};
 ZVAR_VALS       = [1, 2];
 
 HOST            = wave_ghost2(SAMPLE); %wave_gethost
-NAME            = sprintf('%s_online_ratings_%s_vs_%s_%s',...
+NAME            = sprintf('%s_online_ratings_BJSEM_%s_vs_%s_%s',...
                 SAMPLE, YVAR, XVAR, LEGEND_OFF);
-FIG_DIR             = fullfile(HOST.results, '2022_05_14_online_ratings');
+FIG_DIR             = fullfile(HOST.results, '2022_05_20_online_ratingsV2');
 if ~exist(FIG_DIR, 'dir')
     mkdir(FIG_DIR)
 end

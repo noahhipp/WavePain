@@ -26,6 +26,7 @@ if ~exist(EDA_C_FILE, 'file')
     
     % Grab raw data
     data_in = readtable(EDA_FILE);
+    fprintf('Loaded %s\n', EDA_FILE);
     
     % Collapse everything but ID, shape and rating_counter    
     grouping_variables = {'id', 'condition', 'index_within_trial'};
@@ -61,18 +62,22 @@ else
     end
 end
 
-% Collapse second level variance
+% Collapse first and second level variance
 if ~exist(EDA_CC_FILE, 'file')
-    fprintf('%s is missing. Collapsing firstlevel variance.\n', EDA_CC_FILE)
+    fprintf('%s is missing. Collapsing first- and secondlevel variance.\n', EDA_CC_FILE)
     
     % Grab first level collapsed data
-    data_in = readtable(EDA_C_FILE);
-    data_in.GroupCount = [];
+    data_in = readtable(EDA_FILE);
+    
+    % Create complex column for sembj    
+    data_in.id_dv = complex(data_in.id, data_in.s_zt_scl);    
     
     % Collapse everything but ID, shape and rating_counter    
     grouping_variables = {'condition', 'index_within_trial'};
     mean_data = varfun(@nanmean, data_in, 'GroupingVariables', grouping_variables);
-    sem_data = varfun(@sem, data_in, 'GroupingVariables', grouping_variables);
+    sem_data = varfun(@sembj, data_in,...,
+        'InputVariables', {'id_dv'},...
+        'GroupingVariables', grouping_variables);
     fprintf('Height of original DATA: %10d\n', height(data_in));
     fprintf('Height of mean DATA: %10d\n', height(mean_data));
     fprintf('Reduction factor: %f\n', height(data_in) / height(mean_data));
@@ -83,14 +88,14 @@ if ~exist(EDA_CC_FILE, 'file')
     end
     
     % Transfer interesting sem columns to mean DATA
-    idx = contains(sem_data.Properties.VariableNames, 'rating');
+    idx = contains(sem_data.Properties.VariableNames, 'dv');
     cols_to_transfer = sem_data.Properties.VariableNames(idx);
     for i = 1:numel(cols_to_transfer)
         mean_data(:,cols_to_transfer{i}) = sem_data(:,cols_to_transfer{i});
     end            
     
     % Write output
-    data_out = mean_data;
+    data_out = mean_data;    
     writetable(data_out, EDA_CC_FILE);        
     fprintf('\nWrote %s.\n', EDA_CC_FILE);
 else

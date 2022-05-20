@@ -7,12 +7,15 @@
 
 % Based on "Error bars in within-subject designs: a comment on Baguley (2012)" by Denis Cousineau & Fearghal O’Brien
 
-function [data,SEz,SEy,SEMnormj,pm] = MixedStandardErrors_v2(D,colTag)    
+function [data,SEz,SEy,SEMnormj,pm] = MixedStandardErrors_v2(D,colTag)
+
+    pm = '±'; % because why not
+
     % Input
-    % D = table with columns id and dv
+    % D = table with columns SbId and DV
     %
-    % D = table with column id
-    % dvTag = column name of dv
+    % D = table with column SbId
+    % DVTag = column name of DV
 
     %THERE IS NO CORRESPONDENCE BETWEEN GROUPS, obvs
 
@@ -22,83 +25,60 @@ function [data,SEz,SEy,SEMnormj,pm] = MixedStandardErrors_v2(D,colTag)
     % SE = sqrt(MSerror/n);
     % but this leads to same error bars for all conditions
     %
-    % Hence, Suggestion by Cousineau to use standardized data, with modifcation by morey 2008
+    % Hence, Suggestion by Cousineau to use standardized data, with modifcation by Morey 2008
     
     if ~nargin        
         vas=[1 3 3;4 7 7;3 4 4;7 8 8;10 NaN 19;100 1 1];
         D = table(repmat([1:6]',3,1),vas(:));
-        D.Properties.VariableNames = {'id','dv'};     
+        D.Properties.VariableNames = {'SbId','DV'};     
     elseif nargin==2
-        nD = table(D.id,D.(colTag));
-        nD.Properties.VariableNames = {'id','dv'};     
+        nD = table(D.SbId,D.(colTag));
+        nD.Properties.VariableNames = {'SbId','DV'};     
         D = nD;
     end
     
     nancol = NaN(size(D,1),1);
-    onecol = ones(size(D,1),1);
     
     data = [];
-    data = table(D.id,nancol,D.dv,nancol,nancol,nancol,nancol,nancol);
-    data.Properties.VariableNames = {'id','trial_number','dv','m1','m2','dv_centered_on_m2','morey','m1_n1'};
+    data = table(D.SbId,nancol,D.DV,nancol,nancol,nancol,nancol,nancol);
+    data.Properties.VariableNames = {'SbId','n','DV','m1','mGrand','Ysj','Morey','preM2'};
     data = sortrows(data,1); % cosmetics
     
-    ids = unique(data.id);
-    n_ids = numel(ids);
-    
-    % Grand mean
-    data.m2 = nanmean(data.dv).*onecol; 
+    allSbIds = unique(data.SbId);
+    N = numel(allSbIds); % number of subjects
 
     %---------------------------------------
     % FIRST, APPLY COUSINEAU METHOD
     % via Error bars in within-subject designs: a commenton Baguley (2012) eetc.    
     % normalize observation according to Cousineau method    
-    
-    % loop through subs start
-    for i = 1:numel(ids)
-        id                              = ids(i);
-        
-        % Subject mean
-        data.m1(data.id==id)            = nanmean(data.dv(data.id==id));
-        
-        % Count trials (ie measurements)
-        data.trial_number(data.id==id)  = ...
-            [1:numel(data.trial_number(data.id==id))]'; 
-        
-        % N of valid measurements per condition per subject
-        n                               = sum(~isnan(data.dv(data.id==id))); 
-        
-        % Morey correction factor, individ. bc. diff. trial_counts                                                     
-        data.morey(data.id==id)         = sqrt(n/(n-1)); 
-    end % loop through subs end 
-    
-    % Take care auf faulty correction rates
-    data.morey(data.morey==Inf) = NaN;               
-    
-    % Center data on grand mean ("normalize" data)
-    data.dv_centered_on_m2 = data.dv-data.m1+data.m2; 
-    for i = 1:numel(ids)
-        id = ids(i);
-        
-        % m1 but only once for each subject
-        data.m1_n1(data.id==id & data.trial_number==1) =...
-            data.m1(data.id==id & data.trial_number==1);
-        
-        % m1 of centered data
-        data.m1_from_centered(data.id==id) =...
-            nanmean(data.dv_centered_on_m2(data.id==id)); % this is m2 again -.^
+    for sb = 1:numel(allSbIds)
+        sbId = allSbIds(sb);
+        data.m1(data.SbId==sbId) = nanmean(data.DV(data.SbId==sbId)); % for every subject, average across measurements  
+        data.n(data.SbId==sbId) = [1:numel(data.n(data.SbId==sbId))]'; % condition index, not sure if useful
+        n = sum(~isnan(data.DV(data.SbId==sbId))); % n of valid measurements
+        data.Morey(data.SbId==sbId) = sqrt(n/(n-1)); % for every subject, Morey correction factor; has to be individual bc different numbers
+                                                     % of measurement (n) can exist
     end
-    data.Yjmean = data.m1_n1; % ~m2, across subjects
+    data.Morey(data.Morey==Inf) = NaN;
+    data.mGrand = repmat(nanmean(data.DV),size(data,1),1); % grand mean
+    data.Ysj = data.DV-data.m1+data.mGrand; % "normalized" data (actually centered on grand mean, but not my words)
+    for sb = 1:numel(allSbIds)
+        sbId = allSbIds(sb);
+        data.preM2(data.SbId==sbId & data.n==1) = data.m1(data.SbId==sbId & data.n==1);
+        data.m1Yj(data.SbId==sbId) = nanmean(data.Ysj(data.SbId==sbId));
+    end
+    data.Yjmean = repmat(nanmean(data.preM2),size(data,1),1); % ~m2, across subjects
     
     %---------------------------------------
     % SECOND, APPLY MOREY CORRECTION
     % correction factor    
-    data.Zsj = data.morey.*(data.dv_centered_on_m2-data.Yjmean)+data.Yjmean; % formula 4
+    data.Zsj = data.Morey.*(data.Ysj-data.Yjmean)+data.Yjmean; % formula 4
     
     %---------------------------------------
     % THIRD, get standard errors
-    SEy = nanstd(data.dv_centered_on_m2)./sqrt(n_ids);
-    SEz = nanstd(data.Zsj)./sqrt(n_ids);
-    SEMnormj = sqrt((1/(n_ids*(n_ids-1)))*(nansum((data.dv_centered_on_m2-data.m1_from_centered).^2))); % from Franz & Loftus, Psychon Bull Rev (2012) 19:395–404    
+    SEy = nanstd(data.Ysj)./sqrt(N);
+    SEz = nanstd(data.Zsj)./sqrt(N);
+    SEMnormj = sqrt((1/(N*(N-1)))*(nansum((data.Ysj-data.m1Yj).^2))); % from Franz & Loftus, Psychon Bull Rev (2012) 19:395–404    
     
     data.SEy = repmat(SEy,size(data,1),1); % ~~SEy(:) from MixedStandardErrors
     data.SEz = repmat(SEz,size(data,1),1);    
@@ -106,14 +86,14 @@ function [data,SEz,SEy,SEMnormj,pm] = MixedStandardErrors_v2(D,colTag)
   
     if 1==2
         figure;
-        subplot(3,1,1);histogram(data.dv);
-        subplot(3,1,2);histogram(data.dv_centered_on_m2); % normalized
-        subplot(3,1,3);histogram(data.Zsj); % normalized, morey-corrected
+        subplot(3,1,1);histogram(data.DV);
+        subplot(3,1,2);histogram(data.Ysj); % normalized
+        subplot(3,1,3);histogram(data.Zsj); % normalized, Morey-corrected
     end
     
     %---------------------------------------
     % ALSO CONSIDER
-    %The Cousineau–morey approach introduced an accessibleway to plot error bars of various kinds in mean 
+    %The Cousineau–Morey approach introduced an accessibleway to plot error bars of various kinds in mean 
     %plots whenrepeated measure designs are used. Still, the discussion is farfrom over. First, as Franz 
     %and Loftus (2012) correctly noted,such an approach requires that the sphericity assumption bevalid 
     %(the same is true for some of the propositions in Loftus &Masson,1994). Hence, a mean plot of within-subject 

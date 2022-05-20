@@ -1,7 +1,7 @@
 function online_analyis
 
 % Settings
-SAMPLE   = 'fmri'; % can be behav or fmri
+SAMPLE   = 'behav'; % can be behav or fmri
 
 % Housekeeping
 HOST                = wave_ghost2(SAMPLE);
@@ -53,18 +53,22 @@ if ~exist(CPR_C_FILE, 'file')
     fprintf('\nWrote %s.\n', CPR_C_FILE);
 end
 
-% Collapse second level variance
+% Collapse first and second level variance
 if ~exist(CPR_CC_FILE, 'file')
     fprintf('%s is missing. Collapsing firstlevel variance.\n', CPR_CC_FILE)
     
-    % Grab first level collapsed data
-    data_in = readtable(CPR_C_FILE);
-    data_in.GroupCount = [];
+    % Grab raw file
+    data_in = readtable(CPR_FILE);    
+    
+    % Create complex column for sembj
+    data_in.id_rating = complex(data_in.id, data_in.rating);
     
     % Collapse everything but ID, shape and rating_counter    
     grouping_variables = {'shape', 'rating_counter'};
     mean_data = varfun(@mean, data_in, 'GroupingVariables', grouping_variables);
-    sem_data = varfun(@sem, data_in, 'GroupingVariables', grouping_variables);
+    sem_data = varfun(@sembj, data_in,...
+        'InputVariables', 'id_rating',...
+        'GroupingVariables', grouping_variables);
     fprintf('Height of original DATA: %10d\n', height(data_in));
     fprintf('Height of mean DATA: %10d\n', height(mean_data));
     fprintf('Reduction factor: %f\n', height(data_in) / height(mean_data));

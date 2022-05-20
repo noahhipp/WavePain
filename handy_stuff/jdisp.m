@@ -29,7 +29,6 @@ space_pause_probability      = .1; % probability for extra pause
 digit_pause                  = 1;
 
 % Do the printing
-fprintf('\n');
 if ~debug
     for char = string
 
@@ -56,7 +55,6 @@ if ~debug
 else
     disp(string);
 end
-fprintf('\n\n');
 
 % jitter(spc)
 % receives min max secs per char and returns a number sampled from a normal
