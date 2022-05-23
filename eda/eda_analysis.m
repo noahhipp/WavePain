@@ -1,7 +1,7 @@
 function eda_analysis
 
 % Settings
-SAMPLE   = 'behav'; % can be behav or fmri
+SAMPLE   = 'fmri'; % can be behav or fmri
 
 % Housekeeping
 HOST                = wave_ghost2(SAMPLE);

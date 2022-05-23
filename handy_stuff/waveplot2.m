@@ -1,4 +1,4 @@
-function [line, legend_labels] = waveplot2(y, condition,varargin)
+function [line, shade, legend_labels] = waveplot2(y, condition,varargin)
 % Takes time series and wavepain condition and plots it colored according
 % to tasks to current axes. Condition must be specified with capital letter first.
 
@@ -103,6 +103,7 @@ end
 
 % Plot lines and shades
 for i = 1:4    
-    [line(i), shade(i)] = boundedline(x_seconds(ind{:,i}), y(ind{:,i}), sem(ind{:,i}),'k-*', 'cmap', colors(cs(i),:), 'alpha');
+    [line(i), shade(i)] = boundedline(x_seconds(ind{:,i}), y(ind{:,i}), sem(ind{:,i}),'k-', 'cmap', colors(cs(i),:), 'alpha');
     line(i).LineWidth = 1;            
 end  
+ 

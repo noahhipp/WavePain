@@ -56,7 +56,7 @@ XA_TICKS        = [0 5 55 105];
 XLIMS           = [0 105];
 
 % YAxis
-YL = 'pain [VAS]';
+YL = 'SCL [zscores]';
 YA_TICKS = [0 30 60 100];
 
 % HOUSEKEEPING
