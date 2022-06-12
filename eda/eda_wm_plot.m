@@ -128,7 +128,7 @@ if ~DONT_PLOT_OBSERVED_RESPONSE
             hlines(j).LineWidth = LINEWIDTH;
         end
         
-        
+        clear
         % Plot wave
         hold on;
         hwave = plot(x{i}, wave, 'k--');
@@ -192,23 +192,44 @@ if ~DONT_PLOT_OBSERVED_RESPONSE
 end
 
 % FIT LME
-LME_FORMULA = 's_zt_scl~heat*wm*slope+(1|id)';
+LME_FORMULA = 's_zt_scl~heat*wm_cat1*slope+(1|id)';
 
 % Grab raw data
 d = data{1};
 
 % Append categorical variables
-% We only use those two so we can decode it easier for plotting fitted
-% responses later (internally 1back will be encoded as the reference
-% category = 0, and 2back will be 1)
-d.wm_cat1 = categorical(d.wm, [-1 1], {'1back','2back'}); 
+d.wm_cat1 = categorical(d.wm, [0, -1, 1], {'no_task','1back','2back'}); 
 
 % Fitlme
 lme = fitlme(d,LME_FORMULA, 'FitMethod', 'REML');
 disp(lme);
 
 % PLOT OBSERVED RESPONSES
-betas = fixedEffects(lme);
+fitted_res
+
+% % Collect beta weights
+% betas = fixedEffects(lme);
+% betas = betas(2:end); % discard intercept
+% 
+% % Collect design matrix
+% d2 = data{3}; % secondlevel means
+% d2 = d2(:,{'heat','wm','slope',...
+%     'heat_X_slope', 'heat_X_wm','wm_X_slope', 'heat_X_wm_X_slope'});
+% d2.time = repmat(linspace(0,110,1101)',6,1); % construct time vector for easier plotting
+% 
+% if DISCARD_NO_TASK_FOR_LME
+%     d2(d2.wm == 0,:) = [];
+% end
+% 
+% % Now adjust wm encoding
+% d2.wm(d2.wm == -1) = 0;
+% 
+% A = table2array(d2(:,1:end-1));
+% fitted_responses = A(1:end-1)*betas;
+% 
+% % the question is how do I correctly weigh in --> NOPE fuck the non task
+% % areas for now it should be enough to plot fitted responses for the task
+% % regions only
 
 
 
