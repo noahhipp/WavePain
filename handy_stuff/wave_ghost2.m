@@ -25,6 +25,15 @@ switch hostname
         
         n_proc      = 10; % N matlab instances used for parralel computing
         
+    case 'DESKTOP-3UBJ04S' % isn laptop
+        jdisp('--> valid machine! Enjoy :=)');
+        
+        dir         = strcat('C:\Users\hipp\projects\WavePain\data\',sample, '_sample\');
+        results     = 'C:\Users\hipp\OneDrive - Universität Hamburg\projects\wavepain\results';
+        
+        n_proc      = 2;   
+        
+        
 end
 
 % Set output struct
