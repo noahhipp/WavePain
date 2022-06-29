@@ -32,13 +32,16 @@ optargs(1:numvarargs) = varargin;
 index_test = 0;
 
 
-% No task, 1back, 2back
+% % No task, 1back, 2back
+WAVE_COLORS              = wave_load_colors;
 colors = [0 0 0;... % no task
-          0 0 1;... % 1back         
-          1 0 0;... % 2back
+          WAVE_COLORS(2,:);... % 1back         
+          WAVE_COLORS(1,:);... % 2back
           0 1 1;... % 2back-1back   
           1 1 0];   % 1back-2back
-    
+
+
+
 [~,ticks_samples] = getBinBarPos(n_wave); 
 
 

@@ -21,7 +21,7 @@ switch hostname
         jdisp('     --> valid machine! Enjoy the rest of your day! :)')
         
         dir         = strcat('E:\wavepain\data\',sample,'_sample\');
-        results     = 'D:\OneDrive - Universit√§t Hamburg\projects\wavepain\results\';
+        results     = 'D:\OneDrive - Universit‰t Hamburg\projects\wavepain\results';
         
         n_proc      = 10; % N matlab instances used for parralel computing
         

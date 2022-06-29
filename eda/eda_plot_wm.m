@@ -1,10 +1,10 @@
-function eda_wm_plot
+function eda_plot_wm
 
 % Plots online wm s_zt_scls for wavepain paper
 
 % Settings
 SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
-DONT_PLOT_OBSERVED_RESPONSE = 1;
+DONT_PLOT_OBSERVED_RESPONSE = 0;
 XVAR            = 't';
 DETREND_SCL     = 'no'; % can be 'yes' or 'no'
 LEGEND_OFF      = 'legend_off'; % 'legend_off' turns it off else on
@@ -126,9 +126,8 @@ if ~DONT_PLOT_OBSERVED_RESPONSE
         [hlines, hshades, legend_labels] = waveplot2(d{i},z_name, d_error{i});
         for j = 1:numel(hlines)
             hlines(j).LineWidth = LINEWIDTH;
-        end
+        end        
         
-        clear
         % Plot wave
         hold on;
         hwave = plot(x{i}, wave, 'k--');
@@ -188,7 +187,6 @@ if ~DONT_PLOT_OBSERVED_RESPONSE
         print(fname, '-dpng','-r300');
         fprintf('Printed %s\n\n',fname);
     end
-    close all;
 end
 
 % FIT LME
@@ -205,7 +203,7 @@ lme = fitlme(d,LME_FORMULA, 'FitMethod', 'REML');
 disp(lme);
 
 % PLOT OBSERVED RESPONSES
-fitted_res
+% fitted_res
 
 % % Collect beta weights
 % betas = fixedEffects(lme);

@@ -1,4 +1,4 @@
-function eda_online_plot
+function eda_plot_online
 % Plots online s_zt_scls for wavepain paper
 
 % Settings
