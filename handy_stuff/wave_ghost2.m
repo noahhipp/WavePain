@@ -18,7 +18,7 @@ jdisp(sprintf('You are operating on %s. \nValidating... 2 1 ', hostname));
 % Set machine specific variables
 switch hostname
     case 'aranyani'
-        jdisp('     --> valid machine! Enjoy the rest of your day! :)')
+        jdisp('--> valid machine! Enjoy the rest of your day! :)')
         
         dir         = strcat('E:\wavepain\data\',sample,'_sample\');
         results     = 'D:\OneDrive - Universität Hamburg\projects\wavepain\results';

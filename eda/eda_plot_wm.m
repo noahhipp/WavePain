@@ -9,17 +9,18 @@ XVAR            = 't';
 DETREND_SCL     = 'no'; % can be 'yes' or 'no'
 LEGEND_OFF      = 'legend_off'; % 'legend_off' turns it off else on
 
-YVAR            = 's_zt_scl';
-YVAR_ERROR      = 'sembj_id_dv';
+YVAR            = 's_zid_scl';
+YVAR_ERROR      = strcat('sembj_',YVAR);
+% YVAR_ERROR      = 'sembj_s_zt_scl';
 
 ZVAR            = 'condition';
 ZVAR_NAMES      = {'M21', 'M12','W21','W12'};
 ZVAR_VALS       = [1 2 3 4];
 
 HOST            = wave_ghost2(SAMPLE); %wave_gethost
-NAME            = sprintf('%s_wm_s_zt_scls_%s_vs_%s_%s',...
+NAME            = sprintf('%s_%s-vs-%s_%s',...
     SAMPLE, YVAR, XVAR, LEGEND_OFF);
-FIG_DIR         = fullfile(HOST.results, '2022_05_21_wm_s_zt_scls');
+FIG_DIR         = fullfile(HOST.results, '2022-07-06_scl-plots');
 if ~exist(FIG_DIR, 'dir')
     mkdir(FIG_DIR)
 end
@@ -61,9 +62,12 @@ YL = 'SCL [zscores]';
 YA_TICKS = [0 30 60 100];
 
 % HOUSEKEEPING
-NAMES = {   'all_eda.csv',...
-    'all_eda_c.csv',...
-    'all_eda_cc.csv'};
+BASE_NAME = 'all_eda_sampled-at-half-a-hertz.csv';
+% BASE_NAME = 'all_eda.csv';
+[~,BLA,EXT] = fileparts(BASE_NAME);
+NAMES = {BASE_NAME,...
+    strcat(BLA,'_c',EXT),...
+    strcat(BLA,'_cc',EXT)};
 
 DATA_DIR     = fullfile(HOST.dir, 'eda');
 FILES   = fullfile(DATA_DIR, NAMES);
@@ -181,7 +185,7 @@ if ~DONT_PLOT_OBSERVED_RESPONSE
         % Save
         grid on;
         xlim(XLIMS);
-        fname = sprintf('%s_%s_wm_s_zt_scls_%s_vs_%s_%s',...
+        fname = sprintf('%s_%s_%s-vs-%s_%s',...
             SAMPLE,ZVAR_NAMES{i}, YVAR, XVAR, LEGEND_OFF);
         fname = fullfile(FIG_DIR, fname);
         print(fname, '-dpng','-r300');
@@ -190,13 +194,19 @@ if ~DONT_PLOT_OBSERVED_RESPONSE
 end
 
 % FIT LME
-LME_FORMULA = 's_zt_scl~heat*wm_cat1*slope+(1|id)';
+% Append categorical variables
+d.wm_c0 = categorical(d.wm, [0, -1, 1], {'notask','1back','2back'}); % no task is reference category
+d.wm_c1 = categorical(d.wm, [-1, 0, 1], {'1back','notask','2back'}); % 1back is reference category
+d.wm_c2 = categorical(d.wm, [1, 0, -1], {'2back','notask','1back'}); % 2back is reference category
+
+LME_FORMULAS_INTERCEPT_ONLY = {sprintf('%s~heat*wm_cat0*slope+(1|id)', YVAR),...
+    sprintf('%s~heat*wm_cat1*slope+(1|id)', YVAR),...
+    sprintf('%s~heat*wm_cat2*slope+(1|id)', YVAR)};
 
 % Grab raw data
 d = data{1};
 
-% Append categorical variables
-d.wm_cat1 = categorical(d.wm, [0, -1, 1], {'no_task','1back','2back'}); 
+
 
 % Fitlme
 lme = fitlme(d,LME_FORMULA, 'FitMethod', 'REML');

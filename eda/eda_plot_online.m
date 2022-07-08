@@ -2,13 +2,14 @@ function eda_plot_online
 % Plots online s_zt_scls for wavepain paper
 
 % Settings
-SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
+SAMPLE          = 'fmri'; % can be 'behav' or 'fMRI'
 XVAR            = 't';
-DETREND_SCL     = 'yes'; % can be 'yes' or 'no'
+DETREND_SCL     = 'no'; % can be 'yes' or 'no'
 LEGEND_OFF      = 'legend_off'; % 'legend_off' turns it off else on
 
 YVAR            = 's_zt_scl';
-YVAR_ERROR      = 'sembj_id_dv';
+YVAR_ERROR      = strcat('sembj_',YVAR);
+% YVAR_ERROR      = 'sembj_id_dv';
 
 ZVAR            = 'condition';
 ZVAR_NAMES      = {'M-shape', 'W-shape'};
@@ -17,7 +18,7 @@ ZVAR_VALS       = [5 , 6];
 HOST            = wave_ghost2(SAMPLE); %wave_gethost
 NAME            = sprintf('%s_online_s_zt_scls_%s_vs_%s_%s',...
                 SAMPLE, YVAR, XVAR, LEGEND_OFF);
-FIG_DIR         = fullfile(HOST.results, '2022_05_16_online_s_zt_scls');
+FIG_DIR         = fullfile(HOST.results, '2022-07-07_online-scl');
 if ~exist(FIG_DIR, 'dir')
     mkdir(FIG_DIR)
 end
@@ -60,9 +61,15 @@ YL = 'SCL [zscores]';
 YA_TICKS = [0 30 60 100];
 
 % HOUSEKEEPING
-NAMES = {   'all_eda.csv',...
-            'all_eda_c.csv',...
-            'all_eda_cc.csv'};            
+% NAMES = {   'all_eda.csv',...
+%             'all_eda_c.csv',...
+%             'all_eda_cc.csv'};            
+BASE_NAME = 'all_eda_sampled-at-half-a-hertz.csv';
+% BASE_NAME = 'all_eda.csv';
+[~,BLA,EXT] = fileparts(BASE_NAME);
+NAMES = {BASE_NAME,...
+    strcat(BLA,'_c',EXT),...
+    strcat(BLA,'_cc',EXT)};
 
 DATA_DIR     = fullfile(HOST.dir, 'eda');
 FILES   = fullfile(DATA_DIR, NAMES);

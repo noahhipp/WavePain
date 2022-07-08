@@ -1,8 +1,11 @@
 function firstlevel_canonical_pmod
 % specify firstlevel pmod with parametrically modulated stick functions
 
-[base_dir, n_proc, code_dir] = wave_ghost;
-go_back = pwd; % go back to the directory we started in
+
+host        = wave_ghost2('fmri');
+base_dir    = fullfile(host.dir, 'fmri');
+n_proc      = host.n_proc;
+go_back     = pwd; % go back to the directory we started in
 
 % Subs
 all_subs = [5:12 14:53]; 
@@ -59,6 +62,7 @@ contrasts         = [];
 % Load temp file
 temp_file = fullfile(code_dir, 'temps.mat');
 load(temp_file, 'temps');
+% temps = [];
 
 % Load onset file
 onset_file = fullfile(base_dir, 'all_onsets.mat');
@@ -85,7 +89,8 @@ for np = 1:size(subs,2) % core loop start
         strip_file      = spm_select('FPList', mepi_dir, strip_str); 
         struc_file      = spm_select('FPList', st_dir, struc_templ);
         u_rc1_file      = spm_select('FPList', mepi_dir, flow_str);         
-        sub_temps       = temps(temps.id == subs{np}(i),:);        
+        sub_temps       = temps(temps.id == subs{np}(i),:);    
+%         sub_temps       = [];
         a_dir = fullfile(base_dir, name, anadirname);
         if ~exist(a_dir, 'dir')
             mkdir(a_dir)
@@ -143,7 +148,7 @@ for np = 1:size(subs,2) % core loop start
             all_pmods  = {[],[]}; % first entry for wm conditions, second for online                                                                        
             
             for conds = 1:numel(conditions) % condition loop start
-                onset       = RES{conds}.onset; % seconds  
+                onset       = RES{conds}.onset; % seconds converted to TRS in line 161 
                 cond_name   = RES{conds}.name;                
                 [onsets, pmods] = wave_getpmods(onset, cond_name, stick_resolution, sub_temps); % onset and onsets still in seconds                
                 
