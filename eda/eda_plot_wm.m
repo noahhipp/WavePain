@@ -194,23 +194,31 @@ if ~DONT_PLOT_OBSERVED_RESPONSE
 end
 
 % FIT LME
+% Grab raw data
+d = data{1};
+
 % Append categorical variables
 d.wm_c0 = categorical(d.wm, [0, -1, 1], {'notask','1back','2back'}); % no task is reference category
 d.wm_c1 = categorical(d.wm, [-1, 0, 1], {'1back','notask','2back'}); % 1back is reference category
 d.wm_c2 = categorical(d.wm, [1, 0, -1], {'2back','notask','1back'}); % 2back is reference category
 
-LME_FORMULAS_INTERCEPT_ONLY = {sprintf('%s~heat*wm_cat0*slope+(1|id)', YVAR),...
-    sprintf('%s~heat*wm_cat1*slope+(1|id)', YVAR),...
-    sprintf('%s~heat*wm_cat2*slope+(1|id)', YVAR)};
+LME_FORMULAS = {
+    sprintf('%s~heat*wm_c0*slope+(1|id)', YVAR),...
+    sprintf('%s~heat*wm_c1*slope+(1|id)', YVAR),...
+    sprintf('%s~heat*wm_c2*slope+(1|id)', YVAR),...    
+    sprintf('%s~heat*wm_c0*slope+(heat|id)+(wm_c0|id)+(slope|id)', YVAR),... % with correlated slope and intercept for each parameter and extra id intercept
+    sprintf('%s~heat*wm_c2*slope+(heat|id)+(wm_c1|id)+(slope|id)', YVAR),...
+    sprintf('%s~heat*wm_c2*slope+(heat|id)+(wm_c2|id)+(slope|id)', YVAR)};        
 
-% Grab raw data
-d = data{1};
+% Fitlmes
+lmes = {};
+for i = 1:numel(LME_FORMULAS)
+    lmes{i} = fitlme(d, LME_FORMULAS{i}, 'FitMethod', 'REML', 'StartMethod', 'random');
+    disp(lmes{i});
+end
 
 
-
-% Fitlme
-lme = fitlme(d,LME_FORMULA, 'FitMethod', 'REML');
-disp(lme);
+a = 10;
 
 % PLOT OBSERVED RESPONSES
 % fitted_res
