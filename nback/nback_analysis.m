@@ -1,9 +1,10 @@
 function nback_analysis
 % Settings
-SAMPLE   = '';
+SAMPLE   = 'fmri';
 
 % Housekeeping
-[~,~,~,~,~,DATA_DIR]        = wave_ghost();
+host        = wave_ghost2(SAMPLE);
+DATA_DIR                    = host.dir;
 NBACK_DIR                   = fullfile(DATA_DIR, 'nback');
 RAW_TEMPLATE                = 'all_nback.csv';
 SLOPE_COLLAPSED_TEMPLATE    = 'all_nback_slope_collapsed.csv';

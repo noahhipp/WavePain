@@ -3,7 +3,9 @@ function data = wave_load_SPM(ananame, cons_to_extract)
 % data 
 
 % Collect path
-[base_dir] = wave_ghost;
+% [base_dir] = wave_ghost;
+host = wave_ghost2('fmri');
+base_dir = fullfile(host.dir, 'fmri');
 
 % load coordinates
 xyz = wave_load_coordinates;

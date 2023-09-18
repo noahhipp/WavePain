@@ -2,7 +2,7 @@ function online_plot
 % Plots online ratings for wavepain paper
 
 % Settings
-SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
+SAMPLE          = 'fmri'; % can be 'behav' or 'fMRI'
 XVAR            = 't';
 LEGEND_OFF      = 'legend_on'; % 'legend_off' turns it off else on
 
@@ -16,7 +16,7 @@ ZVAR_VALS       = [1, 2];
 HOST            = wave_ghost2(SAMPLE); %wave_gethost
 NAME            = sprintf('%s_online_ratings_BJSEM_%s_vs_%s_%s',...
                 SAMPLE, YVAR, XVAR, LEGEND_OFF);
-FIG_DIR             = fullfile(HOST.results, '2022_05_20_online_ratingsV2');
+FIG_DIR             = fullfile(HOST.results, '2023_02_27_online_ratingsV3');
 if ~exist(FIG_DIR, 'dir')
     mkdir(FIG_DIR)
 end
@@ -115,7 +115,7 @@ for i = 1:numel(ZVAR_VALS)
  
     % Legend
     if ~strcmp(LEGEND_OFF, 'legend_off')
-        l =legend([h{1}, h{2}, h{3}], {'CPRs','CPRs SEM', 'Heat stimulus'},...
+        l =legend([h{1}, h{2}, h{3}], {'cVAS','cVAS SEM', 'Heat stimulus'},...
             'Location','best');        
         l.Title.String = '';
         l.FontSize = L_FONTSIZE;

@@ -1,9 +1,10 @@
-function wave_plot_fmri_wrapper
+    function wave_plot_fmri_wrapper
 
 % If figures are open update title
 wave_updating;
 
-[~, ~, code_dir] = wave_ghost;
+[host] = wave_ghost2;
+code_dir = host.code;
 cd(fullfile(code_dir, 'plotting'));
 
 % Save coordinates

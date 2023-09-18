@@ -1,7 +1,7 @@
 function eda_analysis
 
 % SETTING OF CONSTANTS
-SAMPLE   = 'behav'; % can be behav or fmri
+SAMPLE   = 'fmri'; % can be behav or fmri
 
 % for fitted responses
 LME_FORMULA             = 's_zt_scl~heat*wm_cat1*slope+(1|id)';

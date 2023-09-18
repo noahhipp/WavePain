@@ -22,6 +22,8 @@ end
 %------------------------------CHECK INPUT END-----------------------------
 
 %------------------------------PREPARING STUFF-----------------------------
+FIG_DIMS        = [8.8 8];
+
 
 % Get access to figure;
 global pmod_fig
@@ -30,7 +32,8 @@ if ishandle(pmod_fig)
     new     = 0; % used to toggle customization
     fprintf('Found %25s plot', 'existing figure for pmod');
 else
-    pmod_fig = figure('Color', [1 1 1]);
+    pmod_fig = figure('Color', [1 1 1], 'Units', 'centimeters',...
+        'Position',[10 10 FIG_DIMS]);
     new     = 1;
     fprintf('Created %23s plot', 'new figure for pmod');
 end
@@ -67,14 +70,14 @@ b.LineWidth = 1;
 er  = errorbar(x, data{1}.contrast, data{1}.standarderror);
 er.Color = [0 0 0];
 er.LineStyle = 'none';
-er.LineWidth = 2;
+er.LineWidth = 1;
 
 if new
     fprintf('...instantiating...');
     xticklabels(pmod_names);
     xticks(x);
     ax = gca;
-    ax.FontSize = 10;
+    ax.FontSize = 8;
     ax.XAxis.TickLabelInterpreter = 'none';
     xtickangle(45);
     xlabel('Regressor', 'FontWeight', 'normal');

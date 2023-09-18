@@ -2,7 +2,7 @@ function overall_plot
 % % use fancy raincloudroutine to plot nback performance
 
 % Settings
-SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
+SAMPLE          = 'fmri'; % can be 'behav' or 'fMRI'
 XVAR            = 'rating';
 LEGEND_OFF      = 'legend_on'; % 'legend_off' turns it off else on
 

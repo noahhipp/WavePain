@@ -2,7 +2,6 @@ function eda_plot_wm
 
 % Plots online wm s_zt_scls for wavepain paper
 
-% Settings
 SAMPLE          = 'behav'; % can be 'behav' or 'fMRI'
 DONT_PLOT_OBSERVED_RESPONSE = 0;
 XVAR            = 't';

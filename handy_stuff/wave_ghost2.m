@@ -24,6 +24,7 @@ switch hostname
         results     = 'D:\OneDrive - Universität Hamburg\projects\wavepain\results';
         
         n_proc      = 10; % N matlab instances used for parralel computing
+        code        = "C:\projects\wavepain\code\fmri\03_firstlevel\firstlevel_canonical_pmod";
         
     case 'DESKTOP-3UBJ04S' % isn laptop
         jdisp('--> valid machine! Enjoy :=)');
@@ -41,3 +42,4 @@ host.name       = hostname;
 host.dir        = dir;
 host.results    = results; 
 host.n_proc     = n_proc;
+host.code       = code;         
