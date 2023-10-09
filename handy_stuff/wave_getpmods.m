@@ -37,12 +37,13 @@ slope2  = idx >= bins(6) & idx < bins(7);
 % Waves
 [m, w] = waveit2(110000,1);
 
+% Task
 
-% Tasks
-tbob   = zeros(1,n_samples);
-tbob(task1) = 1;
-tbob(task2) = -1;
-obtb = -tbob;
+
+% tbob   = zeros(1,n_samples);
+% tbob(task1) = 1;
+% tbob(task2) = -1;
+% obtb = -tbob;
 
 % Slopes
 dsus = zeros(1,n_samples);
@@ -63,11 +64,14 @@ end
 
 % wm
 if ismember(condition, {'M21', 'W21'})
-    wm = tbob;
+    wm1 = task2;
+    wm2 = task1;
 elseif ismember(condition, {'M12', 'W12'})
-    wm = obtb;
+    wm1 = task1;
+    wm2 = task2;
 else
-    wm = zeros(1, n_samples);
+    wm1 = zeros(1, n_samples);
+    wm2 = zeros(1, n_samples);
 end
 
 % prepare output: 
@@ -86,7 +90,8 @@ for i = 1:numel(onset)
         template(:,6) = resample_pmod(wm.*slope, frequency);
         template(:,7) = resample_pmod(heat.*wm.*slope, frequency);
     else
-       [template, x] = scale_ramp_sample_pmods(heat, wm, slope, frequency, temps);
+        % only this is adjusted for the new binary wm regressors
+       [template, x] = scale_ramp_sample_pmods(heat, wm1,wm2, slope, frequency, temps);
     end
     
     x = x + onset(i); % shift onset accordingly
@@ -109,7 +114,7 @@ rs_pmod = interp1(x, pmod, xq);
 % SCALE (only for heat), PREPEND/APPEND RAMPS according
 % to subject specific temps and RESAMPLE pmods in desired stick frequency
 
-function [batch,xq] = scale_ramp_sample_pmods(heat,wm, slope, freq, temps)
+function [batch,xq] = scale_ramp_sample_pmods(heat,wm1,wm2, slope, freq, temps)
 % This gets changed so we need to set it
 N = numel(heat);
 template = [];
@@ -120,23 +125,33 @@ heat = heat.*(temps.peak-temps.lead); % amplitude
 heat = heat+temps.lead; % lead in
 template(:,1) = zscore([temps.lead heat temps.lead]);
 
-% wm
-template(:,2) = zscore([0 wm 0]);
+% wm1 wm2
+template(:,2) = zscore([0 wm1 0]);
+template(:,3) = zscore([0 wm2 0]);
 
 % slope
-template(:,3) = zscore([0 slope 0]);
+template(:,4) = zscore([0 slope 0]);
 
-% heat x wm
-template(:,4) = template(:,1).*template(:,2);
+% heat x wm1
+template(:,5) = template(:,1).*template(:,2);
+
+% heat x wm2
+template(:,6) = template(:,1).*template(:,3);
 
 % heat x slope
-template(:,5) = template(:,1).*template(:,3);
+template(:,7) = template(:,1).*template(:,4);
 
-% wm x slope
-template(:,6) = template(:,2).*template(:,3);
+% wm1 x slope
+template(:,8) = template(:,2).*template(:,4);
 
-% heat x wm x slope
-template(:,7) = template(:,1).*template(:,2).*template(:,3);
+% wm2 x slope
+template(:,9) = template(:,3).*template(:,4);
+
+% heat x wm1 x slope
+template(:,10) = template(:,1).*template(:,2).*template(:,4);
+
+% heat x wm2 x slope
+template(:,11) = template(:,1).*template(:,3).*template(:,4);
 
 % Construct time vectors
 x  = [-temps.to_lead linspace(0,110,N), 110+ temps.to_lead]; 

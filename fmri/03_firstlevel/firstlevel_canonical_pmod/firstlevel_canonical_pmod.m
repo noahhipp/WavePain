@@ -4,6 +4,7 @@ function firstlevel_canonical_pmod
 
 host        = wave_ghost2('fmri');
 base_dir    = fullfile(host.dir, 'fmri');
+code_dir    = host.code;
 n_proc      = host.n_proc;
 go_back     = pwd; % go back to the directory we started in
 
@@ -23,16 +24,16 @@ do_warp             = 0;
 do_smooth           = 0;
 
 %-secondlevel
-do_mask             = 0;
-do_ttest            = 0;
-do_nosub_anova_model= 0;
+do_mask             = 1;
+do_ttest            = 1;
+do_nosub_anova_model= 1;
 do_nosub_anova_cons = 1;
 
 TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = [6 6 6]; % smoothing kernel
 stick_resolution    = 10; % /seconds so many sticks we want per second
-anadirname          = 'canonical_pmodV4'; 
+anadir name          = 'canonical_pmodV5'; 
 
 % Each subject has two sessions. Sessions are also used to distinquish
 % subjects --> conceputal distance between eg sub10 sess1 - sub10sess2 =
@@ -48,9 +49,11 @@ realign_str         =  '^rp_afMR.*\.txt';
 
 rfunc_file         = '^rafMRI.nii';
 conditions          = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
-pmod_names          = {'heat', 'wm', 'slope',...
-    'heat_X_wm', 'heat_X_slope','wm_X_slope',...
-    'heat_X_wm_X_slope', 'ramp_up', 'ramp_down'}; % regressor
+pmod_names          = {...
+    'heat', 'wm1','wm2', 'slope',...
+    'heat_X_wm1','heat_X_wm2', 'heat_X_slope','wm1_X_slope','wm2_X_slope',...
+    'heat_X_wm1_X_slope','heat_X_wm2_X_slope',...
+    'ramp_up', 'ramp_down'}; % regressor
 mat_name          = which(mfilename);
 
 to_warp             = 'con_%04.4d.nii';
@@ -152,8 +155,8 @@ for np = 1:size(subs,2) % core loop start
                 cond_name   = RES{conds}.name;                
                 [onsets, pmods] = wave_getpmods(onset, cond_name, stick_resolution, sub_temps); % onset and onsets still in seconds                
                 
-                idx = 1; % wm by default
-                if ismember(cond_name, {'M_Online','W_Online'}) % where to append onsets and pmods
+                idx = 1; % append to all_pmods{1} by default
+                if ismember(cond_name, {'M_Online','W_Online'}) % append to all_pmods{2} if WM condition
                     idx = 2;
                 end
                 all_onsets{idx} = vertcat(all_onsets{idx}, onsets);
@@ -172,7 +175,7 @@ for np = 1:size(subs,2) % core loop start
                     pmod_params = all_pmods{model_cond}(:,pmod);
                     if isempty(find(pmod_params, 1)) % only zeros in pmod --> wm related pmod for online --> skip
 %                         fprintf('\n skipped %s for %s-condition', pmod_names{pmod}, model_conds{model_cond});
-                        continue % dont do anything                        
+                        continue % dont append pmod                        
                     end                        
                     template.spm.stats.fmri_spec.sess(j).cond(model_cond).pmod(idx).name = pmod_names{pmod};
                     template.spm.stats.fmri_spec.sess(j).cond(model_cond).pmod(idx).param = pmod_params;                                                            
@@ -223,20 +226,24 @@ for np = 1:size(subs,2) % core loop start
             con_names       = [con_names,...
                 'online_heat','online_slope','online_heat_X_slope',...
                 'online_ramp_up','online_ramp_down'];
-            contrasts(1,:)  = repmat([0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat
-            contrasts(2,:)  = repmat([0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm
-            contrasts(3,:)  = repmat([0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_slope
-            contrasts(4,:)  = repmat([0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_wm
-            contrasts(5,:)  = repmat([0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_slope
-            contrasts(6,:)  = repmat([0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm_X_slope
-            contrasts(7,:)  = repmat([0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_wm_X_slope                                               
-            contrasts(8,:)  = repmat([0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_ramp_up
-            contrasts(9,:)  = repmat([0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_ramp_down
-            contrasts(10,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 zeros(1,6)],1,n_sess); % online_heat
-            contrasts(11,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 zeros(1,6)],1,n_sess); % online_slope
-            contrasts(12,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 zeros(1,6)],1,n_sess); % online_heat_X_slope
-            contrasts(13,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 zeros(1,6)],1,n_sess); % online_ramp_up
-            contrasts(14,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % online_ramp_down
+            contrasts(1,:)  = repmat([0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat
+            contrasts(2,:)  = repmat([0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm1
+            contrasts(3,:)  = repmat([0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm2
+            contrasts(4,:)  = repmat([0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_slope
+            contrasts(5,:)  = repmat([0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_wm1
+            contrasts(6,:)  = repmat([0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_wm2
+            contrasts(7,:)  = repmat([0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_slope
+            contrasts(8,:)  = repmat([0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm1_slope
+            contrasts(9,:)  = repmat([0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm2_slope
+            contrasts(10,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_tripleX1
+            contrasts(11,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_tripleX2
+            contrasts(12,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_ramp_up
+            contrasts(13,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_ramp_down
+            contrasts(14,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 zeros(1,6)],1,n_sess); % online_heat
+            contrasts(15,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 zeros(1,6)],1,n_sess); % online_slope
+            contrasts(16,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 zeros(1,6)],1,n_sess); % online_heat_X_slpe
+            contrasts(17,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 zeros(1,6)],1,n_sess); % online_ramp_up
+            contrasts(18,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % online_ramp_down
         end        
         
 %         % Make negative contrasts
@@ -358,7 +365,7 @@ end
 %--------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
-% SECOND LEVEL t-Test START (one 2nd level per contrast --> 14 ttests)% 
+% SECOND LEVEL t-Test START (one 2nd level per contrast --> 18 ttests)% 
 %--------------------------------------------------------------------------
 anadirname2          = strcat('second_level_ttest', anadirname);
 for i = 1:numel(con_names) % contrast loop start

@@ -3,19 +3,21 @@ function wave_plot_fmri_pmod(data)
 % nice labeled bar graph
 
 %------------------------------CHECK INPUT---------------------------------
-check0 = 0;
+ana_type = 0;
 check1 = 0;
 if numel(data{1}.contrast) == 10
-    check0 = 1;
+    ana_type = 1;
 elseif numel(data{1}.contrast) == 7
-    check0 = 2; % old data with 7 regressors   
+    ana_type = 2; % old data with 7 regressors   
+elseif numel(data{1}.contrast) == 18 % pmodV5
+    ana_type = 3; % new data with 18 regressors   
 end
 
 if numel(fieldnames(data{1})) == 3
     check1 = 1;
 end
 
-if ~check0 || ~check1
+if ~ana_type || ~check1
     warning('checks not passed. please check input')
     return
 end
@@ -46,15 +48,22 @@ end
 %------------------------------PLOTTING ACTION ----------------------------
 y_label = 'Parameter estimate';
 hold on;
-if check0 == 1
+if ana_type == 1
     pmod_names          = {'wm_Heat', 'wm_WM', 'wm_Slope',...
         'wm_Heat X WM', 'wm_Heat X Slope','wm_WM X Slope',...
         'wm_Heat X WM X Slope',...
         'online_Heat', 'online_Slope', 'online_Heat X Slope'};
-elseif check0 == 2
+elseif ana_type == 2
     pmod_names          = {'Heat', 'WM', 'Slope',...
         'Heat X WM', 'Heat X Slope','WM X Slope',...
         'Heat X WM X Slope'};
+elseif ana_type == 3
+    pmod_names          = {'wm_heat', 'wm_wm1', 'wm_wm2', 'wm_slope',...
+        'wm_heat_X_wm1', 'wm_heat_X_wm2', 'wm_heat_X_slope','wm_wm1_X_slope', 'wm_wm2_X_slope',...
+        'wm_heat_X_wm1_X_slope', 'wm_heat_X_wm2_X_slope',...
+        'wm_ramp_up', 'wm_ramp_down',...
+        'online_heat', 'online_slope', 'online_heat_X_slope',...
+        'online_ramp_up', 'online_ramp_down'};
 end
 
 x = 1:numel(pmod_names);

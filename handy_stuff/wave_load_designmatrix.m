@@ -1,4 +1,5 @@
-function [M, M2] = wave_load_designmatrix
+function [M, M2] = wave_load_designmatrix(varargin)
+
 % Loads standard wavepain designmatrix from binary file
 M       = [];
 fid     = fopen('designmatrix.bin', 'r');
@@ -18,6 +19,14 @@ heat = M(:,1);
 wm1 = M(:,2) == -1;
 wm2 = M(:,2) == 1;
 slope = M(:,3);
+
+% diff heat
+if nargin == 1 || strcmp(varargin{1}, 'diffheat')
+    wm = M(:,2);
+    slope = zscore([0; diff(heat)]);
+    slope = slope./max(slope);
+    M = [heat wm slope heat.*wm heat.*slope wm.*slope heat.*wm.*slope];
+end
 
 wm1 = wm1 - mean(wm1);
 wm2 = wm2 - mean(wm2);

@@ -26,8 +26,11 @@ xtl = lme.CoefficientNames;
 xlabel('Coefficient name');
 xticklabels(xtl);
 xtickangle(45);
+ax = gca;
+ax.XAxis.TickLabelInterpreter = 'none';
 ylabel('Estimate [Zscores]');
 title(char(lme.Formula), 'Interpreter', 'none');
+ylim([-.3 .5]);
 
 
 

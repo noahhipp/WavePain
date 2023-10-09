@@ -1,4 +1,4 @@
-function [lmes, clmes] = eda_fit_lme
+function [lmes] = eda_fit_lme
 % try to explain variance of SCL data using linear mixed effect models
 
 % Housekeeping
@@ -102,26 +102,43 @@ d.wm_c2 = categorical(d.wm, [1, 0, -1], {'2back','notask','1back'}); % 2back is 
 
 % diffheat exploration
 d.diffheat = zscore([0; diff(d.heat)]);
+d.diffheat = d.diffheat./max(d.diffheat);
 d.gradheat = gradient(d.heat);
 
-% Create cropped version with tasks only
+d = movevars(d, 'diffheat','After', 'wm_c2');
+d = movevars(d, 'slope','After', 'wm2');
+
+% Create cropped version with inner slopes only
 dc = d;
 dc(d.time_within_trial < 22 | d.time_within_trial > 88, :) = [];
+
+% Create cropped version with tasks only and discard online
+Tc = dc;
+Tc(Tc.wm_c0 == 'notask', :) = [];
+Tc.wm_c0 = categorical(Tc.wm,[-1 1],{'1back','2back'});
+Tc.wm_c1 = categorical(Tc.wm,[1 -1],{'2back','1back'});
+
 
 % this is björns way and correct
 LME_FORMULAS = {            
     sprintf('%s ~ 1 + heat*wm_c0*slope + (-1 + heat | id )', YVAR), ...
-   sprintf('%s ~ 1 + heat*wm_c0*diffheat + (-1 + heat | id )', YVAR),...
+   sprintf('%s ~ 1 + heat*diffheat*wm_c0 + (-1 + heat | id )', YVAR),...
+   sprintf('%s ~ 1 + heat*diffheat*wm_c1 + (-1 + heat | id )', YVAR),...
     sprintf('%s ~ 1 + heat + wm1 + wm2 + slope + heat*wm1 + heat*wm2 + heat*slope + wm1*slope + wm2*slope + heat*wm1*slope + heat*wm2*slope + (-1 + heat | id)', YVAR),...
     sprintf('%s ~ 1 + heat * wm * slope + (-1 + heat | id)', YVAR)};
     
-
+lmes = struct;
 for i = 1:numel(LME_FORMULAS)
     complete_lme_forms{i} = LME_FORMULAS{i};
     fprintf('Fitting %s\n...', complete_lme_forms{i});
-    lmes{i} = fitlme(d, complete_lme_forms{i}, 'FitMethod', 'REML', 'StartMethod', 'random');
-    clmes{i} = fitlme(dc, complete_lme_forms{i}, 'FitMethod', 'REML', 'StartMethod', 'random'); % cropped --> M --> V, W --> ^
+    lmes.full{i} = fitlme(d, complete_lme_forms{i}, 'FitMethod', 'REML', 'StartMethod', 'random');
+    lmes.cropped{i} = fitlme(dc, complete_lme_forms{i}, 'FitMethod', 'REML', 'StartMethod', 'random'); % cropped --> M --> V, W --> ^
+    try
+        lmes.diffheat_cropped{i} = fitlme(Tc, complete_lme_forms{i}, 'FitMethod', 'REML', 'StartMethod', 'random');
+    catch
+        fprintf('\ncould not fit %s to diffheat data\n', complete_lme_forms{i});
+    end
     fprintf('...done.\n');
 end
 
-save(EDA_LME_FILE, 'lmes','clmes');
+save(EDA_LME_FILE, 'lmes');
