@@ -19,7 +19,7 @@ fir_data = wave_load_SPM('fir_anova_6', 1:6);
 
 % Load data from Canonical pmod ANOVA
 % for pmodV5: wave_load_SPM('second_level_anovacanonical_pmodV5', 1)
-pmod_data = wave_load_SPM('second_level_anovacanonical_pmodV5', 1);
+pmod_data = wave_load_SPM('second_level_anovacanonical_pmodV6', 1);
 
 % Plot timecourses
 cd(fullfile(code_dir, 'plotting'));

@@ -36,6 +36,9 @@ slope2  = idx >= bins(6) & idx < bins(7);
 
 % Waves
 [m, w] = waveit2(110000,1);
+dm = [0 diff(m)];
+dw = [0 diff(w)];
+
 
 % Task
 
@@ -56,10 +59,12 @@ usds            = -dsus;
 % heat and slope
 if ismember(condition, {'M21','M12','M_Online'})
     heat = m;
-    slope = dsus;
+%     slope = dsus;
+    slope = dm;
 else
     heat = w;
-    slope = usds;
+%     slope = usds;
+    slope = dw;
 end
 
 % wm

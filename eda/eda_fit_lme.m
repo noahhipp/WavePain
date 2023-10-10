@@ -2,7 +2,7 @@ function [lmes] = eda_fit_lme
 % try to explain variance of SCL data using linear mixed effect models
 
 % Housekeeping
-SAMPLE = 'fmri';
+SAMPLE = 'behav';
 
 HOST                = wave_ghost2(SAMPLE);
 EDA_DIR             = fullfile(HOST.dir, 'eda');

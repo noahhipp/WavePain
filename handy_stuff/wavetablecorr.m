@@ -9,7 +9,7 @@ d(:,cols_of_type_cell) = [];
 
 
 
-figure; imagesc(corrcoef(d{:,:}));
+imagesc(corrcoef(d{:,:}));
 xticks(1:width(d));
 yticks(1:width(d));
 xticklabels(col_names);

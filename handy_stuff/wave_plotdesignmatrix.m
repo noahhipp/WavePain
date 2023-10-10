@@ -1,7 +1,7 @@
 function wave_plotdesignmatrix(cons, con_names)
 % plots regressors as they would show up in SPM design matrix
 
-cropped = 1;
+cropped = 0;
 
 figure('Color', 'white');
 x = linspace(0, -6*60, 360);
