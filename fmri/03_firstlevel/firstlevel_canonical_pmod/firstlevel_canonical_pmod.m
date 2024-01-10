@@ -36,7 +36,7 @@ TR                  = 1.599;
 heat_duration       = 110; % seconds. this is verified in C:\Users\hipp\projects\WavePain\code\matlab\fmri\fsubject\onsets.mat
 skern               = [6 6 6]; % smoothing kernel
 stick_resolution    = 10; % /seconds so many sticks we want per second
-anadirname = 'canonical_pmodV6'; 
+anadirname = 'canonical_pmodV7'; 
 
 % Each subject has two sessions. Sessions are also used to distinquish
 % subjects --> conceputal distance between eg sub10 sess1 - sub10sess2 =
@@ -53,10 +53,10 @@ realign_str         =  '^rp_afMR.*\.txt';
 rfunc_file         = '^rafMRI.nii';
 conditions          = {'M21', 'M12', 'W21', 'W12', 'M_Online', 'W_Online'};
 pmod_names          = {...
-    'heat', 'wm1','wm2', 'diffheat',...
-    'heat_X_wm1','heat_X_wm2', 'heat_X_diffheat','wm1_X_diffheat','wm2_X_diffheat',...
-    'heat_X_wm1_X_diffheat','heat_X_wm2_X_diffheat',...
-    'ramp_up', 'ramp_down'}; % regressor
+    'heat', 'wm', 'diffheat',...
+    'heat_X_wm', 'heat_X_diffheat','wm_X_diffheat',...
+    'heat_X_wm_X_diffheat',...
+    'leads','ramp_up', 'ramp_down'}; % regressor
 mat_name          = which(mfilename);
 
 secondlevel_mask = fullfile(spm_dir, 'tpm', 'labels_Neuromorphometrics.nii');
@@ -243,38 +243,22 @@ for np = 1:size(subs,2) % core loop start
             con_names       = strcat('wm_',pmod_names); % wm cons           
             con_names       = [con_names,...
                 'online_heat','online_diffheat','online_heat_X_diffheat',...
-                'online_ramp_up','online_ramp_down',...
-                'wm1_LARGER_wm2','wm1_SMALLER_wm2',...
-                'heat_X_wm1_GREATER_wm2', 'heat_X_wm1_SMALLER_wm2',...
-                'diffheat_X_wm1_GREATER_wm2', 'diffheat_X_wm1_SMALLER_wm2',...
-                'heat_X_diffheat_wm1_GREATER_wm2', 'heat_X_diffheat_wm1_SMALLER_wm2'];
-            contrasts(1,:)  = repmat([0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat
-            contrasts(2,:)  = repmat([0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm1
-            contrasts(3,:)  = repmat([0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm2
-            contrasts(4,:)  = repmat([0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_diffheat
-            contrasts(5,:)  = repmat([0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_wm1
-            contrasts(6,:)  = repmat([0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_wm2
-            contrasts(7,:)  = repmat([0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_diffheat
-            contrasts(8,:)  = repmat([0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm1_diffheat
-            contrasts(9,:)  = repmat([0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm2_diffheat
-            contrasts(10,:) = repmat([0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_tripleX1
-            contrasts(11,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_tripleX2
-            contrasts(12,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_ramp_up
-            contrasts(13,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_ramp_down
-            contrasts(14,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 zeros(1,6)],1,n_sess); % online_heat
-            contrasts(15,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 zeros(1,6)],1,n_sess); % online_diffheat
-            contrasts(16,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 zeros(1,6)],1,n_sess); % online_heat_X_diffheat
-            contrasts(17,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 zeros(1,6)],1,n_sess); % online_ramp_up
-            contrasts(18,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % online_ramp_down
-            
-            contrasts(19,:) = repmat([0 0 1 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm1_GREATER_wm2
-            contrasts(20,:) = repmat([0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm1_SMALLER_wm2
-            contrasts(21,:) = repmat([0 0 0 0 0 1 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat_X_wm1_GREATER_wm2
-            contrasts(22,:) = repmat([0 0 0 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat_X_wm1_SMALLER_wm2
-            contrasts(23,:) = repmat([0 0 0 0 0 0 0 0 1 -1 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % diffheat_X_wm1_GREATER_wm2
-            contrasts(24,:) = repmat([0 0 0 0 0 0 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % diffheat_X_wm1_SMALLER_wm2
-            contrasts(25,:) = repmat([0 0 0 0 0 0 0 0 0 0 1 -1 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat_diffheat_X_wm1_GREATER_wm2
-            contrasts(26,:) = repmat([0 0 0 0 0 0 0 0 0 0 -1 1 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % heat_diffheat_X_wm1_SMALLER_wm2    
+                'online_ramp_up','online_ramp_down'];
+            contrasts(1,:)  = repmat([0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat
+            contrasts(2,:)  = repmat([0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm            
+            contrasts(3,:)  = repmat([0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_diffheat
+            contrasts(4,:)  = repmat([0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_wm            
+            contrasts(5,:)  = repmat([0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_diffheat
+            contrasts(6,:)  = repmat([0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_wm_X_diffheat            
+            contrasts(7,:)  = repmat([0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_heat_X_wm_diffheat
+            contrasts(8,:)  = repmat([0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_leads
+            contrasts(9,:)  = repmat([0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_ramp_up
+            contrasts(10,:) = repmat([0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 zeros(1,6)],1,n_sess); % wm_ramp_down
+            contrasts(11,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 zeros(1,6)],1,n_sess); % online_heat
+            contrasts(12,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 zeros(1,6)],1,n_sess); % online_diffheat
+            contrasts(13,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 zeros(1,6)],1,n_sess); % online_heat_X_diffheat
+            contrasts(14,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 zeros(1,6)],1,n_sess); % online_ramp_up
+            contrasts(15,:) = repmat([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 zeros(1,6)],1,n_sess); % online_ramp_down                        
         end        
         
 %         % Make negative contrasts
@@ -395,7 +379,8 @@ matlabbatch{1}.spm.util.imcalc.options.interp = 1;
 matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
 
 if do_mask
-    spm_jobman('run',matlabbatch);
+    check = 0;
+    run_matlab(1, matlabbatch, check);
 end
 %--------------------------------------------------------------------------
 % SECOND LEVEL create overall mask.nii END
@@ -409,7 +394,10 @@ for i = 1:numel(con_names) % contrast loop start
     
     % House keeping
     con_folder      = sprintf('%02d_%s_contrast%02d', i, con_names{i}, skern(1));
-    out_dir         = fullfile(base_dir, 'second_Level', anadirname2, con_folder);        
+    out_dir         = fullfile(base_dir, 'second_Level', anadirname2, con_folder);  
+    if ~exist(out_dir, 'dir')
+        mkdir(out_dir);
+    end
     matlabbatch     = [];    
     
     for j = 1:numel(all_subs) % 2nd level subject loop start
@@ -457,7 +445,7 @@ for i = 1:numel(con_names) % contrast loop start
     matlabbatch{3}.spm.stats.con.consess{co}.tcon.sessrep = 'none';
     co = co + 1; %increment by 1    
     
-    if do_ttest
+   if do_ttest
         spm_jobman('initcfg');
         spm('defaults', 'FMRI');
         spm_jobman('run',matlabbatch);
@@ -475,7 +463,7 @@ end % contrast loop end
 anadirname2     = strcat('second_level_anova', anadirname);
 out_dir         = fullfile(base_dir, 'second_Level', anadirname2);
 
-if ~exist(out_dir)
+if ~exist(out_dir, 'dir')
     mkdir(out_dir)
 end
 
@@ -570,8 +558,7 @@ if ~isempty(matlabbatch)
     spm('defaults', 'FMRI');
     spm_jobman('run',matlabbatch);
     copyfile(which(mfilename),out_dir);
-end
-%--------------------------------------------------------------------------
+end%--------------------------------------------------------------------------
 % SECOND LEVEL no subject ANOVA END
 %--------------------------------------------------------------------------
 
