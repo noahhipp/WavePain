@@ -35,8 +35,12 @@ for lag = lags
         C = corrcoef(x,y);
     end 
    
-    % append top right value of correlation matrix to correlation sequence   
-    c(i) = C(1,2);
+    % append top right value of correlation matrix to correlation sequence
+    if isequal(C, 1)
+        c(i) = C;
+    else
+        c(i) = C(1,2);
+    end
     i = i+1;
 end
 

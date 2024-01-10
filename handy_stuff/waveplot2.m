@@ -8,7 +8,7 @@ function [line, shade, legend_labels] = waveplot2(y, condition,varargin)
 %           defaults to zeros(numel(y), 1);           
 %           - varargin{2} specifies number of samples taken into account for
 %           calculation of bins. This stems from first FIR being 120s long
-%           but wave calulation only being applied to 120s.
+%           but wave calulation only being applied to 110s.
 %           Defaults to numel(y).
 
 n = numel(y);
@@ -38,7 +38,8 @@ colors = [0 0 0;... % no task
           WAVE_COLORS(2,:);... % 1back         
           WAVE_COLORS(1,:);... % 2back
           0 1 1;... % 2back-1back   
-          1 1 0];   % 1back-2back
+          1 1 0;...
+          WAVE_COLORS(5,:)];   % 1back-2back
 
 
 
@@ -97,16 +98,16 @@ switch condition
         cs = [1, 4, 5, 1];
         legend_labels = {'no task', '2back-1back', '1back-2back'};
     case 'Monline'
-        cs = ones(1,4);
+        cs = ones(1,4).*6;
         legend_labels = {'no task'};
     case 'Wonline'
-        cs = ones(1,4);
+        cs = ones(1,4).*6;
         legend_labels = {'no task'};
 end
 
 % Plot lines and shades
 for i = 1:4    
     [line(i), shade(i)] = boundedline(x_seconds(ind{:,i}), y(ind{:,i}), sem(ind{:,i}),'k-', 'cmap', colors(cs(i),:), 'alpha');
-    line(i).LineWidth = 1;            
+    line(i).LineWidth = 2;            
 end  
  
